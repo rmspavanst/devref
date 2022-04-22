@@ -1,0 +1,126 @@
+https://faun.pub/deploying-and-scaling-jenkins-on-kubernetes-2cd4164720bd
+
+https://dzone.com/articles/how-to-set-up-jenkins-on-kubernetes
+
+https://linoxide.com/install-jenkins-on-kubernetes/
+
+
+https://levelup.gitconnected.com/running-jenkins-inside-a-kubernetes-cluster-bd86822d487 (*)
+
+https://citizix.com/running-and-setting-up-jenkins-in-kubernetes/
+
+https://www.blazemeter.com/blog/how-to-setup-scalable-jenkins-on-top-of-a-kubernetes-cluster (gcp)
+
+https://medium.com/@vishal.sharma./running-jenkins-in-kubernetes-cluster-with-persistent-volume-da6584edc126
+
+Prerequisites:
+K8S Cluster (GKE in our case)
+kubectl
+Knowledge of K8S deployment
+
+
+Persistent Volume Claim:
+We need to create and apply PVC using GCP provided Storage Class, we’ll use high performance ‘pd-ssd’ as our Storage Class Type.
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+  name: jenkins-pvc
+  namespace: jenkins-dev
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 80Gi
+  storageClassName: pd-ssd
+  volumeMode: Filesystem
+
+
+
+Jenkins K8S Deployment:
+We now create a K8S Deployment which would use the above created PVC to persist the data in $JENKINS_HOME
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+  namespace: jenkins-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      containers:
+      - image: jenkins/jenkins:lts
+        imagePullPolicy: Always
+        name: container-0
+        ports:
+          - name: http-port
+            containerPort: 8080
+          - name: jnlp-port
+            containerPort: 50000
+        securityContext:
+          allowPrivilegeEscalation: true
+          privileged: true
+          readOnlyRootFilesystem: false
+          runAsUser: 0
+        volumeMounts:
+          - mountPath: /var/jenkins_home
+            name: jenkins-vol
+    volumes:
+    - name: jenkins-vol
+      persistentVolumeClaim:
+      claimName: jenkins-pvc
+
+
+Expose Deployment using K8S Services:
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins
+  namespace: jenkins-dev
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30000
+  selector:
+    app: jenkins
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-jnlp
+  namespace: jenkins-dev
+spec:
+  type: ClusterIP
+  ports:
+    - port: 50000
+      targetPort: 50000
+  selector:
+    app: jenkins
+
+
+Please check all the deployed config using:
+kubectl get all -n jenkins-dev
+
+To get the NodePort details from kubectl:
+kubectl get svc -n jenkins-dev
+
+Browse the Jenkins using NodePort (http://nodeIPaddress:nodeport), we will get this screen to provide initialadminpassword
+
+kubectl get po -n jenkins-dev
+kubectl logs <pod-name> -n jenkins-dev
+
+
+
+

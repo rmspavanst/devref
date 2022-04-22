@@ -1,0 +1,665 @@
+https://www.linuxtechi.com/setup-highly-available-kubernetes-cluster-kubeadm/
+
+https://www.velotio.com/engineering-blog/demystifying-high-availability-in-kubernetes-using-kubeadm
+
+https://medium.com/velotio-perspectives/demystifying-high-availability-in-kubernetes-using-kubeadm-3d83ed8c458b
+
+
+* https://faun.pub/configuring-ha-kubernetes-cluster-on-bare-metal-servers-with-kubeadm-1-2-1e79f0f7857b
+
+
+Minimum requirements for this example:
+
+2 servers with 2 CPUs & 2 GB of RAM for the masters
+3 servers with 4 CPUs & 4 — 8 GB of RAM for the workers
+3 servers with 2 CPUs & 2 GB of RAM for Etcd & HAProxy
+192.168.0.0/24 subnet.
+
+
+192.168.0.1 — HAProxy virtual IP, 192.168.0.2–4 Etcd & HAProxy nodes main IPS, 192.168.0.5–6 Kubernetes masters main IPS, 192.168.0.7–9 Kubernetes workers main IPS.
+Debian 9 base installed on all servers
+
+1. Configuring HAProxy & Heartbeat.
+
+As we’ll have more the one Kubernetes master node we need to configure a HAProxy load balancer in front of them, to distribute the traffic. It’ll be a pair of HAProxy servers, with one virtual IP that they will share. Fault tolerance will be organized by Heartbeat. We’ll use a first two Etcd servers for deploying them.
+
+Let’s install and configure HAProxy with Heartbeat on first and second etcd servers(192.168.0.2–3 in this example):
+
+etcd1# apt-get update && apt-get upgrade && apt-get install -y haproxy 
+etcd2# apt-get update && apt-get upgrade && apt-get install -y haproxy
+
+Save original config and create new one:
+
+etcd1# mv /etc/haproxy/haproxy.cfg{,.back}
+etcd1# vi /etc/haproxy/haproxy.cfg
+
+etcd2# mv /etc/haproxy/haproxy.cfg{,.back}
+etcd2# vi /etc/haproxy/haproxy.cfg
+
+
+Add this configuration parameters for both HAProxy:
+
+global
+    user haproxy
+    group haproxy
+defaults
+    mode http
+    log global
+    retries 2
+    timeout connect 3000ms
+    timeout server 5000ms
+    timeout client 5000ms
+frontend kubernetes
+    bind 192.168.0.1:6443
+    option tcplog
+    mode tcp
+    default_backend kubernetes-master-nodes
+backend kubernetes-master-nodes
+    mode tcp
+    balance roundrobin
+    option tcp-check
+    server k8s-master-0 192.168.0.5:6443 check fall 3 rise 2
+    server k8s-master-1 192.168.0.6:6443 check fall 3 rise 2
+
+
+As you can see, both HAProxy services will use 192.168.0.1 shared IP address. This virtual IP will move between servers, so we need to make some trick and enable net.ipv4.ip_nonlocal_bind sysctl option, to allow system services binding on the non-local IP.
+
+Add to the file /etc/sysctl.conf this option:
+
+etcd1# vi /etc/sysctl.conf
+net.ipv4.ip_nonlocal_bind=1
+
+etcd2# vi /etc/sysctl.conf
+net.ipv4.ip_nonlocal_bind=1
+
+Run on both:
+sysctl -p
+
+And start HAProxy on both servers:
+
+etcd1# systemctl start haproxy
+etcd2# systemctl start haproxy
+
+Check that HAProxy started and listened on virtual IP on both servers:
+
+etcd1# netstat -ntlp
+tcp 0 0 192.168.0.1:6443 0.0.0.0:* LISTEN 2833/haproxy
+etcd2# netstat -ntlp
+tcp 0 0 192.168.0.1:6443 0.0.0.0:* LISTEN 2833/haproxy
+
+## install Heartbeat and configure this virtual IP.
+
+etcd1# apt-get -y install heartbeat && systemctl enable heartbeat
+etcd2# apt-get -y install heartbeat && systemctl enable heartbeat
+
+Now it’s time to create a few configuration files for it, they will be mostly the same for the first and second servers.
+
+Create a /etc/ha.d/authkeys file first, in this file Heartbeat stored data for authenticating each other. File must be the same on both servers:
+
+# echo -n securepass | md5sum
+bb77d0d3b3f239fa5db73bdf27b8d29a
+
+etcd1# vi /etc/ha.d/authkeys
+
+auth 1
+1 md5 bb77d0d3b3f239fa5db73bdf27b8d29a
+
+etcd2# vi /etc/ha.d/authkeys
+
+auth 1
+1 md5 bb77d0d3b3f239fa5db73bdf27b8d29a
+
+This file need to be owned by root only:
+
+etcd1# chmod 600 /etc/ha.d/authkeys
+etcd2# chmod 600 /etc/ha.d/authkeys
+
+Next let’s create a main configuration file for Heartbeat on both servers, it’ll be a bit different for both of them.
+Create /etc/ha.d/ha.cf:
+
+# etcd1
+
+etcd1# vi /etc/ha.d/ha.cf
+#       keepalive: how many seconds between heartbeats
+#
+keepalive 2
+#
+#       deadtime: seconds-to-declare-host-dead
+#
+deadtime 10
+#
+#       What UDP port to use for udp or ppp-udp communication?
+#
+udpport        694
+bcast  ens18
+mcast ens18 225.0.0.1 694 1 0
+ucast ens18 192.168.0.3
+#       What interfaces to heartbeat over?
+udp     ens18
+#
+#       Facility to use for syslog()/logger (alternative to log/debugfile)
+#
+logfacility     local0
+#
+#       Tell what machines are in the cluster
+#       node    nodename ...    -- must match uname -n
+node    etcd1_hostname
+node    etcd2_hostname
+
+
+## etcd2
+
+etcd2# vi /etc/ha.d/ha.cf
+#       keepalive: how many seconds between heartbeats
+#
+keepalive 2
+#
+#       deadtime: seconds-to-declare-host-dead
+#
+deadtime 10
+#
+#       What UDP port to use for udp or ppp-udp communication?
+#
+udpport        694
+bcast  ens18
+mcast ens18 225.0.0.1 694 1 0
+ucast ens18 192.168.0.2
+#       What interfaces to heartbeat over?
+udp     ens18
+#
+#       Facility to use for syslog()/logger (alternative to vlog/debugfile)
+#
+logfacility     local0
+#
+#       Tell what machines are in the cluster
+#       node    nodename ...    -- must match uname -n
+node    etcd1_hostname
+node    etcd2_hostname
+
+
+The “node” parameters for this config you can get by running uname -n on both Etcd servers. Also, use your network card name instead of ens18.
+At last we need to create the /etc/ha.d/haresources file on these servers. File be the same for both of them. In this file we declare our shared IP address and which node be the master by default:
+
+etcd1# vi /etc/ha.d/haresources
+etcd1_hostname 192.168.0.1
+
+etcd2# vi /etc/ha.d/haresources
+etcd1_hostname 192.168.0.1
+
+After all done, let’s start our Heartbeat services on both servers, and check that on etcd1 node we got this declared virtual IP up:
+etcd1# systemctl restart heartbeat
+etcd2# systemctl restart heartbeat
+etcd1# ip a
+ens18: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    link/ether xx:xx:xx:xx:xx:xx brd ff:ff:ff:ff:ff:ff
+    inet 192.168.0.2/24 brd 192.168.0.255 scope global ens18
+       valid_lft forever preferred_lft forever
+    inet 192.168.0.1/24 brd 192.168.0.255 scope global secondary
+
+
+You can check that HAProxy working OK running nc to the 192.168.0.1 6443 address. You must got a timeout, as there is no Kubernetes API listening on backend yet. But it means that HAProxy and Heartbeat configured well.
+
+# nc -v 192.168.0.1 6443 
+Connection to 93.158.95.90 6443 port [tcp/*] succeeded!
+
+
+
+
+4. Preparing nodes for Kubernetes.
+
+Install Docker on all nodes:
+
+Update the apt package index
+# apt-get update
+
+Install packages to allow apt to use a repository over HTTPS 
+# apt-get -y install \
+  apt-transport-https \
+  ca-certificates \
+  curl \
+  gnupg2 \
+  software-properties-common
+
+Add Docker’s official GPG key
+# curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+
+Add docker apt repository
+# apt-add-repository \
+  "deb [arch=amd64] https://download.docker.com/linux/debian \
+  $(lsb_release -cs) \
+  stable"
+
+Install docker-ce.
+# apt-get update && apt-get -y install docker-ce
+
+Check docker version
+# docker -v
+Docker version 18.09.0, build 4d60db4
+
+After that, install Kubernetes packages on all nodes:
+kubeadm: the command to bootstrap the cluster.
+kubelet: the component that runs on all of the machines in your cluster and does things like starting pods and containers.
+kubectl: the command line utilite to talk to your cluster.
+You can install kubectl optionally, but I often install it on all nodes, to get availability to run some Kubernetes command for the debugging reasons.
+
+Add the Google repository key
+# curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+
+Add the Google repository
+# cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
+deb https://apt.kubernetes.io/ kubernetes-xenial main
+EOF
+
+Update and install packages
+# apt-get update && apt-get install -y kubelet kubeadm kubectl
+
+Hold back packages
+# apt-mark hold kubelet kubeadm kubectl
+
+Check kubeadm version
+# kubeadm version 
+kubeadm version: &version.Info{Major:"1", Minor:"13", GitVersion:"v1.13.1", GitCommit:"eec55b9dsfdfgdfgfgdfgdfgdf365bdd920", GitTreeState:"clean", BuildDate:"2018-12-13T10:36:44Z", GoVersion:"go1.11.2", Compiler:"gc", Platform:"linux/amd64"}
+
+After you finish with installing kubeadm and rest packages, don’t forget to disable swap.
+# swapoff -a
+# sed -i '/ swap / s/^/#/' /etc/fstab
+
+## Note: Repeat this installations process on rest of the nodes. Software packages will be the same for the all cluster nodes and only next configuration will determine each role they will get later.
+
+
+5. Configuring HA Etcd cluster
+
+Before we begin make sure that all etcd nodes can talk to each other over ports 2379 and 2380, also you need to configure a ssh access between them for using scp.
+
+We’ll start on the first etcd node, and then just copy all needed certificates and config files on rest servers.
+On all etcd nodes we need to add a new systemd config file, for the kubelet unit, with higher precedence:
+
+etcd-nodes# cat << EOF > /etc/systemd/system/kubelet.service.d/20-etcd-service-manager.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/kubelet --address=127.0.0.1 --pod-manifest-path=/etc/kubernetes/manifests --allow-privileged=true
+Restart=always
+EOF
+
+etcd-nodes# systemctl daemon-reload
+etcd-nodes# systemctl restart kubelet
+
+
+Then ssh to the first etcd node, we’ll use this node to generate all needed kubeadm configs for each etcd nodes and then will copy them.
+
+# Export all our etcd nodes IP's as variables 
+etcd1# export HOST0=192.168.0.2
+etcd1# export HOST1=192.168.0.3
+etcd1# export HOST2=192.168.0.4
+
+# Create temp directories to store files for all nodes
+etcd1# mkdir -p /tmp/${HOST0}/ /tmp/${HOST1}/ /tmp/${HOST2}/
+etcd1# ETCDHOSTS=(${HOST0} ${HOST1} ${HOST2})
+etcd1# NAMES=("infra0" "infra1" "infra2")
+
+etcd1# for i in "${!ETCDHOSTS[@]}"; do
+HOST=${ETCDHOSTS[$i]}
+NAME=${NAMES[$i]}
+cat << EOF > /tmp/${HOST}/kubeadmcfg.yaml
+apiVersion: "kubeadm.k8s.io/v1beta1"
+kind: ClusterConfiguration
+etcd:
+    local:
+        serverCertSANs:
+        - "${HOST}"
+        peerCertSANs:
+        - "${HOST}"
+        extraArgs:
+            initial-cluster: ${NAMES[0]}=https://${ETCDHOSTS[0]}:2380,${NAMES[1]}=https://${ETCDHOSTS[1]}:2380,${NAMES[2]}=https://${ETCDHOSTS[2]}:2380
+            initial-cluster-state: new
+            name: ${NAME}
+            listen-peer-urls: https://${HOST}:2380
+            listen-client-urls: https://${HOST}:2379
+            advertise-client-urls: https://${HOST}:2379
+            initial-advertise-peer-urls: https://${HOST}:2380
+EOF
+done
+
+
+Then generate the main certificate authority using kubeadm
+
+etcd1# kubeadm init phase certs etcd-ca
+
+This command will create two files ca.crt & ca.key in /etc/kubernetes/pki/etcd/ directory.
+
+etcd1# ls /etc/kubernetes/pki/etcd/ 
+ca.crt  ca.key
+
+Now let’s generate certificates for all our etcd nodes:
+
+### Create certificates for the etcd3 node 
+etcd1# kubeadm init phase certs etcd-server --config=/tmp/${HOST2}/kubeadmcfg.yaml
+etcd1# kubeadm init phase certs etcd-peer --config=/tmp/${HOST2}/kubeadmcfg.yaml
+etcd1# kubeadm init phase certs etcd-healthcheck-client --config=/tmp/${HOST2}/kubeadmcfg.yaml
+etcd1# kubeadm init phase certs apiserver-etcd-client --config=/tmp/${HOST2}/kubeadmcfg.yaml
+etcd1# cp -R /etc/kubernetes/pki /tmp/${HOST2}/
+
+### cleanup non-reusable certificates
+etcd1# find /etc/kubernetes/pki -not -name ca.crt -not -name ca.key -type f -delete
+
+### Create certificates for the etcd2 node
+etcd1# kubeadm init phase certs etcd-server --config=/tmp/${HOST1}/kubeadmcfg.yaml
+etcd1# kubeadm init phase certs etcd-peer --config=/tmp/${HOST1}/kubeadmcfg.yaml
+etcd1# kubeadm init phase certs etcd-healthcheck-client --config=/tmp/${HOST1}/kubeadmcfg.yaml
+etcd1# kubeadm init phase certs apiserver-etcd-client --config=/tmp/${HOST1}/kubeadmcfg.yaml
+etcd1# cp -R /etc/kubernetes/pki /tmp/${HOST1}/
+
+### cleanup non-reusable certificates again
+etcd1# find /etc/kubernetes/pki -not -name ca.crt -not -name ca.key -type f -delete
+
+### Create certificates for the this local node
+etcd1# kubeadm init phase certs etcd-server --config=/tmp/${HOST0}/kubeadmcfg.yaml
+etcd1 #kubeadm init phase certs etcd-peer --config=/tmp/${HOST0}/kubeadmcfg.yaml
+etcd1# kubeadm init phase certs etcd-healthcheck-client --config=/tmp/${HOST0}/kubeadmcfg.yaml
+etcd1# kubeadm init phase certs apiserver-etcd-client --config=/tmp/${HOST0}/kubeadmcfg.yaml
+
+# No need to move the certs because they are for this node
+# clean up certs that should not be copied off this host
+etcd1# find /tmp/${HOST2} -name ca.key -type f -delete
+etcd1# find /tmp/${HOST1} -name ca.key -type f -delete
+
+Then let’s copy certificates and kubeadm configs to the etcd2 and etcd3 nodes.
+First generate a ssh key pair on etcd1 and add public part to the etcd2 & 3 nodes. In this example all commands be done from the root user.
+
+etcd1# scp -r /tmp/${HOST1}/* ${HOST1}:
+etcd1# scp -r /tmp/${HOST2}/* ${HOST2}:
+### login to the etcd2 or run this command remotely by ssh
+etcd2# cd /root
+etcd2# mv pki /etc/kubernetes/
+### login to the etcd3 or run this command remotely by ssh
+etcd3# cd /root
+etcd3# mv pki /etc/kubernetes/
+
+
+Ensure that files exist on all nodes before starting the etcd cluster:
+
+List of required files on etcd1 is:
+
+/tmp/192.168.0.2
+└── kubeadmcfg.yaml
+---
+/etc/kubernetes/pki
+├── apiserver-etcd-client.crt
+├── apiserver-etcd-client.key
+└── etcd
+    ├── ca.crt
+    ├── ca.key
+    ├── healthcheck-client.crt
+    ├── healthcheck-client.key
+    ├── peer.crt
+    ├── peer.key
+    ├── server.crt
+    └── server.key
+
+
+For the etcd2 node it’s:
+/root
+└── kubeadmcfg.yaml
+---
+/etc/kubernetes/pki
+├── apiserver-etcd-client.crt
+├── apiserver-etcd-client.key
+└── etcd
+    ├── ca.crt
+    ├── healthcheck-client.crt
+    ├── healthcheck-client.key
+    ├── peer.crt
+    ├── peer.key
+    ├── server.crt
+    └── server.key
+
+And last etcd3 node:
+/root
+└── kubeadmcfg.yaml
+---
+/etc/kubernetes/pki
+├── apiserver-etcd-client.crt
+├── apiserver-etcd-client.key
+└── etcd
+    ├── ca.crt
+    ├── healthcheck-client.crt
+    ├── healthcheck-client.key
+    ├── peer.crt
+    ├── peer.key
+    ├── server.crt
+    └── server.key
+
+
+After all certificates and configs now in place we need to create the manifests. On each node run the kubeadm command to generate a static manifest for etcd cluster:
+
+etcd1# kubeadm init phase etcd local --config=/tmp/192.168.0.2/kubeadmcfg.yaml
+etcd2# kubeadm init phase etcd local --config=/root/kubeadmcfg.yaml
+etcd3# kubeadm init phase etcd local --config=/root/kubeadmcfg.yaml
+
+
+After that etcd cluster must be configured and healthy, we can check it by running this command on etcd1 node:
+
+etcd1# docker run --rm -it \
+--net host \
+-v /etc/kubernetes:/etc/kubernetes quay.io/coreos/etcd:v3.2.24 etcdctl \
+--cert-file /etc/kubernetes/pki/etcd/peer.crt \
+--key-file /etc/kubernetes/pki/etcd/peer.key \
+--ca-file /etc/kubernetes/pki/etcd/ca.crt \
+--endpoints https://192.168.0.2:2379 cluster-health
+### status output
+member 37245675bd09ddf3 is healthy: got healthy result from https://192.168.0.3:2379 
+member 532d748291f0be51 is healthy: got healthy result from https://192.168.0.4:2379 
+member 59c53f494c20e8eb is healthy: got healthy result from https://192.168.0.2:2379 
+cluster is healthy
+
+
+The etcd cluster is UP, and we can move forward.
+
+
+6. Configuring masters and workers nodes
+
+It’s time to setup master nodes for our cluster, copy this files from the first etcd node to the first master node:
+
+etcd1# scp /etc/kubernetes/pki/etcd/ca.crt 192.168.0.5:
+etcd1# scp /etc/kubernetes/pki/apiserver-etcd-client.crt 192.168.0.5:
+etcd1# scp /etc/kubernetes/pki/apiserver-etcd-client.key 192.168.0.5:
+
+Then ssh to the master1 node and create the kubeadm-config.yaml file with the following contents:
+
+master1# cd /root && vi kubeadm-config.yaml
+apiVersion: kubeadm.k8s.io/v1beta1
+kind: ClusterConfiguration
+kubernetesVersion: stable
+apiServer:
+  certSANs:
+  - "192.168.0.1"
+controlPlaneEndpoint: "192.168.0.1:6443"
+etcd:
+    external:
+        endpoints:
+        - https://192.168.0.2:2379
+        - https://192.168.0.3:2379
+        - https://192.168.0.4:2379
+        caFile: /etc/kubernetes/pki/etcd/ca.crt
+        certFile: /etc/kubernetes/pki/apiserver-etcd-client.crt
+        keyFile: /etc/kubernetes/pki/apiserver-etcd-client.key
+
+Move the previously copied certificates and key to the properly directory on master1 as we listed in config.
+
+master1# mkdir -p /etc/kubernetes/pki/etcd/ 
+master1# cp /root/ca.crt /etc/kubernetes/pki/etcd/
+master1# cp /root/apiserver-etcd-client.crt /etc/kubernetes/pki/
+master1# cp /root/apiserver-etcd-client.key /etc/kubernetes/pki/
+
+To creating first master node run:
+master1# kubeadm init --config kubeadm-config.yaml
+
+If all previous steps was done right you will see this:
+You can now join any number of machines by running the following on each node
+as root:
+kubeadm join 192.168.0.1:6443 --token aasuvd.kw8m18m5fy2ot387 --discovery-token-ca-cert-hash sha256:dcbaeed8d1478291add0294553b6b90b453780e546d06162c71d515b494177a6
+
+
+Copy this kubeadm init output to some text file, we’ll use this token in future when will join the second master and worker nodes to our cluster.
+
+As I said previously our Kubernetes cluster will use some overlay network inside, for the Pods and other services, so at this point we need to install some CNI plugin. I recommend a Weave CNI plugin, after some experience I found it more useful and less problem, but you can choose another one like Calico or other.
+
+Installing the Weave net plugin on first master node:
+master1# kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+
+The connection to the server localhost:8080 was refused - did you specify the right host or port?
+serviceaccount/weave-net created
+clusterrole.rbac.authorization.k8s.io/weave-net created
+clusterrolebinding.rbac.authorization.k8s.io/weave-net created
+role.rbac.authorization.k8s.io/weave-net created
+rolebinding.rbac.authorization.k8s.io/weave-net created
+daemonset.extensions/weave-net created
+
+Wait a little and type next command for checking that pods of the components get started:
+
+master1# kubectl --kubeconfig /etc/kubernetes/admin.conf get pod -n kube-system -w
+NAME                             READY   STATUS   RESTARTS AGE 
+coredns-86c58d9df4-d7qfw         1/1     Running  0        6m25s 
+coredns-86c58d9df4-xj98p         1/1     Running  0        6m25s 
+kube-apiserver-master1           1/1     Running  0        5m22s 
+kube-controller-manager-master1  1/1     Running  0        5m41s 
+kube-proxy-8ncqw                 1/1     Running  0        6m25s 
+kube-scheduler-master1           1/1     Running  0        5m25s 
+weave-net-lvwrp                  2/2     Running  0        78s
+
+It’s recommended to join new control plane nodes only after the first node has finished initializing.
+To check the state of our cluster now run this:
+
+master1# kubectl --kubeconfig /etc/kubernetes/admin.conf get nodes
+NAME      STATUS   ROLES    AGE   VERSION 
+master1   Ready    master   11m   v1.13.1
+
+Cool, the first master node is UP and ready, now we can add second master node and add our workers nodes, to complete the Kubernetes cluster creation.
+
+For adding a second master node make some ssh key on master1 and add public part to the master2 node. Make test login and then copy some files from the first master node to the second:
+master1# scp /etc/kubernetes/pki/ca.crt 192.168.0.6:
+master1# scp /etc/kubernetes/pki/ca.key 192.168.0.6:
+master1# scp /etc/kubernetes/pki/sa.key 192.168.0.6:
+master1# scp /etc/kubernetes/pki/sa.pub 192.168.0.6:
+master1# scp /etc/kubernetes/pki/front-proxy-ca.crt @192.168.0.6:
+master1# scp /etc/kubernetes/pki/front-proxy-ca.key @192.168.0.6:
+master1# scp /etc/kubernetes/pki/apiserver-etcd-client.crt @192.168.0.6:
+master1# scp /etc/kubernetes/pki/apiserver-etcd-client.key @192.168.0.6:
+master1# scp /etc/kubernetes/pki/etcd/ca.crt 192.168.0.6:etcd-ca.crt
+master1# scp /etc/kubernetes/admin.conf 192.168.0.6:
+
+### Check that files was copied well
+
+master2# ls /root
+admin.conf  ca.crt  ca.key  etcd-ca.crt  front-proxy-ca.crt  front-proxy-ca.key  sa.key  sa.pub
+
+On second master node move the previously copied certificates and keys to the properly directories:
+master2#
+mkdir -p /etc/kubernetes/pki/etcd
+mv /root/ca.crt /etc/kubernetes/pki/
+mv /root/ca.key /etc/kubernetes/pki/
+mv /root/sa.pub /etc/kubernetes/pki/
+mv /root/sa.key /etc/kubernetes/pki/
+mv /root/apiserver-etcd-client.crt /etc/kubernetes/pki/ 
+mv /root/apiserver-etcd-client.key /etc/kubernetes/pki/
+mv /root/front-proxy-ca.crt /etc/kubernetes/pki/
+mv /root/front-proxy-ca.key /etc/kubernetes/pki/
+mv /root/etcd-ca.crt /etc/kubernetes/pki/etcd/ca.crt
+mv /root/admin.conf /etc/kubernetes/admin.conf
+
+Now let’s join the second master node to the cluster, for this we’ll need a join command output, that was previously given to us by kubeadm init on the first node.
+
+Run on master2:
+
+master2# kubeadm join 192.168.0.1:6443 --token aasuvd.kw8m18m5fy2ot387 --discovery-token-ca-cert-hash sha256:dcbaeed8d1478291add0294553b6b90b453780e546d06162c71d515b494177a6 --experimental-control-plane
+
+We need to add the --experimental-control-plane flag. This flag automates joining this master nodes to the cluster. Without this flag you’ll just add a regular worker node.
+Wait a bit before node complete joining the cluster and check the new cluster state:
+
+master1# kubectl --kubeconfig /etc/kubernetes/admin.conf get nodes
+NAME      STATUS   ROLES    AGE   VERSION 
+master1   Ready    master   32m   v1.13.1 
+master2   Ready    master   46s   v1.13.1
+
+Also check that all pods from all master nodes started OK:
+
+master1# kubectl — kubeconfig /etc/kubernetes/admin.conf get pod -n kube-system -w
+ 
+NAME                            READY  STATUS   RESTARTS  AGE 
+coredns-86c58d9df4-d7qfw        1/1    Running  0         46m 
+coredns-86c58d9df4-xj98p        1/1    Running  0         46m 
+kube-apiserver-master1          1/1    Running  0         45m 
+kube-apiserver-master2          1/1    Running  0         15m 
+kube-controller-manager-master1 1/1    Running  0         45m 
+kube-controller-manager-master2 1/1    Running  0         15m 
+kube-proxy-8ncqw                1/1    Running  0         46m 
+kube-proxy-px5dt                1/1    Running  0         15m 
+kube-scheduler-master1          1/1    Running  0         45m 
+kube-scheduler-master2          1/1    Running  0         15m 
+weave-net-ksvxz                 2/2    Running  1         15m 
+weave-net-lvwrp                 2/2    Running  0         41m
+
+Well done, we almost finished with our Kubernetes cluster configuration, the last thing we need to do, it’s add the three worker nodes that we prepared previously.
+
+Login to worker nodes and run the kubeadm join command without --experimental-control-plane flag.
+
+worker1-3# kubeadm join 192.168.0.1:6443 --token aasuvd.kw8m18m5fy2ot387 --discovery-token-ca-cert-hash sha256:dcbaeed8d1478291add0294553b6b90b453780e546d06162c71d515b494177a6
+
+Now let’s check our cluster state again:
+master1# kubectl --kubeconfig /etc/kubernetes/admin.conf get nodes
+NAME           STATUS   ROLES    AGE     VERSION 
+master1   Ready    master   1h30m   v1.13.1 
+master2   Ready    master   1h59m   v1.13.1 
+worker1   Ready    <none>   1h8m    v1.13.1 
+worker2   Ready    <none>   1h8m    v1.13.1 
+worker3   Ready    <none>   1h7m    v1.13.1
+
+As you can see we now have a fully configured HA Kubernetes cluster with two master nodes and three worker nodes. This cluster based on a HA etcd cluster with fault tolerance load balancer in front of our masters. Sounds good as for me.
+
+
+7. Configuring remote cluster control
+
+One more things that we left to do in this first part of article, configure a remote kubectl utility, that we’ll use for controlling our cluster. Previously we run all commands from the master1 node but this is good only for the first time, when we configure cluster. Then configuring some external control node will be a good idea. You can use your laptop or other server for it.
+
+Login to this server and run:
+Add the Google repository key
+control# curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+Add the Google repository
+control# cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
+deb https://apt.kubernetes.io/ kubernetes-xenial main
+EOF
+
+Update and install kubectl
+control# apt-get update && apt-get install -y kubectl
+
+In your user home dir create
+control# mkdir ~/.kube
+
+Take the Kubernetes admin.conf from the master1 node
+control# scp 192.168.0.5:/etc/kubernetes/admin.conf ~/.kube/config
+
+Check that we can send commands to our cluster
+
+control# kubectl get nodes
+NAME           STATUS   ROLES    AGE     VERSION 
+master1        Ready    master   6h58m   v1.13.1 
+master2        Ready    master   6h27m   v1.13.1 
+worker1        Ready    <none>   5h36m   v1.13.1 
+worker2        Ready    <none>   5h36m   v1.13.1 
+worker3        Ready    <none>   5h36m   v1.13.1
+
+Good, now let’s run some test pod in our cluster and check how it works.
+
+control# kubectl create deployment nginx --image=nginx 
+deployment.apps/nginx created
+
+control# kubectl get pods 
+NAME                   READY   STATUS    RESTARTS   AGE 
+nginx-5c7588df-6pvgr   1/1     Running   0          52s
+
+Congrats, you just run your first Kubernetes deployment. And it means your new HA Kubernetes cluster ready. Actually Kubernetes cluster configuration process using kubeadm a pretty easy and fast.
+
+In the next part of article we’ll add the internal storage by configuring a GlusterFS on all worker nodes, and will configure an internal load balancer for our Kubernetes cluster and also run some stress tests by shutdown some nodes and check how stable cluster can be.
+
+## Afterwords
+Well, implementing this example you can meet some problems, don’t worry, for canceling any changes and returning your nodes to the base state you can just run kubeadm reset, it’ll totally remove all changes that kubeadm was done before and you can start your configuration from scratch again. Also, mind checking a docker containers state on your cluster nodes, to be sure that all of them starts and working without error. For getting more info about bad containers use docker logs container id.

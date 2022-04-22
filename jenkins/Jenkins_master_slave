@@ -1,0 +1,223 @@
+https://www.howtoforge.com/tutorial/ubuntu-jenkins-master-slave/ (*)
+
+https://www.linkedin.com/pulse/how-setup-jenkins-kubernetes-cluster-jasvinder-singh (*K8s)
+
+https://medium.com/swlh/quick-and-simple-how-to-setup-jenkins-distributed-master-slave-build-on-kubernetes-37f3d76aae7d (*)
+
+* https://digitalavenue.dev/How-To-Setup-Jenkins-On-Kubernetes/
+
+You Got Benefits !!!
+    Multi-Tasking: You can run many more build jobs in parallel
+    Self-Healing: Replacing corrupted Jenkins instances automatically.
+    Cost Saving: Spinning up and removing slaves dynamically based on need.
+    Even Load Distribution: Spreading the load across different physical machines/ VMs / Nodes when required.
+
+
+STEP 01: Create a Namespace for the Jenkins Deployment
+
+vi jenkins-ns.yaml
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: jenkins
+
+kubectl apply -f jenkins-ns.yaml
+
+
+STEP 02: Create Persistent Volume
+
+Creating a persistence volume is essential since all of your Jenkins jobs, plugins, configurations should be persisted. If one pod dies, then another new pod can continue with persistent data from your volume.
+
+
+vi jenkins-pv.yaml
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jenkins-home-pv
+  namespace: jenkins
+  labels:
+    usage: jenkins-shared-deployement
+spec:
+  storageClassName:  default # managed-premium
+  capacity:
+    storage: 5Gi # Change Me
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/var/jenkins_home"
+
+kubectl apply -f jenkins-pv.yaml -n jenkins
+
+
+
+STEP 03: Create a PersistentVolumeClaim
+“PersistentVolumeClaim” request for storage with a specific size and access mode. In this case, I’m going to claim 5GB of storage to my “Jenkins_Home.”
+
+Note: Make sure to match the selector labels If you plan to change the manifest as you like. (Ex: usage: Jenkins-shared-deployment)
+
+vi jenkins-pvc.yaml
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jenkins-home-pvc 
+  namespace: jenkins
+  labels:
+    app: jenkins
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: default # managed-premium 
+  resources:
+    requests:
+      storage: 5Gi # Change Me
+
+kubectl apply -f jenkins-pvc.yaml -n jenkins
+
+
+STEP 04: Create a Deployment Manifest
+
+Here, I’m using Jenkins LTS docker image and expose port 8080 for the web access and port 50000 for the Jenkins JNLP service, which use to access Jenkins workers, respectively.
+
+Let’s create a Kubernetes deployment manifest for the Jenkins server. Here I’m using Jenkins LTS image and exposing port number 8080 and 50000 for web access and inter master agent communications.
+
+vi jenkins-deployemt.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins-master
+  namespace: jenkins
+  labels:
+    app: jenkins
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      securityContext: # Set runAsUser to 1000 to let Jenkins run as non-root user 'jenkins' which exists in 'jenkins/jenkins' docker image.
+        runAsUser: 0
+        fsGroup: 1000
+      containers:
+      - name: jenkins-master
+        # https://github.com/jenkinsci/docker
+        image: jenkins/jenkins:lts #jenkinsci/jenkins:2.150.1
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: JENKINS_HOME
+          value: /var/jenkins_home
+        - name: JAVA_OPTS
+          value: -Djenkins.install.runSetupWizard=false
+        - name: JAVA_OPTS
+          value: "-Xmx8192m"
+        # - name: COPY_REFERENCE_FILE_LOG
+        #   value: $JENKINS_HOME/copy_reference_file.log
+        ports:
+        - name: jenkins-port # Access Port for UI
+          containerPort: 8080
+        - name: jnlp-port # Inter agent communication via docker daemon
+          containerPort: 50000
+        resources: # Resource limitations 
+          requests:
+            memory: "256Mi" # Change Me
+            cpu: "50m"
+          limits:
+            memory: "4Gi" # Change Me
+            cpu: "2000m"
+        volumeMounts:
+        - name: jenkins-home-volume
+          mountPath: "/var/jenkins_home"
+      volumes:
+      - name: jenkins-home-volume
+        persistentVolumeClaim:
+          claimName: jenkins-home-pvc 
+
+
+kubectl apply -f jenkins-deployment.yaml -n jenkins
+
+
+STEP 05: Create a Service Manifest
+
+Now, We have deployed Jenkins on Kubernetes. But, It is still not accessible.
+
+Services in Kubernetes use to expose applications running on Kubernetes pods. Now we need to grant access to the Jenkins via Kubernetes service. So, We need to define a service for the Jenkins server. Here, we expose port 8080 and 50000.
+
+vi jenkins-svc.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-ui-service
+  namespace: jenkins
+spec:
+  type: ClusterIP # NodePort, LoadBalancer 
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      # nodePort: 30100
+      name: ui
+  selector:
+    app: jenkins
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-jnlp-service
+  namespace: jenkins
+spec:
+    type: ClusterIP # NodePort, LoadBalancer
+  ports:
+    - port: 50000
+      targetPort: 50000
+  selector:
+    app: jenkins
+
+kubectl  apply -f jenkins-svc.yaml -n jenkins
+
+Now you can access the Jenkins Dashboard.
+
+
+STEP 06: Port-Forwarding (Optional)
+
+As you can see in the service manifest, I have used “ClusterIP” as my network service. So, I need to port-forward Jenkins-UI service to access through my (localhost) computer.
+
+If you plan to deploy on Cloud service, you will get many more options such as ingress controllers. We discuss them in the next tutorial.
+
+For now, I’m going to port forward Jenkins-UI (8080/TCP) to my localhost as I’m deploying Jenkins on Minikube.
+
+Get the Jenkins-UI service details.
+
+dimuthu@srv01:~/jenkins-k8s$ kubectl get svc -n jenkins
+NAME                   TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)     AGE
+jenkins-jnlp-service   ClusterIP   10.106.232.10   <none>        50000/TCP   10m
+jenkins-ui-service     ClusterIP   10.98.225.50    <none>        8080/TCP    10m
+Now, I’m going to forward my port 8080 to my local machine. Simply run the following command.
+
+dimuthu@srv01:~/jenkins-k8s$ kubectl port-forward service/jenkins-ui-service 8080:8080 -n jenkins
+Forwarding from 127.0.0.1:8080 -> 8080
+Forwarding from [::1]:8080 -> 8080
+
+
+STEP 05: Access Jenkins Server
+
+Now, You can access your Jenkins server through the web browser.
+
+http://<YOUR-HOST-NAME-OR-IP>:8080/
+
+
+kubectl logs deployment/jenkins-master  -n jenkins
+
