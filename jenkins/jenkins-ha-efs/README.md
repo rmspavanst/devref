@@ -1,6 +1,9 @@
 
 https://github.com/aplimasolutions/terraform-demos
 
+https://www.youtube.com/watch?v=Wa0sM4D56qQ
+
+
 
 
 # How to set up a highly available Jenkins master ?

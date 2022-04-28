@@ -1,0 +1,12 @@
+* combine21.yml
+  Ansible: Transforming list to dictionary with items2dict
+  https://stackoverflow.com/questions/66193508/ansible-transforming-list-to-dictionary-with-items2dict/
+
+* combine19.yml combine20.yml
+  Ansible: How to udpate dictionary key value in a file
+  https://stackoverflow.com/questions/65516712/ansible-how-to-udpate-dictionary-key-value-in-a-file
+
+* combine18.yml
+  Ansible logic to have same user sudo at some instances whereas normal at other instances
+  https://stackoverflow.com/questions/65300940/ansible-logic-to-have-same-user-sudo-at-some-instances-whereas-normal-at-other-i/
+

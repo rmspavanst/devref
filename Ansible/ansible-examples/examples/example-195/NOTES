@@ -1,0 +1,15 @@
+* test9.yml
+  Ansible: appending to a list conditionally
+  https://serverfault.com/questions/1057555/ansible-appending-to-a-list-conditionally
+
+* test8.yml, test8b.yml
+  Run an Ansible task to all hosts if at least one of the hosts has a variable
+  https://stackoverflow.com/questions/66262728/run-an-ansible-task-to-all-hosts-if-at-least-one-of-the-hosts-has-a-variable/
+
+* test7.yml
+  Is there any filter in ansible can mimic all() and any()?
+  https://stackoverflow.com/questions/66207600/is-there-any-filter-in-ansible-can-mimic-all-and-any/
+
+* test6.yml
+  How to run a playbook conditionally if any of a property is True
+  https://stackoverflow.com/questions/65429038/how-to-run-a-playbook-conditionally-if-any-of-a-property-is-true/

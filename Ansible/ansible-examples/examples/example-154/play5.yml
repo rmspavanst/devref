@@ -1,0 +1,7 @@
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - meta: end_play
+      when: condition|default(false)|bool
+    - debug:
+        msg: Start play
