@@ -94,6 +94,44 @@ networks:
     driver: bridge
 
 
+## 0r ## gitlab
+# docker-compose.yml
+version: '3.7'
+services:
+  web:
+    image: 'gitlab/gitlab-ce:latest'
+    restart: always
+    hostname: 'localhost'
+    container_name: gitlab-ce
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://localhost'
+    ports:
+      - '8080:80'
+      - '8443:443'
+    volumes:
+      - '$GITLAB_HOME/config:/etc/gitlab'
+      - '$GITLAB_HOME/logs:/var/log/gitlab'
+      - '$GITLAB_HOME/data:/var/opt/gitlab'
+    networks:
+      - gitlab
+  gitlab-runner:
+    image: gitlab/gitlab-runner:alpine
+    container_name: gitlab-runner    
+    restart: always
+    depends_on:
+      - web
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - '$GITLAB_HOME/gitlab-runner:/etc/gitlab-runner'
+    networks:
+      - gitlab
+
+networks:
+  gitlab:
+    name: gitlab-network
+
+
 Now, run the following command to launch the stack:
 
 $ docker-compose up -d
@@ -117,4 +155,6 @@ SonarQube - http://your-ip-address:9000
 GitLab - http://your-ip-address:10080
 
 $ docker exec -it <your-jinkins-container-id> cat /var/jenkins_home/secrets/initialAdminPassword
+
+$ docker exec -it gitlab-ce grep 'Password:' /etc/gitlab/initial_root_password
 
