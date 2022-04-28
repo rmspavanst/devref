@@ -15,6 +15,8 @@ https://openreggui.org/git/help/install/kubernetes/gitlab_chart.md
 
 https://gitcrcm.marseille.inserm.fr/help/install/kubernetes/gitlab_chart.md
 
+https://kp2.in.htwg-konstanz.de/git/help/install/kubernetes/gitlab_chart.md
+
 
 
 
