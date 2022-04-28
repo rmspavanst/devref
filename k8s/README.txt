@@ -13,6 +13,10 @@ https://blog.dbi-services.com/deploy-gitlab-on-kubernetes-using-helm/
 
 https://openreggui.org/git/help/install/kubernetes/gitlab_chart.md
 
+https://gitcrcm.marseille.inserm.fr/help/install/kubernetes/gitlab_chart.md
+
+
+
 
 
 
