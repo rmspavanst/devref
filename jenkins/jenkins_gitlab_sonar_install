@@ -1,0 +1,120 @@
+## Setup Jenkins, SonarQube & GitLabs
+
+https://appfleet.com/blog/jenkins-pipeline-with-sonarqube-and-gitlab/
+
+
+# Step 1:
+
+Make sure that your host machine has enough power to run these components, as GitLab alone requires 4 GB of RAM to perform its operations smoothly. To run all three together, you need at least 8 GB of RAM and 20 GB of hard disk space.
+
+# Step 2:
+
+For SonarQube, you need to set the recommended values as a root user on the host machine:
+
+$ sysctl -w vm.max_map_count=262144
+$ sysctl -w fs.file-max=65536
+$ ulimit -n 65536
+$ ulimit -u 4096
+
+# Step 3:
+
+For this guide, we are going to use a simple docker-compose.yml file. However, you are free to edit the file as per your requirement.
+
+Before launching the containers, please make sure that you change the value of GITLAB_SECRETS_DB_KEY_BASE, GITLAB_HOST, SONARQUBE_JDBC_PASSWORD, and POSTGRES_PASSWORD. Although, along with this, you can also modify the define ports in the file.
+
+
+version: "3.2"
+ 
+services:
+   jenkins:
+       image: jenkinsci/jenkins:lts
+       container_name: jenkins-container
+       restart: always
+       ports:
+           - "8080:8080"
+           - '50000:50000'
+       volumes:
+       - '/var/run/docker.sock:/var/run/docker.sock'
+       - '/data/jenkins/jenkins_home:/var/jenkins_home'
+       environment:
+       - "JENKINS_OPTS=--prefix=/jenkins"
+ 
+   gitlab:
+       image: gitlab/gitlab-ce:latest
+       container_name: gitlab-container
+       restart: always
+       environment:
+           - GITLAB_SECRETS_DB_KEY_BASE=long-and-random-alphanumeric-string
+           - GITLAB_HOST=your-host-ip-here
+           - GITLAB_PORT=10080
+           - GITLAB_SSH_PORT=10022
+       ports:
+           - "10080:80"
+           - "10022:22"
+       volumes:
+       - '/data/gitlab/config:/etc/gitlab'
+       - '/data/gitlab/logs:/var/log/gitlab'
+       - '/data/gitlab/data:/var/opt/gitlab'
+ 
+   sonarqube:
+       image: sonarqube:7.9.2-community
+       container_name: sonar-container
+       restart: always
+       networks:
+           - sonarnet
+       environment:
+           - SONARQUBE_JDBC_USERNAME=sonar
+           - SONARQUBE_JDBC_PASSWORD=your-strong-password-here
+           - SONARQUBE_JDBC_URL=jdbc:postgresql://postgressdb:5432/sonarqube
+       ports:
+       - "9000:9000"
+       - "9092:9092"
+       volumes:
+       - '/data/sonar/sonarqube_conf:/opt/sonarqube/conf'
+       - '/data/sonar/sonarqube_data:/opt/sonarqube/data'
+       - '/data/sonar/sonarqube_extensions:/opt/sonarqube/extensions'
+       - '/data/sonar/sonarqube_bundled-plugins:/opt/sonarqube/lib/bundled-plugins'
+  
+   postgressdb:
+       image: postgres:12.1
+       container_name: postgres-container
+       restart: always
+       networks:
+           - sonarnet
+       environment:
+           - POSTGRES_USER=sonar
+           - POSTGRES_PASSWORD=your-strong-password-here
+           - POSTGRES_DB=sonarqube
+       volumes:
+       - '/data/postgresql/sonarqube_db:/var/lib/postgresql'
+       - '/data/postgresql/postgresql_data:/var/lib/postgresql/data'
+ 
+networks:
+   sonarnet:
+    driver: bridge
+
+
+Now, run the following command to launch the stack:
+
+$ docker-compose up -d
+
+
+
+## Step 4:
+
+Now, to verify if all systems are up and running, run this command:
+
+$ docker ps
+
+CONTAINER ID    IMAGE                     COMMAND             CREATED         STATUS                  PORTS                                                   NAMES
+f54e223417fa    gitlab/gitlab-ce:latest   "/assets/wrapper"   1 minute ago    1 minute ago (healthy)  443/tcp, 0.0.0.0:10022->22/tcp, 0.0.0.0:10080->80/tcp   gitlab-container
+9102f03f69b8    sonarqube                 "./bin/run.sh"      1 minute ago    1 minute ago            0.0.0.0:9000->9000/tcp                                  sonar-container
+05f554da39fc    jenkinsci/jenkins:lts     "/bin/tini --..."   1 minute ago    1 minute ago            0.0.0.0:8080->8080/tcp, 0.0.0.0:50000->50000/tcp        jenkins-container
+If all went well, then you can access all three of them by following mentioned URLs:
+
+Jenkins - http://your-ip-address:8080
+SonarQube - http://your-ip-address:9000
+GitLab - http://your-ip-address:10080
+
+$ docker exec -it <your-jinkins-container-id> cat /var/jenkins_home/secrets/initialAdminPassword
+
