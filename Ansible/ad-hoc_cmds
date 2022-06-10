@@ -1,0 +1,13 @@
+ansible localhost -m yum -a "name=tree state=present"
+ansible localhost -m service -a "name=httpd state=restarted"
+ansible localhost -m uri -a "url=http://materials.example.com/"
+ansible localhost -m uri -a "url=http://materials.example.com/nothing"
+ansible servera.lab.example.com -m ping
+ansible servera.lab.example.com -m yum -a "name=httpd state=latest"
+ansible servera.lab.example.com -m yum -a "name=httpd state=latest" -b
+ansible servera.lab.example.com -m service -a "name=httpd enabled=yes state=started" -b
+
+
+ansible-playbook --syntax-check webserver.yml
+
+
