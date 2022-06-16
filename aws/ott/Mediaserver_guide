@@ -1,0 +1,38 @@
+How To Create Your Own Media Streaming Server or Website Like Netflix, Amazon Prime, Hotstar Using Amazon AWS Platform. So through this, I will show you guys how to configure or set up a website like Netflix or Amazon prime using Emby with the help of AWS.  
+
+
+Commands: wget https://github.com/MediaBrowser/Emby....
+
+
+dpkg -i emby-server-deb_4.1.1.0_amd64.deb
+
+
+
+Emby Server for Linux - Emby: https://emby.media/linux-server.html
+
+
+✿ How To Configure VPC in AWS Public & Private Subnets | Route Tables | Internet Gateway: https://youtu.be/5620yOWWFxU
+
+✿ How To Make Your Own Web Hosting Cpanel in AWS Step by Step | WHM installation: https://youtu.be/Kmfy6yzDTu0
+
+✿How To Link Your Domain Name With AWS EC2 | Amazon Web Service: https://youtu.be/qor31Egu0Rg
+
+✿ How To Setup Windows Server Instance in AWS EC2 | Amazon Web Service: https://youtu.be/1arfOob0rNQ
+
+✿ How to Create Your Own VPN Server Using AWS Amazon Cloud Computing: https://youtu.be/jKr92GR2t5k
+
+✿ How To Recover EC2 Amazon Linux Lost Key Pair: https://youtu.be/bmqmWxz8dXQ
+
+✿ How to Configure Free Tier Linux VPS on Amazon: https://youtu.be/TjDCV5inzis
+
+✿ Cloud Computing Overview Part 3 | Storage Systems: https://www.youtube.com/watch?v=lKwJP...
+
+✿ Cloud Computing Part 2 | Deployment Model: https://www.youtube.com/watch?v=wkx_J...
+
+✿ Cloud Computing Overview Part 1 | What is Cloud Computing? : https://www.youtube.com/watch?v=C4oRQ...
+
+
+
+How to build YouTube like website with AWS?:
+--------------------------------------------
+https://www.youtube.com/watch?v=1ecqqWRvgrU

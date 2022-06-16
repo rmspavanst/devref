@@ -1,0 +1,16 @@
+How To Create Your Own Media Server Like Netflix, Amazon Prime, Hotstar Using AWS:
+-------------------------------------------------------------------------------------
+
+Step1: 
+------
+1. Launch EC2 instance(ubuntu 18) and aloow ports: 22/8096.
+2. Login to instance and create sudo password, allow sudo Login
+3. login to root user and download ubuntu Emby release (https://emby.media/linux-server.html) and run below cmds
+   wget https://github.com/MediaBrowser/Emby.Releases/releases/download/4.7.2.0/emby-server-deb_4.7.2.0_amd64.deb
+   dpkg -i emby-server-deb_4.7.2.0_amd64.deb
+   Open a web browser to http://localhost:8096
+
+4. select language, username/password, Add media library--contect type: movies, Select folder: /home/ubuntu and library settings
+
+
+
