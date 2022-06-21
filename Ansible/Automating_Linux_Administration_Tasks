@@ -1,0 +1,546 @@
+---
+- name: Install the required packages on the web server
+  hosts: servera.lab.example.com
+  tasks:
+    - name: Install the httpd packages
+      yum:
+        name: httpd 
+        state: present
+
+
+---
+- name: Install the required packages on the web server
+  hosts: servera.lab.example.com
+  tasks:
+    - name: Install the packages
+      yum:
+        name:
+          - httpd
+          - mod_ssl
+          - httpd-tools
+        state: present
+
+
+
+---
+- name: Install the required packages on the web server
+  hosts: servera.lab.example.com
+  tasks:
+    - name: Install the packages
+      yum:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - httpd
+        - mod_ssl
+        - httpd-tools
+
+---
+- name: Display installed packages
+  hosts: servera.lab.example.com
+  tasks:
+    - name: Gather info on installed packages
+      package_facts:
+        manager: auto
+
+    - name: List installed packages
+      debug:
+        var: ansible_facts.packages
+
+    - name: Display NetworkManager version
+      debug:
+        msg: "Version {{ansible_facts.packages['NetworkManager'][0].version}}"
+      when: "'NetworkManager' in ansible_facts.packages"
+
+
+---
+- name: Install the required packages on the web servers
+  hosts: webservers
+  tasks:
+    - name: Install httpd on RHEL
+      yum:
+        name: httpd
+        state: present
+      when: "ansible_distribution == 'RedHat'"
+
+    - name: Install httpd on Fedora
+      dnf:
+        name: httpd
+        state: present
+      when: "ansible_distribution == 'Fedora'"
+
+---
+- name: Configure the company Yum repositories
+  hosts: servera.lab.example.com
+  tasks:
+    - name: Ensure Example Repo exists
+      yum_repository:
+        file: example   
+        name: example-internal
+        description: Example Inc. Internal YUM repo
+        baseurl: http://materials.example.com/yum/repository/
+        enabled: yes
+        gpgcheck: yes   
+        state: present
+
+---
+- name: Configure the company Yum repositories
+  hosts: servera.lab.example.com
+  tasks:
+    - name: Deploy the GPG public key
+      rpm_key:
+        key: http://materials.example.com/yum/repository/RPM-GPG-KEY-example
+        state: present
+
+    - name: Ensure Example Repo exists
+      yum_repository:
+        file: example
+        name: example-internal
+        description: Example Inc. Internal YUM repo
+        baseurl: http://materials.example.com/yum/repository/
+        enabled: yes
+        gpgcheck: yes
+        state: present
+
+
+#The entire playbook now looks as follows:
+
+---
+- name: Repository Configuration
+  hosts: all
+  vars:
+    custom_pkg: example-motd
+  tasks:
+    - name: Gather Package Facts
+      package_facts:
+        manager: auto
+
+    - name: Show Package Facts for the custom package
+      debug:
+        var: ansible_facts.packages[custom_pkg]
+      when: custom_pkg in ansible_facts.packages
+
+    - name: Ensure Example Repo exists
+      yum_repository:
+        name: example-internal
+        description: Example Inc. Internal YUM repo
+        file: example
+        baseurl: http://materials.example.com/yum/repository/
+        gpgcheck: yes
+
+    - name: Ensure Repo RPM Key is Installed
+      rpm_key:
+        key: http://materials.example.com/yum/repository/RPM-GPG-KEY-example
+        state: present
+
+    - name: Install Example motd package
+      yum:
+        name: "{{ custom_pkg }}"
+        state: present
+
+    - name: Show Package Facts for the custom package
+      debug:
+        var: ansible_facts.packages[custom_pkg]
+      when: custom_pkg in ansible_facts.packages
+
+
+#Insert a task immediately after the Install Example motd package task using the package_facts module to update the package facts. Set the module's manager keyword with a value of auto.
+
+---
+- name: Repository Configuration
+  hosts: all
+  vars:
+    custom_pkg: example-motd
+  tasks:
+    - name: Gather Package Facts
+      package_facts:
+        manager: auto
+
+    - name: Show Package Facts for the custom package
+      debug:
+        var: ansible_facts.packages[custom_pkg]
+      when: custom_pkg in ansible_facts.packages
+
+    - name: Ensure Example Repo exists
+      yum_repository:
+        name: example-internal
+        description: Example Inc. Internal YUM repo
+        file: example
+        baseurl: http://materials.example.com/yum/repository/
+        gpgcheck: yes
+
+    - name: Ensure Repo RPM Key is Installed
+      rpm_key:
+        key: http://materials.example.com/yum/repository/RPM-GPG-KEY-example
+        state: present
+
+    - name: Install Example motd package
+      yum:
+        name: "{{ custom_pkg }}"
+        state: present
+
+    - name: Gather Package Facts
+      package_facts:
+        manager: auto
+
+    - name: Show Package Facts for the custom package
+      debug:
+        var: ansible_facts.packages[custom_pkg]
+      when: custom_pkg in ansible_facts.packages
+
+
+# manage users
+
+# cat vars/users_vars.yml
+---
+users:
+  - username: user1
+    groups: webadmin
+  - username: user2
+    groups: webadmin
+  - username: user3
+    groups: webadmin
+  - username: user4
+    groups: webadmin
+  - username: user5
+    groups: webadmin
+
+#users.yml
+  
+---
+- name: Create multiple local users
+  hosts: webservers
+  vars_files:
+    - vars/users_vars.yml
+  handlers:
+  - name: Restart sshd
+    service:
+      name: sshd
+      state: restarted
+
+  tasks:
+
+  - name: Add webadmin group
+    group:
+      name: webadmin
+      state: present
+
+  - name: Create user accounts
+    user:
+      name: "{{ item.username }}"
+      groups: "{{ item.groups }}"
+    loop: "{{ users }}"
+
+  - name: Add authorized keys
+    authorized_key:
+      user: "{{ item.username }}"
+      key: "{{ lookup('file', 'files/'+ item.username + '.key.pub') }}"
+    loop: "{{ users }}"
+
+  - name: Modify sudo config to allow webadmin users sudo without a password
+    copy:
+      content: "%webadmin ALL=(ALL) NOPASSWD: ALL"
+      dest: /etc/sudoers.d/webadmin
+      mode: 0440
+
+  - name: Disable root login via SSH
+    lineinfile:
+      dest: /etc/ssh/sshd_config
+      regexp: "^PermitRootLogin"
+      line: "PermitRootLogin no"
+    notify: "Restart sshd"
+
+# Managing the Boot Process and Scheduled Processes
+
+- name: remove tempuser.
+  at:
+    command: userdel -r tempuser
+    count: 20
+    units: minutes
+    unique: yes
+
+- cron:
+    name: "Flush Bolt"
+    user: "root"
+    minute: 45
+    hour: 11
+    job: "php ./app/nut cache:clear"
+
+- name: start nginx
+  service:
+    name: nginx
+    state: started"
+
+- name: reload web server
+  systemd:
+    name: apache2
+    state: reload
+    daemon-reload: yes
+
+- name: "Reboot after patching"
+  reboot:
+    reboot_timeout: 180
+
+- name: force a quick reboot
+  reboot:
+
+#The shell module example:
+- name: Run a templated variable (always use quote filter to avoid injection)
+  shell: cat {{ myfile|quote }}1
+
+
+#To sanitize any variables, It is suggested that you use {{ var | quote }} instead of just {{ var }}
+
+# The command module example:
+- name: This command only
+  command: /usr/bin/scrape_logs.py arg1 arg2
+  args:
+    chdir: scripts/
+    creates: /path/to/script
+
+---
+- name:
+  hosts: webservers
+  vars:
+    local_shell:  "{{ ansible_env }}"
+  tasks:
+    - name: Printing all the environment variables in Ansible
+      debug:
+        msg: "{{ local_shell }}"
+
+---
+- name: Recurring cron job
+  hosts: webservers
+  become: true
+
+  tasks:
+    - name: Crontab file exists
+      cron:
+        name: Add date and time to a file
+        minute: "*/2"
+        hour: 9-16
+        weekday: 1-5
+        user: devops
+        job: date >> /home/devops/my_date_time_cron_job
+        cron_file: add-date-time
+        state: present
+
+# ansible webservers -u devops -b -a "cat /etc/cron.d/add-date-time"
+
+---
+- name: Remove scheduled cron job
+  hosts: webservers
+  become: true
+
+  tasks:
+    - name: Cron job removed
+      cron:
+        name: Add date and time to a file
+        user: devops
+        cron_file: add-date-time
+        state: absent
+
+---
+- name: Schedule at task
+  hosts: webservers
+  become: true
+  become_user: devops
+
+  tasks:
+    - name: Create date and time file
+      at:
+        command: "date > ~/my_at_date_time\n"
+        count: 1
+        units: minutes
+        unique: yes
+        state: present
+
+---
+- name: Change default boot target
+  hosts: webservers
+  become: true
+
+  tasks:
+    - name: Default boot target is graphical
+      file:
+        src: /usr/lib/systemd/system/graphical.target
+        dest: /etc/systemd/system/default.target
+        state: link
+
+---
+- name: Reboot hosts
+  hosts: webservers
+  become: true
+
+  tasks:
+    - name: Hosts are rebooted
+      reboot:
+
+---
+- name: Change default runlevel target
+  hosts: webservers
+  become: true
+
+  tasks:
+    - name: Default runlevel is multi-user target
+      file:
+        src: /usr/lib/systemd/system/multi-user.target
+        dest: /etc/systemd/system/default.target
+        state: link
+
+## Managing Storage
+
+# storage_vars.yml
+---
+
+partitions:
+  - number: 1
+    start: 1MiB
+    end: 257MiB
+
+volume_groups:
+  - name: apache-vg
+    devices: /dev/vdb1
+
+logical_volumes:
+  - name: content-lv
+    size: 64M
+    vgroup: apache-vg
+    mount_path: /var/www
+
+  - name: logs-lv
+    size: 128M
+    vgroup: apache-vg
+    mount_path: /var/log/httpd
+
+# storage.yml
+---
+- name: Ensure Apache Storage Configuration
+  hosts: webservers
+  vars_files:
+    - storage_vars.yml
+  tasks:
+    - name: Correct partitions exist on /dev/vdb
+      debug:
+        msg: TODO
+      loop: "{{ partitions }}"
+
+    - name: Ensure Volume Groups Exist
+      debug:
+        msg: TODO
+      loop: "{{  volume_groups }}"
+
+    - name: Create each Logical Volume (LV) if needed
+      debug:
+        msg: TODO
+      loop: "{{ logical_volumes }}"
+      when: true
+
+    - name: Ensure XFS Filesystem exists on each LV
+      debug:
+        msg: TODO
+      loop: "{{ logical_volumes }}"
+
+    - name: Ensure the correct capacity for each LV
+      debug:
+        msg: TODO
+      loop: "{{ logical_volumes }}"
+
+    - name: Each Logical Volume is mounted
+      debug:
+        msg: TODO
+      loop: "{{ logical_volumes }}"
+
+  
+  # The content of the first task should be:
+---
+- name: Ensure Apache Storage Configuration
+  hosts: webservers
+  vars_files:
+    - storage_vars.yml
+  tasks:
+    - name: Correct partitions exist on /dev/vdb
+      parted:
+        device: /dev/vdb
+        state: present
+        number: "{{ item.number }}"
+        part_start: "{{ item.start }}"
+        part_end: "{{ item.end }}"
+      loop: "{{ partitions }}"
+
+    - name: Ensure Volume Groups Exist
+      lvg:
+        vg: "{{ item.name }}"
+        pvs: "{{ item.devices }}"
+      loop: "{{  volume_groups }}"
+
+    - name: Create each Logical Volume (LV) if needed
+      lvol:
+        vg: "{{ item.vgroup }}"
+        lv: "{{ item.name }}"
+        size: "{{ item.size }}"
+      loop: "{{ logical_volumes }}"
+      when: item.name not in ansible_lvm["lvs"]
+
+    - name: Ensure XFS Filesystem exists on each LV
+      filesystem:
+        dev: "/dev/{{ item.vgroup }}/{{ item.name }}"
+        fstype: xfs
+      loop: "{{ logical_volumes }}"
+
+    - name: Ensure the correct capacity for each LV
+      lvol:
+        vg: "{{ item.vgroup }}"
+        lv: "{{ item.name }}"
+        size: "{{ item.size }}"
+        resizefs: yes
+        force: yes
+      loop: "{{ logical_volumes }}"
+
+    - name: Each Logical Volume is mounted
+      mount:
+        path: "{{ item.mount_path }}"
+        src: "/dev/{{ item.vgroup }}/{{ item.name }}"
+        fstype: xfs
+        opts: noatime
+        state: mounted
+      loop: "{{ logical_volumes }}"
+
+# ansible-playbook storage.yml
+
+# ansible all -m setup -a "filter=ansible_lvm"
+
+# ansible all -a lsblk
+
+
+
+## Managing Network Configuration
+
+# ansible-galaxy list
+
+# ansible webservers -m setup
+# ansible webservers -m setup -a 'gather_subset=network filter=ansible_interfaces'
+# ansible webservers -m setup -a 'gather_subset=network filter=ansible_ens4'
+
+# playbook.yml
+
+---
+- name: NIC Configuration
+  hosts: webservers
+
+  roles:
+    - rhel-system-roles.network
+
+# mkdir -pv group_vars/webservers
+---
+network_connections:
+  - name: eth1
+    type: ethernet
+    ip:
+      address:
+        - 172.25.250.30/24
+
+# ansible-playbook playbook.yml
+
+## https://github.com/ansible/lightbulb
+
