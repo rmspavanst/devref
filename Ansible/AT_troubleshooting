@@ -1,0 +1,12 @@
+https://access.redhat.com/articles/3344101#installation-considerations-12
+
+
+# Ansible Tower Role Based Access Control Guide
+https://access.redhat.com/solutions/4223691
+
+# Backing Up and Restoring Tower
+https://docs.ansible.com/ansible-tower/latest/html/administration/backup_restore.html
+https://docs.ansible.com/ansible-tower/latest/html/administration/backup_restore.html
+
+# Inventroy
+https://docs.ansible.com/ansible-tower/latest/html/userguide/inventories.html
