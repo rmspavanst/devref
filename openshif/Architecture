@@ -1,0 +1,118 @@
+Module Topics:
+---------------
+Overview
+Product and Infrastructure Providers
+Architecture and Concepts
+Operators
+Networking Workflow
+Container Deployment Workflow
+
+1. Overview:
+
+Red Hat® OpenShift® Container Platform:
+
+Container orchestration platform based on Kubernetes
+Benefits both operations and development
+Provides developers and IT organizations with cloud application platform
+Used for deploying applications on secure, scalable resources
+Minimal configuration and management overhead
+Supports Java™, Python, Ruby, Node.js, Perl, PHP, .NET, and more
+OpenShift Container Platform’s Control Plane is only available to deploy on Red Hat Enterprise Linux® CoreOS (RHCOS)
+OpenShift Container Platform workloads may be deployed on RHCOS or Red Hat Enterprise Linux® (RHEL)
+RHCOS available only for OpenShift deployments, not for general use
+RHCOS codifies operational expertise for OpenShift with new purpose-built tooling
+RHCOS is FIPS-compliant
+Brings Kubernetes platform to customer data centers and cloud
+Meets security, privacy, compliance, and governance requirements
+
+
+master: openshift services/ infrastructure services/ k8s services/ etcd
+worker: Kibena|Elasticsearch/ Registry/ Router/ Prometheus|Grafana Alert Manager, Monitoring|Logging|Tuned|SDN|DNS|Kubelet
+Compute/Network/Storage
+
+
+Supported Infrastructures:
+-----------------------------
+OpenShift supported on RHCOS and RHEL
+OpenShift 4 hybrid cloud solution
+Supported on public and private clouds, as well as bare metal
+Full stack automation (IPI) supported on:
+AWS, Microsoft Azure, Google Cloud Platform, VMware vSphere
+Red Hat OpenStack® Platform, Red Hat Virtualization
+Bare metal
+Preexisting infrastructure (UPI) supported on:
+AWS, Microsoft Azure, Google Cloud Platform
+VMware vSphere, Red Hat OpenStack Platform, IBM Z
+IBM Power Systems, bare metal
+Future releases to support even more infrastructures
+
+
+OpenShift 3.11
+---------------
+Supported anywhere RHEL runs
+Bare-metal physical machines, virtualized infrastructure, in private or certified public clouds
+Virtualization platforms: Red Hat Virtualization, vSphere, Hyper-V
+Red Hat OpenStack Platform, certified public cloud providers like Amazon, Google, Azure
+x86 and IBM Power server architectures
+
+Phusical ---- Virtual ---- Private ---- Public ---- Hybrid
+
+OpenShift Kubernetes Engine:
+--------------------------------
+Users explore OpenShift 4 Kubernetes Engine, not entire platform
+Core Kubernetes functionality with big ISV ecosystem
+Enjoy RHCOS immutable and secure architecture
+Appeals to DIY, *KS, or lower end
+
+Node Host:
+------------
+OpenShift runs on RHCOS and RHEL
+
+OpenShift has two types of nodes:
+Workers
+Masters
+
+Nodes are instances of RHEL or RHCOS with OpenShift installed
+Workers are where end-user applications run
+Masters manage the cluster
+
+Containers:
+------------
+Application instances and components run in OCI-compliant containers
+Images: Application "binary"
+Containers: Runtime
+OpenShift worker node can run many containers
+Node capacity related to memory and CPU capabilities of underlying resources
+Cloud, hardware, or virtualized
+
+image(binary)------->container(runtime)
+
+
+
+Pod:
+-----
+One or more containers deployed together on one host
+Consists of colocated group of containers with shared resources such as volumes and IP addresses
+Smallest compute unit defined, deployed, managed
+
+May contain one or more tightly coupled, colocated applications, ones that run with shared context
+Example: Web server and application to pull and sync files
+
+Models application-specific logical host in containerized environment
+In pre-container world, applications executed on same physical or virtual host
+In OpenShift, pods replace individual application containers as smallest deployable unit
+
+image---> container----> pod(container/container/container)
+
+Orchestrated unit in OpenShift
+OpenShift schedules and runs all containers in pod on same node
+Complex applications made up of many pods, each with own containers
+Interact externally and also with one another inside OpenShift environment
+OpenShift runs container images in containers wrapped by meta object called "pod"
+Possible to have multiple containers in single pod
+Example: To support cluster features as sidecar containers
+
+Most applications benefit from flexibility of single-container pod
+Different components such as application server and database generally not placed in single pod
+Allows for individual application components to be easily scaled horizontally
+Application components are wired together by services

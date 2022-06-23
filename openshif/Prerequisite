@@ -1,0 +1,82 @@
+Prerequisite Skills:
+-----------------------
+
+Selling OpenShift Container Platform
+Describe use of containers
+List four statements that define and describe OpenShift
+Describe benefits of OpenShift in detail
+List four OpenShift capabilities that enable DevOps and continuous integration (CI)
+Describe OpenShift development model (OKD → OpenShift Container Platform)
+Describe Red Hat OpenShift commercial offerings
+Describe OpenShift Commons
+Describe how companies are changing development approach
+Describe how Red Hat addresses container adoption concerns
+List critical features of OpenShift for developers and operations
+Describe basic OpenShift security features
+Describe persistent storage and its benefits with OpenShift
+Describe aggregated logging and metrics collection features in OpenShift
+Describe benefits of source-to-image (S2I)
+Describe OpenShift objection handling
+Discover and qualify OpenShift Container Platform use cases
+Explain positioning of OpenShift Container Platform in a competitive landscape
+Describe changes and enhancements in latest versions of OpenShift Container Platform
+
+Architecture and Concepts:
+---------------------------
+
+Describe what containers are
+Describe what pods are
+Describe role of masters, nodes, and infranodes
+Describe role of scheduler
+Describe role of integrated registry
+Describe what services and routes are and what they are used for
+Describe role of probes and controllers in pod health and scaling
+Describe persistent storage and its benefits with OpenShift
+Describe external routing into OpenShift applications and router’s role
+Describe internal routing within OpenShift
+Describe workflow of pod deployment in OpenShift
+Describe relationship between OpenShift and Red Hat Enterprise Linux® CoreOS (RHCOS)
+
+User Experience:
+-----------------
+Describe roles of projects and users
+Demonstrate user’s view of OpenShift Container Platform web console
+Demonstrate project ownership, isolation, and sharing
+Describe roles of quotas and limits
+Demonstrate viewing project’s quota and limits using OpenShift Container Platform web console
+Demonstrate scaling application up to allowed quota
+Describe S2I process
+Describe role of OpenShift’s integrated registry
+Describe role of build configurations
+Describe roles of image stream and images
+Demonstrate creating S2I-based image
+
+Application Deployment:
+------------------------
+Describe role of deployment configurations
+Provide brief overview of OpenShift deployment options
+Demonstrate scaling application and triggering new deployment
+Describe CI/CD workflow and how it is implemented with OpenShift
+Demonstrate delivery pipelines/Jenkins integration
+Explain software delivery life cycle (SDLC) and promotion paths
+Demonstrate how using environment variables and internal DNS system wire application components together
+Describe role of templates, operators, and Helm charts
+Demonstrate deploying a multicomponent application from template
+Demonstrate OpenShift Container Platform integration with Red Hat CloudForms®
+Demonstrate using pod/container terminal
+
+Assumptions:
+-------------
+You want to learn how to use OpenShift Container Platform
+You can read and modify some form of code
+You have a workstation available for this training
+You have an SSH client installed on your workstation
+
+
+Class Environment:
+--------------------
+Shared OpenShift cluster provisioned in Amazon Web Services (AWS)
+Shared between all OPENTLC users
+Provisioning of lab environments covered in first lab in module 3
+Lab instructions contain provisioning details for required environments
+
