@@ -1,0 +1,39 @@
+cd  /etc/httpd/conf.d/
+vi luxasia.conf
+
+
+<VirtualHost *:80>
+
+ServerAdmin root@localhost
+    ServerName 65.0.150.92
+    DefaultType text/html
+
+    # Redirect any HTTP request to HTTPS
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*) https://%{SERVER_NAME}/$1 [R,L]
+
+   # RewriteRule "^/?(.*)" "https://%{SERVER_NAME}/$1" [R=301,L]
+   # RewriteRule (.*) https://%{SERVER_NAME}/$1 [R,L]
+   # RewriteRule (.*) https://%{SERVER_NAME}%{REQUEST_URI}
+
+</VirtualHost>
+
+<VirtualHost *:443>
+
+  ServerName 65.0.150.92
+
+
+SSLEngine on
+  SSLCertificateFile /etc/pki/tls/certs/ec2-65-0-150-92.ap-south-1.compute.amazonaws.com.crt
+  SSLCertificateKeyFile /etc/pki/tls/private/ec2-65-0-150-92.ap-south-1.compute.amazonaws.com.key
+
+#  ProxyRequests off
+#  ProxyPreserveHost On
+  ProxyPass / http://localhost:8080/
+  ProxyPassReverse / http://localhost:8080/
+
+  ProxyPass /jobs http://localhost:8080/jobs
+  ProxyPassReverse /jobs http://localhost:8080/jobs
+
+</VirtualHost>
