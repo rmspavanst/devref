@@ -1,0 +1,92 @@
+https://virtual-bytes.co.uk/2021/05/06/deploying-ansible-awx-on-kubernetes-from-day-0/
+
+Kubectl get nodes
+
+kubectl get pods -A
+
+# Debugging Pending Pods:
+kubectl describe pod coredns-f9fd979d6-7xshl -n kube-system
+
+kubectl describe nodes
+
+Error: 
+---------------------------
+
+Here we see taints, one of which is the one referred to in our coredns pod above (“node.kubernetes.io/not-ready”), and the other is “node-role.kubernetes.io/master:NoSchedule”. This is telling the control plane that this is the Kubernetes master node and therefore don’t run any pods on it. But in our single node stack we need our pods to all run on a single node, so we can fix this bit by just removing the taint:
+
+kubectl taint nodes --all node-role.kubernetes.io/master-
+
+
+# Container Networking and CNI
+
+wget https://github.com/vmware-tanzu/antrea/releases/download/v1.0.0/antrea.yml -O /root/antrea.yml (v1.17.1)
+kubectl apply -f /root/antrea.yml
+
+kubectl get pods -A
+
+
+# Storage
+
+wget https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.19/deploy/local-path-storage.yaml -O /root/local-path-storage.yaml
+or 
+wget https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.22/deploy/local-path-storage.yaml -O /root/local-path-storage.yaml
+
+sed -i "s#/opt/local-path-provisioner#/mnt/local-storage#g" /root/local-path-storage.yaml
+
+kubectl apply -f /root/local-path-storage.yaml
+
+kubectl get sc
+
+
+
+## The AWX Operator
+
+kubectl apply -f https://raw.githubusercontent.com/ansible/awx-operator/0.9.0/deploy/awx-operator.yaml
+
+or 
+
+kubectl apply -f https://raw.githubusercontent.com/ansible/awx-operator/0.13.0/deploy/awx-operator.yaml
+
+kubectl get deployments
+
+vi awx.yml
+
+---
+apiVersion: awx.ansible.com/v1beta1
+kind: AWX
+metadata:
+  name: awx
+
+
+kubectl apply -f awx.yml && watch kubectl get pods
+
+kubectl delte pod <podname>
+
+kubectl describe pods awx-postgres-0
+
+kubectl describe pvc
+
+## Setting the Default Storage Class
+
+So let’s set our ‘local-path’ Storage Class as the default:
+
+kubectl patch sc local-path -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+kubectl get sc
+
+kubectl get pvc postgres-awx-postgres-0 -o=yaml > awx-pvc.yml
+kubectl delete pvc postgres-awx-postgres-0
+kubectl apply -f awx-pvc.yml
+
+kubectl get pvc
+
+
+
+
+
+
+
+
+
+
+
+

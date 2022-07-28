@@ -116,6 +116,11 @@ kubectl label node kubernetes-worker1 node-role.kubernetes.io/worker1=worker1
 
 ******AWX install in K8s:****************
 
+ref:
+
+https://virtual-bytes.co.uk/2021/05/06/deploying-ansible-awx-on-kubernetes-from-day-0/
+
+
 install the helm to manage to create the database pod:
   $ curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
 $ chmod 700 get_helm.sh

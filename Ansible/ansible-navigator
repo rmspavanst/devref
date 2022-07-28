@@ -1,0 +1,21 @@
+anisble-navigator.yml
+
+---
+ansible-navigator:
+  execution-environment:
+    container-engine: podman
+    image: ee-supported-rhel8
+    enabled: false
+    pull-policy: never
+
+  playbook-artifact:
+    save-as: /home/rhel/playbook-artifacts/{playbook_name}-artifact-{ts_utc}.json
+
+  logging:
+    level: debug
+
+
+
+ansible-galaxy collection publish ansible-test_collection-1.0.0.tar.gz -c
+ansible-galaxy collection publish community-lab_collection-1.0.0.tar.gz -c
+

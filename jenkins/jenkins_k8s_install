@@ -22,6 +22,9 @@ Knowledge of K8S deployment
 Persistent Volume Claim:
 We need to create and apply PVC using GCP provided Storage Class, we’ll use high performance ‘pd-ssd’ as our Storage Class Type.
 
+jenkins-pvc.yaml
+-----------------
+
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -36,6 +39,23 @@ spec:
       storage: 80Gi
   storageClassName: pd-ssd
   volumeMode: Filesystem
+
+  or 
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: jenkins-claim
+  namespace: jenkins
+spec:
+  storageClassName: local-path
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+kubectl create -f jenkins-pvc.yaml -n jenkins
 
 
 
