@@ -84,6 +84,13 @@ kubectl get pvc
 
 
 
+https://www.youtube.com/watch?v=nQfWyFSYOd8
+
+Refer to the below links for more details:
+https://github.com/ansible/awx/blob/d...
+https://github.com/ansible/awx-operator
+https://github.com/Ompragash/awx-deploy
+
 
 
 
