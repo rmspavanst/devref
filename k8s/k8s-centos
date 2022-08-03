@@ -1,4 +1,11 @@
 
+https://upcloud.com/resources/tutorials/install-kubernetes-cluster-centos-8
+
+https://tayeh.me/posts/install-kubernetes-cluster-on-centos-8-with-kubeadm-crio/
+
+
+
+
 Master and worker node:
 ------------------------
 
@@ -112,6 +119,11 @@ kubeadm join 192.168.0.157:6443 --token ycu5yd.att8mgqyf8qg9w44 --discovery-toke
 
 rm /etc/containerd/config.toml
 systemctl restart containerd
+
+
+kubectl cluster-info
+kubectl get node -owide
+
 
 
 kubectl label node <node name> node-role.kubernetes.io/<role name>=<key - (any name)>
