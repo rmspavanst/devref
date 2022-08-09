@@ -1,0 +1,38 @@
+df -h
+
+sudo fdisk -l (can see newly added device)
+
+sudo fdisk /dev/sdb (this partion will in list)
+
+command: n
+Select: e (e for extended)
+Partition number: 1 (and make everything default)
+
+Command: t (to format)
+Hex Code: 83
+
+Command: w (to save this stage)
+
+sudo fdisk -l (now you can see added storage)
+
+sudo mk (list)
+
+sudo mkfs.ext4 /dev/sdb1 (to format)
+
+Now have to mount:
+=================
+
+mkdir /media/mydisk
+
+sudo mount /dev/sdb1 /media/mydisk
+
+df -h (can see the mount disk)
+
+cd /media/mydisk/ (now can create new files)
+
+then add the mount disk in fstab
+
+
+
+
+
