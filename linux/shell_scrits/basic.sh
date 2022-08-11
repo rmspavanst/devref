@@ -6,13 +6,15 @@
 echo
 echo This script will run basic administrative cmds
 echo
-top
+top | head -10
 echo
 echo
 df -h
 echo
-free -h
+free -m
 echo
 uptime
-echo4
+echo
 iostat
+echo
+echo End of script
