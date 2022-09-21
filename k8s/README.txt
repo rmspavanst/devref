@@ -18,6 +18,14 @@ https://gitcrcm.marseille.inserm.fr/help/install/kubernetes/gitlab_chart.md
 https://kp2.in.htwg-konstanz.de/git/help/install/kubernetes/gitlab_chart.md
 
 
+K8s-CRI-o on centos8
+---------------------
+
+https://tayeh.me/posts/install-kubernetes-cluster-on-centos-8-with-kubeadm-crio/
+
+
+
+
 
 
 
