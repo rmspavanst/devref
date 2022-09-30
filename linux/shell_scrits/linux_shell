@@ -1,0 +1,269 @@
+https://www.log2base2.com/shell-script-examples/loop/shell-program-to-find-average-of-n-numbers.html
+
+
+
+
+# Find the largest file in a directory and its subdirectories using the find command
+## Warning: only works with GNU find ##
+find /path/to/dir/ -printf '%s %p\n'| sort -nr | head -10
+find . -printf '%s %p\n'| sort -nr | head -10
+
+
+## How to Find Out Top Directories and Files (Disk Space) in Linux Using Find ##
+find /path/to/search/ -type f -printf '%s %p\n'| sort -nr | head -10
+or
+## another option ##
+find /path/to/search/ -type f -iname "*.mp4" -printf '%s %p\n'| sort -nr | head -10
+
+#Hunt down disk space hogs with ducks
+## shell alias ##  
+alias ducks='du -cks * | sort -rn | head'
+## deal with special files names ##
+alias ducks='du -cks -- * | sort -rn | head'
+
+
+## Shell script to monitor CPU, Memory and Disk usage and send the output to a file in table format
+
+#!/bin/bash
+
+free -m | awk 'NR==2{printf "Memory Usage: %s/%sMB (%.2f%)\n", $3,$2,$3*100/$2 }'
+df -h | awk '$NF=="/"{printf "Disk Usage: %d/%dGB (%s)\n", $3,$2,$5}'
+top -bn1 | grep load | awk '{printf "CPU Load: %.2f\n", $(NF-2)}' 
+
+or 
+
+# vi /opt/scripts/cpu-memory-swap.sh
+
+#!/bin/bash
+echo "-------------------------------------------"
+echo "Server_Name   CPU(%)   Memory(%)   Swap(%)"
+echo "-------------------------------------------"
+for server in `more /opt/scripts/server-list.txt`
+do
+scpu=$(ssh $server cat /proc/stat | awk '/cpu/{printf("%.2f%\n"), ($2+$4)*100/($2+$4+$5)}' |  awk '{print $0}' | head -1)
+smem=$(ssh $server free | awk '/Mem/{printf("%.2f%"), $3/$2*100}')
+sswap=$(ssh $server free | awk '/Swap/{printf("%.2f%"), $3/$2*100}')
+echo "$server   $scpu   $smem   $sswap"
+done | column -t
+echo "-------------------------------------------"
+
+
+## Method-2 : Shell Script to Monitor CPU, Memory and Swap usage on Multiple Linux System with eMail alert
+
+# vi /opt/scripts/cpu-memory-swap-1.sh
+
+#!/bin/bash
+if which mailx > /dev/null
+then
+echo "mailx package is exist"
+elif (( $(cat /etc/*-release | grep "Red Hat" | wc -l) > 0 ))
+then
+yum install mailx -y > /dev/null 
+else
+apt install mailutils -y > /dev/null
+fi
+echo "-------------------------------------------" >> /tmp/cpu-mem-swap.txt
+echo "Server_Name   CPU(%)   Memory(%)   Swap(%)" >> /tmp/cpu-mem-swap.txt
+echo "-------------------------------------------" >> /tmp/cpu-mem-swap.txt
+for server in `more /opt/scripts/server-list.txt`
+do
+scpu=$(ssh $server cat /proc/stat | awk '/cpu/{printf("%.2f%\n"), ($2+$4)*100/($2+$4+$5)}' |  awk '{print $0}' | head -1)
+smem=$(ssh $server free | awk '/Mem/{printf("%.2f%"), $3/$2*100}')
+sswap=$(ssh $server free | awk '/Swap/{printf("%.2f%"), $3/$2*100}')
+echo "$server   $scpu   $smem   $sswap" >> /tmp/cpu-mem-swap.txt
+done | column -t
+echo "-------------------------------------------" >> /tmp/cpu-mem-swap.txt
+echo "CPU and Memory Report for `date +"%B %Y"`" | mailx -s "CPU and Memory Report on `date`" -a /tmp/cpu-mem-swap.txt daygeek@gmail.com
+rm /tmp/cpu-mem-swap.txt
+
+
+
+## Method-3 : Shell Script to Monitor CPU, Memory and Swap usage on Multiple Linux System with eMail alert
+
+#!/bin/bash
+if which mailx > /dev/null
+then
+echo "mailx package is exist"
+elif (( $(cat /etc/*-release | grep "Red Hat" | wc -l) > 0 ))
+then
+yum install mailx -y > /dev/null 
+else
+apt install mailutils -y > /dev/null
+fi
+echo "Server_Name, CPU, Memory, Swap" > /tmp/cpu-mem-swap.csv
+for server in `more /opt/scripts/server-list.txt`
+do
+scpu=$(ssh $server cat /proc/stat | awk '/cpu/{printf("%.2f%\n"), ($2+$4)*100/($2+$4+$5)}' |  awk '{print $0}' | head -1)
+smem=$(ssh $server free | awk '/Mem/{printf("%.2f%"), $3/$2*100}')
+sswap=$(ssh $server free | awk '/Swap/{printf("%.2f%"), $3/$2*100}')
+echo "$server, $scpu, $smem, $sswap" >> /tmp/cpu-mem-swap.csv
+done
+echo "CPU and Memory Report for `date +"%B %Y"`" | mailx -s "CPU and Memory Report on `date`" -a /tmp/cpu-mem-swap.csv  daygeek@gmail.com
+rm /tmp/cpu-mem-swap.csv
+
+
+## CPU/DISK/MEMORY Usage
+
+#! /bin/bash
+printf "Date\t\t\tMemory\t\tDisk\t\tCPU\n"
+end=$((SECONDS+3600))
+while [ $SECONDS -lt $end ]; do
+CURRENTDATE=`date +"%Y-%m-%d %T"`
+MEMORY=$(free -m | awk 'NR==2{printf " \t%.2f%%\t\t", $3*100/$2 }')
+DISK=$(df -h | awk '$NF=="/"{printf "%s\t\t", $5}')
+CPU=$(top -bn1 | grep load | awk '{printf "%.2f%%\t\t\n", $(NF-2)}')
+echo  ${CURRENTDATE} "$MEMORY$DISK$CPU"
+sleep 5
+done
+
+
+## Write a shell script to list of users logged in by date and write it to an output file.
+
+#!/bin/bash
+now=$(date +"%s")
+who|while read user term dt; do
+   logon=$(date -j -f "%b %d %H:%M" "$dt" "+%s")
+   if (( now - logon < 300 ));then
+      echo $user
+   fi
+done
+
+
+## #shell script to check whether a number is positive or negative
+
+echo "Enter a Number"
+read num
+
+if [ $num -lt 0 ]
+then
+    echo "Negative"
+elif [ $num -gt 0 ]
+then
+    echo "Positive"
+else
+    echo "Neither Positive Nor Negative"
+fi
+
+#shell script to find the greatest of two numbers
+
+echo "Enter Num1"
+read num1
+echo "Enter Num2"
+read num2
+
+if [ $num1 -gt $num2 ]
+then
+    echo $num1
+else
+    echo $num2
+fi
+
+#shell script to find the greatest of three numbers
+
+echo "Enter Num1"
+read num1
+echo "Enter Num2"
+read num2
+echo "Enter Num3"
+read num3
+
+if [ $num1 -gt $num2 ] && [ $num1 -gt $num3 ]
+then
+    echo $num1
+elif [ $num2 -gt $num1 ] && [ $num2 -gt $num3 ]
+then
+    echo $num2
+else
+    echo $num3
+fi
+
+
+#shell script to print numbers 1 to 100
+
+i=1
+while [ $i -le 100 ]
+do
+    echo $i
+    i=$(($i+1))
+done
+
+#shell script to print numbers 1 to 100
+#using while loop and expr
+
+i=1
+while [ $i -le 100 ]
+do
+    echo $i
+    i=`expr $i + 1`
+done
+
+#shell script to print numbers 1 to 100
+#using for loop
+
+for((i=1;i<=100;i++))
+do
+    echo $i
+done
+
+echo "Enter a number"
+read num
+
+sum=0
+
+while [ $num -gt 0 ]
+do
+    mod=`expr $num % 10`    #It will split each digits
+    sum=`expr $sum + $mod`  #Add each digit to sum
+    num=`expr $num / 10`    #divide num by 10.
+done
+
+echo $sum
+
+#shell script for largest of n numbers
+  
+echo "Enter Size(N)"
+read N
+
+i=1
+max=0
+
+echo "Enter Numbers"
+while [ $i -le $N ]
+do
+  read num
+  if [ $i -eq 1 ]  #set first number as max
+  then
+      max=$num
+  else             #from number 2 update max if the num > max.
+      if [ $num -gt $max ]
+      then
+        max=$num
+      fi
+  fi
+  i=$((i + 1))  #increment i by 1
+done
+
+echo $max
+
+#shell script to find average of n numbers
+  
+echo "Enter Size(N)"
+read N
+
+i=1
+sum=0
+
+echo "Enter Numbers"
+while [ $i -le $N ]
+do
+  read num               #get number
+  sum=$((sum + num))     #sum+=num
+  i=$((i + 1))
+done
+
+avg=$(echo $sum / $N | bc -l)
+
+echo $avg
+
+
+
