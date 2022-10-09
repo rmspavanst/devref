@@ -9,6 +9,205 @@ do
 done | head -n 11
 ##
 
+df -h -t btrfs --total
+ps aux|grep httpd
+
+
+netstat -tulpn
+
+sudo firewall-cmd --get-active-zones
+sudo firewall-cmd --zone libvirt --list-all
+
+sudo firewall-cmd --add-service http --permanent
+sudo firewall-cmd –reload
+
+
+### https://www.javatpoint.com/linux-wget ##
+
+
+kill	  Need to specify PID number
+killall	Kill more than one process with a single name
+pkill	  Need to specify name of the process
+xkill	  Kill a x server client
+
+ps -A   PID for a process
+
+SIGNULL	0	NULL, check access to PID
+SIGHUP	1	Hangup
+SIGINT	2	Interrupt
+SIGQUIT	3	Quit
+SIGKILL	9	Kill
+SIGTERM	15	Terminate
+SIGSTOP	24	Stop
+SIGTSTP	25	Stop/pause the process
+SIGCONT	26	Continue a stopped process
+
+killall -I 
+
+pmap PID  To check pmap of a process we need PID of the process
+pmap -x PID  x stands for extended
+pmap -d PID  some extra information
+pmap -q PID  q stands for quiet
+
+
+Linux route:
+-------------
+The route command displays and manipulate IP routing table for your system.
+A router is a device which is basically used to determine the best way to route packets to a destination
+
+route
+route -n  
+route -Cn  
+
+
+tac <file name> (reverse output)
+head <filename> (It displays the first 10 lines of a file.)
+tail <file name> (It displays the last 10 lines of a file.)
+more <file name>  
+less <file name>  
+
+cut -d(delimiter) -f(columnNumber) <fileName>  
+
+cat test.txt | grep <searchWord>  
+
+comm <file1> <file2> (The 'comm' command is used to compare two files or streams)
+
+echo test.txt | sed 's/class/jtp/' (The sed command is also known as stream editor)
+echo test.txt | sed 's/7/10/'
+
+cat test.txt | tr 'prcu' 'PRCU' (The tr command is used to translate the file content like from lower case to upper case.)
+
+sort test.txt | uniq (The uniq command is used to form a sorted list in which every word will occur only once.)
+
+wc <file name> (The wc command is used to count the lines, words, and characters in a file.)
+
+The od command is used to display the content of a file in different s, such as hexadecimal, octal, and ASCII characters.
+
+The sort command is used to sort files in alphabetical order.
+
+The gzip command is used to truncate the file size. It is a compressing tool. It replaces the original file by the compressed file having '.gz' extension
+
+The gunzip command is used to decompress a file. It is a reverse operation of gzip command
+
+find Command
+--------------
+find . -name "*.pdf" 
+locate <file name>  The locate command is used to search a file by file name
+
+
+User:
+--------
+
+whoami
+who
+who am i
+w (This command tells about the users who are logged in and what are they doing)
+
+Create a user with an expiry date:
+----------------------------------
+sudo useradd -d /home/test -e 2020-03-16 Demo2 
+
+grep admin /etc/sudoers 
+
+useradd -m -d /home/xyz -c "xyz" xyz 
+The command useradd -D can be used to display this file
+
+The /etc/skel/ contains some hidden files which have profile settings and default values for applications.
+
+userdel -r <userName>  option, you can delete home directory along with user account
+
+
+grep:
+=====
+
+grep t msg.txt  
+grep l msg.txt  
+grep v msg.txt  
+
+One Or The Other:
+
+grep -E 'j|g' msg.txt  
+grep -P 'j|g' msg.txt  
+grep -G 'j\|g' msg.txt  
+
+One Or More / Zero Or More:
+
+grep -E '1*' list  
+grep -E '1+' list  
+
+Match The End Of A String:
+
+grep r$ dupli.txt  
+grep e$ dupli.txt  
+
+Match The Start Of A String: grep ^o dupli.txt  
+
+Separating Words: grep '\bsome\b' file   grep -w some file  
+
+ps -ef | grep httpd
+
+
+
+Linux rename Regular Expressions:
+===================================
+
+rename 's/string/other string/'  ex: rename 's/text/txt/' *  
+
+
+Linux Sed Regular Expressions:
+==============================
+
+echo interactive | sed 's/inte/dist/'  
+echo interactive | sed 's:inte:dist:'  
+echo interactive | sed 's_inte_dist_'  
+echo interactive | sed 's|inte|dist|'  
+
+sed -i 's/today/tomorrow/' file  
+
+Simple Back Referencing: echo fourty | sed 's/four/&&/' 
+
+A Dot For Any Character: echo xxxx-xx-xx | sed 's/....-..-../YYYY-MM-DD/'  
+
+Multiple Back Referencing:
+
+echo 2014-06-30 | sed 's/\(....\)-\(..\)-\(..\)/\1:\2:\3/'  
+echo 2014-06-30 | sed 's/\(....\)-\(..\)-\(..\)/\1_\2_\3/'  
+echo 2014-06-30 | sed 's/\(....\)-\(..\)-\(..\)/\2:\3:\1/'  
+echo 2014-06-30 | sed 's/\(....\)-\(..\)-\(..\)/\3:\2:\1/'
+
+White Space  echo -e 'this\tis\tjavatpoint' | sed 's/\s/ /g'  
+Optional Occurrence cat list2 | sed 's/iii\?/Y/' 
+Exact n Times Occurence cat list2 | sed 's/i\{3\}/Y/' 
+Occurence In Range cat list2 | sed 's/i\{3,4\}/Y/'  
+
+
+Listing User Accounts:
+----------------------
+cut -d: -f1 /etc/passwd | column  
+
+chmod u+x file  
+chmod g-x file  
+chmod u-w file  
+chmod a+w file  
+chmod +w file  
+chmod o=rw file
+chmod u=rwx,g=rw,o=r file  
+
+
+mkdir -m 777 new1  
+mkdir -m 000 new2 
+
+cp -p list dupli.txt 
+
+alias syntax:
+=============
+
+alias fi=file  
+
+
+
+
+
 
 
 
