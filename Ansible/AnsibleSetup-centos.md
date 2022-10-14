@@ -105,3 +105,13 @@ win_ping.yml
   tasks:
     - name: test connection
       ansible.windows.win_ping:
+
+
+Installing a collection from Galaxy
+======================================
+
+ansible-galaxy collection install
+
+To install a collection hosted in Galaxy: ansible-galaxy collection install my_namespace.my_collection
+
+ansible-galaxy collection install my_namespace-my_collection-1.0.0.tar.gz -p ./collections
