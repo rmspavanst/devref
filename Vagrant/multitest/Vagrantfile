@@ -11,3 +11,27 @@ Vagrant.configure("2") do |config|
     test2.vm.network "private_network", ip: "10.9.8.6"
   end
 end
+
+
+
+
+Vagrant.configure("3") do |config|
+  config.vm.box = "jasonc/centos8"
+  
+  config.vm.define "ansible" do |ansible|
+    ansible.vm.hostname = "ansible"
+    ansible.vm.network "private_network", ip: "10.9.8.5"
+  end
+
+  config.vm.define "host1" do |host1|
+    host1.vm.hostname = "host1"
+    host1.vm.network "private_network", ip: "10.9.8.6"
+  end
+
+
+  config.vm.define "host2" do |host2|
+    host2.vm.hostname = "host2"
+    host2.vm.network "private_network", ip: "10.9.8.7"
+  end
+
+end

@@ -1,0 +1,103 @@
+Required Tools:
+================
+     -Virtualbox
+     -Vagrant
+     -Git
+
+What does Vagrant do?
+– Create and destroy VMs
+– Starts, stops, restarts VMs
+– Access to VMs
+– Networking and WM settings
+– Orchestrates “provisioning” for on-demand setup
+
+step:1- Install Git for Windows
+---------------------------------
+Download URL: https://git-scm.com/download/win
+
+Then during installation steps, select below settings:
+
+“Use Git from the Windows Command Prompt” with this option you will be able to use Git from both Git Bash and the Windows Command Prompt.
+“Checkout as-is, commit Unix-style line endings”
+And finish the installation.
+
+
+Step:2- Install VirtualBox
+-----------------------------
+For the sake of compatibility and in order to eliminate the version problems please install VirtualBox 5.1.14r112924 (Qt5.6.2) version.
+
+ Downlod Link: http://download.virtualbox.org/virtualbox/5.1.4/VirtualBox-5.1.4-110228-Win.exe
+
+ Installation of VirtualBox is pretty straight-forward. Just click the .exe file and click next -> next -> next to finish installation.
+
+Also, download Oracle VM VirtualBox Extension Pack.
+
+ Download Link: http://download.virtualbox.org/virtualbox/5.1.4/Oracle_VM_VirtualBox_Extension_Pack-5.1.4.vbox-extpack
+
+Then, open VirtualBox and click File -> Preferences -> Extensions click the below icon
+
+And select the extension pack and then click “Install” -> “I Agree” -> “Yes”
+
+
+
+Step:3- Install Vagrant:
+-------------------------
+In order to eliminate compatibility issues, it is better to install Vagrant 1.9.2 version.
+
+ Vagrant Download Link: https://releases.hashicorp.com/vagrant/1.9.2/vagrant_1.9.2.msi
+
+Install the Vagrant it is very easy to install and then restart your machine.
+
+ After these setting you should do below settings to run Vagrant without any problem:
+
+1) Enable VT-X (Intel Virtualization Technology) in your computer bios settings.
+
+2) Disable Hyper-V on program and features page in the control panel.
+
+Download and Run Ubuntu Desktop (GUI) Vagrant Box on Windows 10
+Open Git Bash and type “pwd” it should show your user directory as shown below:
+
+/c/Users/onurb
+
+Then, create a folder as “project” by using “mkdir projects” command.
+
+Then, go to that folder with “cd projects”
+
+Then create a folder for Ubuntu by using “mkdir ubuntu1404-desktop” command.
+
+and go to that folder with “cd ubuntu1404-desktop” command.
+
+After these steps run below commands sequentially:
+
+vagrant init box-cutter/ubuntu1404-desktop
+
+vagrant up –provider virtualbox
+
+Then, Vagrant download and then run the box.
+
+Vagrant Box Link: https://atlas.hashicorp.com/box-cutter/boxes/ubuntu1404-desktop/versions/2.0.26
+
+ After these settings whenever you will run “vagrant up” command, Vagrant will run and open the Ubuntu in GUI mode as shown below:
+ Also, you can use any ready Vagrant box from below page.
+
+https://atlas.hashicorp.com/boxes/search
+
+
+
+Most Common Vagrant Commands:
+================================
+I will also summarise Vagrant commands with images. This time I will use “hashicorp/precise64” Linux box.
+
+vagrant init: (initialize)
+
+vagrant up: download image and do rest of the settings and power-up the box
+
+vagrant status: Shows status
+
+vagrant suspend: Saves the box’s current state
+
+vagrant halt: shutdown the box (Power-off)
+
+vagrant destroy:  shutdown and delete the box
+
+Vagrant init (Initialize)

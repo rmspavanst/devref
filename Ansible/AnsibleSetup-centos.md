@@ -4,6 +4,15 @@ $ sudo dnf install ansible -y
 $ ansible --version
 $ pip install pywinrm (for windows host)
 
+or 
+
+You should install python and pip:
+
+sudo yum install python3 python3-pip
+After this you'll are able to run:
+
+sudo pip3 install ansible
+
 
 Create a new user called ansible and assign it to sudo group
 $ adduser ansible

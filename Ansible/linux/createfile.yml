@@ -1,0 +1,21 @@
+---
+- hosts: all
+  tasks:
+
+    - name: Creates directory
+      file:
+        path: /root/ansible/
+        state: directory
+        #owner: www-data
+        #group: www-data
+        #mode: 0775
+        recurse: yes
+    - name: Create a file
+      file:
+        path: /root/ansible/abc.txt
+        state: touch
+    - name: line insert
+      lineinfile:
+        path: /root/ansible/abc.txt
+        line: 'Added Line 2'
+        insertafter: Added Line 1
