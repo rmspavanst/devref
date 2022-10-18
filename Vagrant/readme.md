@@ -11,3 +11,5 @@ vagrant ssh
 vagrant suspend (to pause your VM, navigate to the directory with your Vagrantfile)
 vagrant halt (To turn your VM off, navigate to the directory with your Vagrantfile)
 vagrant destroy (To destroy your VM, navigate to the directory with your Vagrantfile)
+vagrant reload
+vagrant resume

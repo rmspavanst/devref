@@ -3,3 +3,16 @@ Vagrant.configure("2") do |config|
   config.vm.hostname = "testbox01"
   config.vm.network "private_network", ip: "10.9.8.7"
 end
+
+
+or 
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "jasonc/centos8"
+  
+  config.vm.define "test3" do |test3|
+    test3.vm.hostname = "test3"
+    test3.vm.network "private_network", ip: "10.9.8.7"  
+  end
+ 
+end
