@@ -1,0 +1,24 @@
+- hosts: all
+  tasks:
+  - win_ping:
+    when: ansible_os_family == "Windows"
+    register: win
+  - debug: var=win
+
+  - ping:
+    when: ansible_os_family != "Windows"
+    register: linux
+  - debug: var=linux
+
+tasks:
+    - name: Ping ubuntu
+      remote_user: ubuntu
+      become: yes
+      ping:
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+    - name: Ping centos
+      remote_user: ec2-user
+      become: yes
+      ping:
+      when: ansible_distribution == 'Centos'

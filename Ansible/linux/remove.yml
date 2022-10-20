@@ -1,0 +1,8 @@
+---
+- name: delete directory and files
+  hosts: linux
+  tasks:
+    - name: Delete content & directory
+      file:
+        state: absent
+        path: /root/ansible/

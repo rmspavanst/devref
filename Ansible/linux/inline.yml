@@ -1,0 +1,46 @@
+---
+- hosts: all
+  tasks:
+
+    - name: Creates directory
+      file:
+        path: /root/ansible/
+        state: directory
+        #owner: www-data
+        #group: www-data
+        #mode: 0775
+        recurse: yes
+    - name: Create a file
+      file:
+        path: /root/ansible/abc.txt
+        state: touch
+
+    - name: line insert
+      lineinfile:
+        path: "/root/ansible/abc.txt"
+        line: This is the second line
+        insertbefore: BOF
+
+    - name: line insert
+      lineinfile:
+        path: "/root/ansible/abc.txt"
+        line: This is the first line
+        insertbefore: BOF
+
+#- name: Update hosts
+#  lineinfile:
+#    path: /etc/hosts
+#    state: present
+#    line: "{{ item }}"
+#  with_items:
+#  - '192.168.0.108 K8_slave'
+#  - '192.168.0.105 K8_master'
+
+
+
+#    - name: line insert
+#      lineinfile:
+#        path: /root/ansible/abc.txt
+#        line: 'Added Line 1' /n 'Added Line 2'
+#        line: 'Added Line 4'
+#        insertafter: Added Line 2
