@@ -1,0 +1,86 @@
+---
+- name: Install docker
+  gather_facts: No
+  hosts: linux
+  become: true
+
+  tasks:
+    - name: Install yum utils
+      yum:
+        name: yum-utils
+        state: latest
+
+    - name: Install device-mapper-persistent-data
+      yum:
+        name: device-mapper-persistent-data
+        state: latest
+
+    - name: Install lvm2
+      yum:
+        name: lvm2
+        state: latest
+
+    - name: Add Docker repo
+      get_url:
+        url: https://download.docker.com/linux/centos/docker-ce.repo
+        dest: /etc/yum.repos.d/docer-ce.repo
+
+
+    - name: Enable Docker Edge repo
+      ini_file:
+        dest: /etc/yum.repos.d/docer-ce.repo
+        section: 'docker-ce-edge'
+        option: enabled
+        value: 0
+
+
+    - name: Enable Docker Test repo
+      ini_file:
+        dest: /etc/yum.repos.d/docer-ce.repo
+        section: 'docker-ce-test'
+        option: enabled
+        value: 0
+
+
+    - name: Install Docker
+      package:
+        name: "{{ item }}" 
+        state: latest
+        update_cache: yes
+      with_items:
+        - "docker-ce"
+        - "docker-ce-cli"
+        - "containerd.io"
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+      register: service
+    - debug:
+        msg: "{{ service }}"
+
+
+
+    - name: enable docker
+      systemd:
+        name: docker
+        enabled: true
+
+
+    - name: Download and install Docker Compose
+      get_url:
+        url: https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: 0755
+
+    - name: create symbolink for docker compose
+      command: ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+
+    - name: check docker and docker compose version
+      command: docker --version && docker-compose --version
+      register: docker
+
+    - debug:
+        var: docker.stdout

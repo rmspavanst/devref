@@ -1,0 +1,84 @@
+---
+- hosts: web
+#  remote_user: ansible-user
+#  become: yes
+#  gather_facts: no
+  tasks:
+    - name: Apache latest version installation
+      yum:
+        name: httpd
+        state: latest
+    - name: Enable service to start on boot up
+      service:
+        name: httpd
+        state: started
+    - name: Create firewall rule for apache service
+      firewalld:
+        service: http
+        zone: public
+        permanent: yes
+        immediate: yes
+        state: enabled
+  handlers:
+  - name: Restart apache service
+    service:
+      name: httpd
+      state: restarted
+
+
+---
+- name: setup webserver
+  hosts: web
+  become: true
+  tasks:
+    - name: httpd installed
+      ansible.builtin.yum:
+        name: httpd
+        state: latest
+    - name: custom index.html
+      ansible.builtin.copy:
+        dest: /var/www/html/index.html
+        content: |
+                    Custom Web Page
+    - name: httpd service enabled
+      ansible.builtin.service:
+        name: httpd
+        enabled: true
+        state: started
+    - name: open firewall
+      ansible.posix.firewalld:
+        service: http
+        state: enabled
+        immediate: true
+        permanent: true
+
+
+---
+- name: Java Demo App status check
+  hosts: localhost
+  gather_facts: false
+  vars:
+    web_pkg: httpd
+    firewall_pkg: firewalld
+    web_service: httpd
+    firewall_service: firewalld
+    python_pkg: python3-PyMySQL
+    rule: http
+    app_url: http://localhost
+
+
+  tasks:
+    - name: Confirm that 200 OK response is returned
+      uri:
+        url: "{{ app_url }}"
+        status_code: 200
+      ignore_errors: yes
+      register: url_state
+    - debug:
+        msg:
+          - "Demo App is running"
+      when: url_state.status == 200
+    - debug:
+        msg:
+          - "Demo App is not running"
+      when: url_state.status != 200
