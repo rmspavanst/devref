@@ -1,0 +1,56 @@
+Need to set up yum repository for locally-mounted DVD on Red Hat Enterprise Linux 8:
+======================================================================================
+
+
+Environment:
+Red Hat Enterprise Linux 8
+
+Issue:
+How to set up yum repository to use locally-mounted DVD with Red Hat Enterprise Linux (RHEL) 8
+Would like to upgrade server from RHEL 8.x to RHEL 8.y
+Have a secure environment that will never be connected to the internet, but still needs to be updated
+Way to update the packages on server, with no satellite server and servers disconnected from internet
+Offline patches for Red Hat systems
+How do I create a local repository in RHEL 8?
+
+
+Resolution:
+=============
+Please note: If the system is registered to Red Hat Network, yum can be run with the --noplugins option to prevent it from connecting to RHN. The safer option would be to unregister the system to avoid updating to the latest release.
+
+Mount the downloaded RHEL installation ISO to a directory like /media/rheldvd,
+
+Raw
+# mount -o loop <downloaded iso name> /media/rheldvd
+
+Example:
+# mount -o loop rhel-server-8.0-x86_64-dvd.iso /media/rheldvd
+If you use DVD media, you can mount like below.
+
+Raw
+# mount /dev/sr0  /media/rheldvd
+Create new repo file like below. There are two repositories in RHEL 8, named BaseOS and AppStream.
+
+Raw
+# cat /etc/yum.repos.d/my.repo 
+[dvd-BaseOS]
+name=DVD for RHEL - BaseOS
+baseurl=file:///media/rheldvd/BaseOS
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+
+[dvd-AppStream]
+name=DVD for RHEL - AppStream
+baseurl=file:///media/rheldvd/AppStream
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+As a final step, it might be a good idea to run the command yum clean all once
+
+Raw
+# yum clean all
+Check whether you can get the packages list from the DVD repositories.
+
+Raw
+# yum  --noplugins list
