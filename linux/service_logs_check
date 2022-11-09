@@ -1,0 +1,43 @@
+# Just use the journalctl command, as in:
+
+journalctl -u service-name.service
+
+journalctl -xefu service-name.service
+
+# Or, to see only log messages for the current boot:
+
+journalctl -u service-name.service -b
+
+# For things named <something>.service, you can actually just use <something>, as in:
+
+journalctl -u service-name
+
+
+# systemctl can include the complete output of its status listing, without truncation., by adding the -l flag:
+
+systemctl -l status service-name
+
+
+# https://www.linode.com/docs/guides/how-to-use-journalctl/
+
+## Use journalctl to View Your System's Logs
+
+# View journalctl without PagingPermalink To send your logs to standard output and avoid paging them, use the --no-pager option:
+
+journalctl --no-pager
+
+# It’s not recommended that you do this without first filtering down the number of logs shown.
+
+journalctl -u service-name.service
+
+# Show Logs within a Time RangePermalink Use the --since option to show logs after a specified date and time:
+
+journalctl --since "2018-08-30 14:10:10"
+
+# Use the --until option to show logs up to a specified date and time:
+
+journalctl --until "2018-09-02 12:05:50"
+
+# Combine these to show logs between the two times:
+
+journalctl --since "2018-08-30 14:10:10" --until "2018-09-02 12:05:50"
