@@ -1,3 +1,7 @@
+https://github.com/bitnami/containers/tree/main/bitnami/redmine#how-to-use-this-image
+
+
+
 1. apt-get update -y
 2. apt-get install apt-transport-https ca-certificates dirmngr gnupg2 -y
 
