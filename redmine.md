@@ -1,5 +1,13 @@
 https://github.com/bitnami/containers/tree/main/bitnami/redmine#how-to-use-this-image
 
+https://gist.github.com/brunojppb/bb5dbfacdbcb06ce6bd6303329ff2d72
+
+https://redmine.org/projects/redmine/wiki/HowTo_Install_Redmine_on_Ubuntu_step_by_step
+
+https://kifarunix.com/install-redmine-on-ubuntu/(22.04) working
+
+
+https://unixcop.com/how-to-install-redmine-on-centos-8/
 
 
 1. apt-get update -y
@@ -12,7 +20,7 @@ https://github.com/bitnami/containers/tree/main/bitnami/redmine#how-to-use-this-
 CREATE DATABASE redminedb CHARACTER SET utf8mb4;
 GRANT ALL PRIVILEGES ON redminedb.* TO 'redmineuser'@'localhost' IDENTIFIED BY 'root123';
 
-flush priviliges;
+FLUSH PRIVILEGES;
 
 exit;
 
@@ -76,3 +84,20 @@ bundle install --without development test --path vendor/bundle
 
 
 
+
+cat > /etc/apache2/sites-available/redmine.conf << 'EOL'
+Listen 3000
+<VirtualHost *:3000>
+	ServerName redmine.kifarunix-demo.com
+	RailsEnv production
+	DocumentRoot /opt/redmine/public
+
+	<Directory "/opt/redmine/public">
+	        Allow from all
+	        Require all granted
+	</Directory>
+
+	ErrorLog ${APACHE_LOG_DIR}/redmine_error.log
+        CustomLog ${APACHE_LOG_DIR}/redmine_access.log combined
+</VirtualHost>
+EOL

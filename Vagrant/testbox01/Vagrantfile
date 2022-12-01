@@ -9,6 +9,7 @@ or
 
 Vagrant.configure("2") do |config|
   config.vm.box = "jasonc/centos8"
+  #config.vm.box = "mghalbi/centos9"
   
   config.vm.define "test3" do |test3|
     test3.vm.hostname = "test3"
