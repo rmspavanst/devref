@@ -1,0 +1,9 @@
+---
+- block:
+    - include_tasks: install_httpd_php.yml
+      when: inventory_hostname in web_ips
+      tags: [A1.1]
+ 
+
+ 
+

@@ -1,0 +1,14 @@
+- name: Exercise psutil
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - shell:
+        cmd: |
+          echo $$
+          sleep 20 &
+          echo $!
+      register: sleepers
+
+    - moreati.psutil.psutil_kill:
+        pids: "{{ sleepers.stdout_lines }}"
+      register: killers

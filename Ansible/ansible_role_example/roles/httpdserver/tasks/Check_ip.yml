@@ -1,0 +1,23 @@
+---
+- block:
+  - debug:
+      msg: "Check the Server IP, IP shall be {{ IIB_MQ_DRC }}"
+  
+  - name: get and check the ip adress
+    shell: "{{ IP }}"
+    register: ip
+
+  - debug:
+      var: ip
+
+  - fail:
+      msg: " {{ IIB_MQ_DRC }} and {{ ip }} not matched."
+    when: "'{{ IIB_MQ_DRC }}' != '{{ ip }}'"
+
+  - debug:
+      msg: " IP shall be {{ IIB_MQ_DRC }} and this server IP is {{ ip.stdout }}, IP Address is Matched."
+    when: "'{{ IIB_MQ_DRC }}' == '{{ ip }}'"
+ 
+  tags:
+    - A1.1
+    

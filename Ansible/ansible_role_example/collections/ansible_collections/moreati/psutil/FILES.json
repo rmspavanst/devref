@@ -1,0 +1,75 @@
+{
+ "files": [
+  {
+   "name": ".",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "plugins",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "plugins/modules",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/psutil_kill.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "bb60dfb216282bdc33f4f764f2ff508fcfded19b486504bd14eb9454b2697ed7",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/__init__.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "format": 1
+  },
+  {
+   "name": "README.md",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "ec00c23636c88247afca16cabeb3aaa6e2e33b6b28cddfa1f705e835174ea96a",
+   "format": 1
+  },
+  {
+   "name": ".gitignore",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "e4b240aa7e6ee62813615d6034ce5c8c51f79c43e61e4c0a7f2a0062634a92e5",
+   "format": 1
+  },
+  {
+   "name": ".editorconfig",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "b09d85605676a0bfaaa8b38925a19bbbc77446f0bb482ce0c50dd48625e2d0d5",
+   "format": 1
+  },
+  {
+   "name": "requirements.txt",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "1767cfe9f96f8c2c9b941d22551c9fc3e5d0d7269e9bf59d804d0d040b005725",
+   "format": 1
+  },
+  {
+   "name": "playbook.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "1de469c422e8bb0bf3a0b50187f405aed8c2cef1a56c6e613b63a34d7d737e27",
+   "format": 1
+  }
+ ],
+ "format": 1
+}

@@ -1,0 +1,34 @@
+{
+ "collection_info": {
+  "namespace": "moreati",
+  "name": "psutil",
+  "version": "0.1.1",
+  "authors": [
+   "Alex Willmer <alex@moreati.org.uk>"
+  ],
+  "readme": "README.md",
+  "tags": [
+   "process",
+   "ps",
+   "psutil"
+  ],
+  "description": "Manage processes with psutil",
+  "license": [
+   "Apache-2.0"
+  ],
+  "license_file": null,
+  "dependencies": {},
+  "repository": "https://github.com/moreati/psutil-ansible",
+  "documentation": null,
+  "homepage": null,
+  "issues": null
+ },
+ "file_manifest_file": {
+  "name": "FILES.json",
+  "ftype": "file",
+  "chksum_type": "sha256",
+  "chksum_sha256": "f40f9dc7aba30de613695ae6a5964c5a5c3f3549dfa2c6456271b3d71aabfe02",
+  "format": 1
+ },
+ "format": 1
+}

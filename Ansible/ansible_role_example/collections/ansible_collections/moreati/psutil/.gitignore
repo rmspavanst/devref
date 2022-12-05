@@ -1,0 +1,4 @@
+# Some items duplicated in galaxy.yml
+*.log
+*.retry
+*.tar.gz

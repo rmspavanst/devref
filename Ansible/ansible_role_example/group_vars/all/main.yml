@@ -1,0 +1,30 @@
+---
+IP: "ifconfig | grep 'inet 172.29' | awk '{print $2}'"
+IIB_MQ_DRC: "172.29.48.202"
+WAS_DRC: "172.29.48.203"
+
+
+IIB_Admin_console: "http://172.29.48.202:4415"
+WAS_Admin_console: "https://172.29.48.203:9043/ibm/console/logon.jsp"
+
+pause_duration: "30"
+
+
+IIB_DR_ips: [
+  "172.29.48.202"
+]
+
+WAS_DR_ips: [
+  "172.29.48.203"
+]
+
+
+username: "wasadmin"
+password: "Prdwas"
+server: "/opt/IBM/WebSphere/AppServer/profiles/AppSrv01/bin/"
+node: "/opt/IBM/WebSphere/AppServer/profiles/AppSrv01/bin/"
+manager: "/opt/IBM/WebSphere/AppServer/profiles/Dmgr01/bin/"
+
+
+
+

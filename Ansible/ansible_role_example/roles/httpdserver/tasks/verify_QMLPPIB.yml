@@ -1,0 +1,23 @@
+---
+- block:
+  - debug:
+      msg: "Verify the QMLPPIB admin console URL"
+    
+  - name: " Verifying the url {{ IIB_Admin_console }}"
+    uri:
+      url: "{{ IIB_Admin_console }}"
+      status_code: 200
+      validate_certs: no
+    register: validate_result
+
+  - name: "Report the status of IB admin console page"
+    debug:
+      msg: "IB admin console page verification is successful. The page is up."
+    when: validate_result.status == 200
+
+  - fail:
+      msg: "IB admin console page is not up."
+    when: validate_result.status != 200
+
+  tags:
+    - A1.4

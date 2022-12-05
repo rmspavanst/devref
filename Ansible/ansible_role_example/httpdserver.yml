@@ -1,0 +1,22 @@
+---
+
+#- hosts:
+#    - webserver
+#  gather_facts: false
+#  become: yes
+#  become_user: ansible
+
+#  tasks:
+#   - include_role:
+#       name: httpdserver 
+#     tags: [A1.1,A1.2,A1.3,A1.4]
+
+#  any_errors_fatal: true
+
+
+- hosts: webserver
+  gather_facts: yes
+  tasks:
+   - name: running role
+     include_role:
+             name: httpdserver
