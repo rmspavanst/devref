@@ -1,0 +1,36 @@
+---
+- hosts: windows 
+  gather_facts: false
+
+  tasks:
+    - name: Get JSON content
+      command: cat user_data.json
+      register: user_data
+      delegate_to: localhost
+
+    - set_fact:
+        user_data_json: "{{ user_data.stdout }}"
+
+    - name: Display JSON content
+      debug:
+        msg: "{{ user_data_json | json_query(jentry) }}"
+      vars:
+        jentry: "[*].{FirstName: firstName, LastName: lastName, Password: password, Group: group1, CompanyName: orgName, Description: designation }"
+        
+    - name: Add Domain user
+      win_domain_user:
+        name: "{{ item.firstName }}.{{ item.lastName }}"
+        password: "{{ item.password }}"
+        state: present
+        groups:
+        - "{{ item.group1 }}"
+#        - "{{ group2 }}"
+        firstname: "{{ item.firstName }}"
+        lastname: "{{ item.lastName }}"
+        user_cannot_change_password: yes
+        update_password: when_changed
+        user_cannot_change_password: no
+        email: "{{ item.firstName }}.{{ item.lastName }}@testdomain.lab"
+        company: "{{ item.orgName }}"
+        description: "{{ item.designation }}"
+      loop: "{{ user_data_json | json_query('[*]') }}"

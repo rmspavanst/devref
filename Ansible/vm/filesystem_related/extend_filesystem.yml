@@ -1,0 +1,59 @@
+---
+- hosts: vms
+  remote_user: ben
+  become_method: sudo
+  become_user: root
+  become: yes
+  vars_prompt:
+    - name: "partition_number"
+      prompt: "Enter partition no 1 to 4"
+      private: no
+
+    - name: "size"
+      prompt: "enter size in MB or GB and no space"
+      private: no
+
+    - name: "vg_name"
+      prompt: "Name of the Volume Group"
+      private: no
+
+    - name: "lv_name"
+      prompt: "Name of the logical Volume"
+      private: no
+    - name: "fs"
+      prompt: "Type of filesystem need to be created."
+      private: no
+    - name: "existing_disk"
+      prompt: "put the existing disk"
+      private: no
+  tasks:
+    - name: get raw disk
+      shell: echo $(/diff.sh)
+      register: raw_disks
+    - debug:
+       var: raw_disks.stdout
+    - name: create_partition
+      parted:
+        device: "/dev/{{ raw_disks.stdout }}"
+        number: "{{ partition_number }}"
+        flags: [ lvm ]
+        state: present
+        part_end: "{{ size }}"
+
+    - name: Install lvm2 dependency
+      package:
+        name: lvm2
+        state: present
+    - name: pvcreate
+      shell: pvcreate "/dev/{{ raw_disks.stdout }}{{ partition_number }}"
+    - name: extend volume group
+      shell: vgextend "{{ vg_name }}" "/dev/{{ raw_disks.stdout }}{{ partition_number }}"
+      #      lvg:
+      # vg: "{{ vg_name }}"
+      # pvs: "/dev/{{ raw_disks }}{{ partition_number }}"
+    - name: extend lv and resize
+      lvol:
+        vg: "{{ vg_name }}"
+        lv: "{{ lv_name }}"
+        size: +100%FREE
+        resizefs: true

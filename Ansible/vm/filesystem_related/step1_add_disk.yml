@@ -1,0 +1,23 @@
+---
+- hosts: all
+  remote_user: root
+#  become_method: sudo
+#  become_user: root
+  become: yes
+  tasks:
+    - name: get fdisk info before adding disk
+      shell: "/bin/lsblk > /old_lsblk"
+    - pause:
+        prompt: "Please add disk into vm \" done \"? Please confirm with \"yes\". Abort with \"no\" or Ctrl+c and then \"a\""
+      register: done_adding
+    - set_fact:
+        confirm: "{{ done_adding.user_input | bool }}"
+    - name: get fdisk info after adding disk
+      shell: "/bin/lsblk > /new_lsblk"
+    - name: copy diff shell into client vm
+      copy:
+        src: /root/done_script/filesystem_related/diff.sh
+        dest: /
+        owner: root
+        group: root
+        mode: 0755

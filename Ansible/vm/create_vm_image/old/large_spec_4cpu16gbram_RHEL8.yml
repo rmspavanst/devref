@@ -1,0 +1,37 @@
+---
+- name: create vm from templete
+  hosts: vms
+  become: false
+  gather_facts: false
+  pre_tasks:
+    - include_vars: vars.yml
+  tasks:
+    - name:  Clone a virtual machine from Linux template and customize
+      community.vmware.vmware_guest:
+        hostname: "192.168.1.165"
+        username: "administrator@vsphere.local"
+        password: "P@ssw0rd"
+        validate_certs: false
+        datacenter: M4
+        state: present
+        folder: DCS3700
+        template: "Linux-RHEL8-DHCP-Large"
+        name: "{{ server_name }}"
+        networks:
+          - name: VM Network
+            device_type: vmxnet3
+            connected: true
+#            start_connected: true
+            wait_for_ip_address: true
+        customization:
+#      domain: "{{ guest_domain }}"
+#      dns_servers:
+#        - 8.9.9.9
+#        - 7.8.8.9
+#      dns_suffix:
+#        - example.com
+#        - example2.com
+          script_text: |
+            #!/bin/bash
+            touch /tmp/touch-from-playbook
+      delegate_to: localhost

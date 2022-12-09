@@ -1,0 +1,78 @@
+---
+- hosts: all
+  remote_user: root
+#  become_method: sudo
+#  become_user: root
+  become: yes
+  vars_prompt:
+    - name: "partition_number"
+      prompt: "Enter partition no 1 to 4"
+      private: no
+
+    - name: "size"
+      prompt: "enter size in MB or GB and no space"
+      private: no
+
+    - name: "vg_name"
+      prompt: "Name of the Volume Group"
+      private: no
+
+    - name: "lv_name"
+      prompt: "Name of the logical Volume"
+      private: no
+    - name: "fs"
+      prompt: "Type of filesystem need to be created."
+      private: no
+
+    - name: "mount_point"
+      prompt: "absolute path creation"
+      private: no
+  tasks:
+    - name: get raw disk
+      shell: echo $(/diff.sh)
+      register: raw_disks
+    - debug:
+        var: raw_disks.stdout
+    - name: create_partition
+      parted:
+        device: "/dev/{{ raw_disks.stdout }}"
+        number: "{{ partition_number }}"
+        flags: [ lvm ]
+        state: present
+        part_end: "{{ size }}"
+    - name: Install lvm2 dependency
+      package:
+        name: lvm2
+        state: present
+
+    - name: task for creating volume group
+      lvg:
+        vg: "{{ vg_name }}"
+        pvs: "/dev/{{ raw_disks.stdout }}{{ partition_number }}"
+        pesize: 10
+
+    - name: task for creating logical volume
+      lvol:
+        vg: "{{ vg_name }}"
+        lv: "{{ lv_name }}"
+        size: 100%FREE
+        force: yes
+
+    - name: Create directory "{{ mount_point }}" if does not exist
+      file:
+        path: "{{ mount_point }}"
+        state: directory
+        mode: '0755'
+
+    - name: format the xfs filesystem
+      filesystem:
+        fstype: "{{ fs }}"
+        dev: "/dev/{{ vg_name }}/{{ lv_name }}"
+
+    - name: mount the lv on "{{ mount_point }}"
+      mount:
+        path: "{{ mount_point }}"
+        src: "/dev/{{ vg_name }}/{{ lv_name }}"
+        fstype: "{{ fs }}"
+        state: mounted
+

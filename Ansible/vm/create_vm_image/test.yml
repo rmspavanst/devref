@@ -1,0 +1,20 @@
+---
+- name: create vm from templete
+  hosts: vms
+  become: false
+  gather_facts: false
+  pre_tasks:
+    - include_vars: vars.yml
+  tasks:
+  - name: Clone the template
+    vmware_guest:
+      hostname: "192.168.1.165"
+      username: "administrator@vsphere.local"
+      password: "P@ssw0rd"
+      validate_certs: False
+      name: "{{ server_name }}"
+      template: "Linux-RHEL8-DHCP-medium"
+      datacenter: M4
+      folder: DCS3700
+      state: poweredon
+      wait_for_ip_address: yes

@@ -1,0 +1,45 @@
+---
+- hosts: windows 
+  gather_facts: true
+  vars_prompt:
+    - name: "firstname"
+      prompt: "Enter First Name "
+      private: no
+    - name: "lastname"
+      prompt: "enter lastname "
+      private: no
+    - name: "password"
+      prompt: "Enter Password"
+      private: yes
+      encrypt: sha512_crypt
+      confirm: yes
+      salt_size: 7
+    - name: "group1"
+      prompt: "enter group name"
+      private: no
+#    - name: "group2"
+#      prompt: "enter group name"
+#      private: no	  
+    - name: "companyname"
+      prompt: "Enter company name "
+      private: no
+    - name: "description"
+      prompt: "Position"
+      private: no
+  tasks:
+  - name: Add Domain user
+    win_domain_user:
+      name: "{{ firstname }}.{{ lastname }}"
+      password: "{{ password }}"
+      state: present
+      groups:
+      - "{{ group1 }}"
+#      - "{{ group2 }}"
+      firstname: "{{ firstname }}"
+      lastname: "{{ lastname }}"
+      user_cannot_change_password: yes
+      update_password: when_changed
+      user_cannot_change_password: no
+      email: "{{ firstname }}.{{ lastname }}@testdomain.lab"
+      company: "{{ companyname }}"
+      description: "{{ description }}"

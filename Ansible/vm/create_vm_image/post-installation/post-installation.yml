@@ -1,0 +1,143 @@
+---
+ - hosts: all
+   remote_user: root
+   ignore_errors: yes
+   pre_tasks:
+    - include_vars: vars.yml
+   tasks:
+     - name: Create Senior SA User account
+       user:
+         name: sysadmin
+         comment: "Senior System Administrator"
+         update_password: always
+         password: $6$rGEiyne296RbCcWG$30USo5sbYe/Rv9vpMaO7BqRCABzQi.iRuYGgfWZmPd6RmmCYd1JV6aDPYFt8Qoinz7/VEwNNGIyIS9GmlRvYC1
+         non_unique: yes
+         uid: 1999
+         expires: -1
+
+     - name: add sudo entry
+       blockinfile:
+         path: /etc/sudoers
+         block: |
+           sysadmin   ALL=(ALL)       NOPASSWD: ALL
+
+     - name: Create dbadmin account
+       user:
+         name: dbadmin
+         comment: "read-only account"
+         update_password: always
+         password: $6$rGEiyne296RbCcWG$30USo5sbYe/Rv9vpMaO7BqRCABzQi.iRuYGgfWZmPd6RmmCYd1JV6aDPYFt8Qoinz7/VEwNNGIyIS9GmlRvYC1
+         non_unique: yes
+         uid: 1998
+         expires: -1
+
+     - name: hosts file entry
+       lineinfile:
+         dest: /etc/hosts
+         regexp: "{{item.name}}"
+         line: "{{item.value}} {{item.name}}"
+         state: present
+       with_items:
+          - { name: 'hostname1.abc.com', value: '188.2.3.4' }
+          - { name: 'hostname2.abc.com', value: '188.2.3.5' }
+          - { name: 'hostname3.abc.com', value: '188.2.3.6' }
+     - name: 'hashout dhcp'
+       lineinfile:
+         path: /etc/sysconfig/network-scripts/ifcfg-ens192
+         state: absent
+         regexp: "{{ item }}"
+       with_items:
+         - '^BOOTPROTO=dhcp'
+     - name: get ip
+       shell: echo $(ip -4  addr show ens192 |  grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+       register: ip
+     - debug:
+         var: ip.stdout
+     - name: set network settings
+       blockinfile:
+         path: /etc/sysconfig/network-scripts/ifcfg-ens192
+         block: |
+           BOOTPROTO="none"
+           IPADDR="{{ ip.stdout }}"
+           NETMASK="255.255.254.0"
+           GATEWAY="192.168.1.1"
+     - name: Set a hostname
+       ansible.builtin.hostname:
+         name: "{{ server_name }}"
+
+##Hardening Sample#####
+     - name: '[Configuration of pam_limits module]'
+       pam_limits:
+         dest: /etc/security/limits.conf
+         domain: '*'
+         limit_type: "{{ item.limit_type }}"
+         limit_item: "{{ item.limit_item }}"
+         value: "{{ item.value }}"
+       with_items:
+         - { limit_type: 'soft',limit_item: 'nofile', value: '32768' }
+         - { limit_type: 'hard',limit_item: 'nofile', value: '32768'}
+         - { limit_type: 'soft',limit_item: 'nproc', value: '32768' }
+         - { limit_type: 'hard',limit_item: 'nproc', value: '32768' }
+     - name: '[Configuration of pam_limits module]'
+       lineinfile:
+         dest: /etc/security/limits.conf
+         line: "{{ item }}"
+       with_items:
+         - '# Systemizer Technic OS Hardening done at {{ ansible_date_time.time  }}, {{ ansible_date_time.date  }}'
+# Section 4.5 - Securing NFS is skipped as it will need to be done manually while mounting
+     # Systemizer Technic Linux OS Hardening Section 4.6
+     - name: '[Securing SSH] - SSH Service Started & Enabled'
+       service:
+         name: sshd
+         state: started
+         enabled: yes
+     - name: '[Securing SSH] - Config File Optimization'
+       lineinfile:
+         path: /etc/ssh/sshd_config
+         state: absent
+         regexp: "{{ item }}"
+       with_items:
+         - '^Ciphers'
+         - '^MACs'
+#     - name: '[Securing SSH] - Config File Optimization - specific'
+#       lineinfile:
+#         dest: /etc/ssh/sshd_config
+#         line: "{{ item }}"
+#       with_items:
+#         - 'Ciphers aes128-ctr,aes192-ctr,aes256-ctr # Systemizer Technic OS Hardening - Optimized for CVE-xxxx'
+#         - 'MACs hmac-sha1,umac-64@openssh.com,hmac-ripemd160,hmac-sha2-256,hmac-sha2-512,hmac-ripemd160@openssh.com # Systemizer Technic OS Hardening - Optimized for CVE-xxxx'
+#     - name: '[Securing SSH] - Config File Optimization specific'
+#       lineinfile:
+#         dest: /etc/ssh/sshd_config
+#         line: "{{ item }}"
+#       with_items:
+#         - 'Ciphers aes128-ctr,aes192-ctr,aes256-ctr # Systemizer Technic Linux OS Hardening - Optimized for CVE-xxxx'
+#         - 'MACs hmac-sha1-etm@openssh.com,umac-64-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-ripemd160-etm@openssh.com,hmac-sha1,umac-64@openssh.com,umac-128@openssh.com,hmac-sha2-256,hmac-sha2-512,hmac-ripemd160 # Systemizer Technic Linux OS Hardening - Optimized for CVE-xxx'
+     - name: '[Securing SSH] - Config File Optimization'
+       lineinfile:
+         path: /etc/ssh/sshd_config
+         state: absent
+         regexp: "{{ item }}"
+       with_items:
+         - '^PasswordAuthentication'
+         - '^PermitEmptyPasswords'
+         - '^X11Forwarding'
+#        - '^PermitRootLogin'
+         - '^RhostsRSAAuthentication'
+         - '^RhostsAuthentication'
+     - name: '[Securing SSH] - Config File Optimization'
+       lineinfile:
+         dest: /etc/ssh/sshd_config
+         line: "{{ item }}"
+       with_items:
+         - PasswordAuthentication yes
+         - PermitEmptyPasswords no
+         - X11Forwarding no
+#        - PermitRootLogin no
+         - RhostsRSAAuthentication no
+         - RhostsAuthentication no
+         - '# Systemizer Technic Linux OS Hardening done at {{ ansible_date_time.time  }}, {{ ansible_date_time.date  }}'
+     - name: Restart service httpd, in all cases
+       ansible.builtin.service:
+         name: httpd
+         state: restarted

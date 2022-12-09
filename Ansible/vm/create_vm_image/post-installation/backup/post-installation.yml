@@ -1,0 +1,48 @@
+---
+ - hosts: vms
+   remote_user: root
+   ignore_errors: yes
+   tasks:
+     - name: Create Senior SA User account
+       user:
+         name: sysadmin
+         comment: "Senior System Administrator"
+         update_password: always
+         password: $6$rounds=656000$oVeBVbh/3DOP1vBo$qesEyE/YaQm94eXVIOThwdacFWih5DKpYY2QoLzMoMhxubur4xY5Yhu0SspUVScaogy4/ZM.U4DtCic0E7SKO1
+         non_unique: yes
+         uid: 1999
+         expires: -1
+
+     - name: add sudo entry
+       blockinfile:
+         path: /etc/sudoers
+         block: |
+           sysadmin   ALL=(ALL)       NOPASSWD: ALL
+
+     - name: Create dbadmin account
+       user:
+         name: dbadmin
+         comment: "read-only account"
+         update_password: always
+         password: $6$rounds=656000$ECN/5j7tCZI08INl$JGzY.KnI6LvtPjbzHr.UdS8aEsNPnN7LKSDkb1Pdeu/2n.XJBvh4jlkZMSGb6tp4jz7y/4b.5ZR9uAci/iXCj0
+         non_unique: yes
+         uid: 1998
+         expires: -1
+
+     - name: hosts file entry
+       lineinfile:
+         dest: /etc/hosts
+         regexp: "{{item.name}}"
+         line: "{{item.value}} {{item.name}}"
+         state: present
+       with_items:
+          - { name: 'hostname1.abc.com', value: '188.2.3.4' }
+          - { name: 'hostname2.abc.com', value: '188.2.3.5' }
+          - { name: 'hostname3.abc.com', value: '188.2.3.6' }
+    - name: replace ip address 
+      :
+       src: /root/ifcfg-ens192
+       dest: /etc/sysconfig/network-scripts/ifcfg-ens192
+       owner: root
+       group: root
+       mode: 0644

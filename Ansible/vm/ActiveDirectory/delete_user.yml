@@ -1,0 +1,16 @@
+---
+- hosts: windows 
+  gather_facts: true
+  
+  vars:
+    userToBeDeleted:
+      - ben1.chong1
+      - justin.lau
+
+  tasks:
+  - name: Delete Domain user
+    win_domain_user:
+      name: "{{ item }}"
+      state: absent
+#      remove: yes
+    loop: "{{ userToBeDeleted }}"

@@ -1,0 +1,15 @@
+[windows]
+192.168.0.167
+#192.168.0.129
+
+[windows:vars]
+#ansible_user=ben
+#ansible_password=zaq12wsx.
+ansible_user=firstname1.lastname1
+ansible_password=P@ssw0rd
+ansible_port=5986
+ansible_connection=winrm
+ansible_winrm_transport=basic
+ansible_winrm_server_cert_validation=ignore
+ansible_winrm_scheme=https
+ansible_winrm_kerberos_delegation=true
