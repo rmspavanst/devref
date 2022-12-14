@@ -10,4 +10,4 @@ ansible servera.lab.example.com -m service -a "name=httpd enabled=yes state=star
 
 ansible-playbook --syntax-check webserver.yml
 
-
+ansible-playbook -i inventory --syntax-check webserver.yml -l web
