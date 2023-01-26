@@ -1,0 +1,10 @@
+Resources:
+  EC2Instance: null
+  Type: 'AWS::EC2::Instance'
+  Properties:
+    InstanceType: t2.micro
+    KeyName: rmsst
+    ImageId: ami-0cca134ec43cf708f
+  Tags:
+    - Key: Name
+      Value: Ktexperts-EC2
