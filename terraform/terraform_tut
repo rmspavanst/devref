@@ -1,0 +1,30 @@
+1. Terraform is an IAC tool, using terraform can manage Physical servers, VMWare, AWS, GCP, AZURE, 
+                                                     BigIP, CloudFare, DNS, Palo Alto, infoblox,
+                                                     DataDog, Grafana, Auth0, Wavefront, Sumo logic
+                                                     InfluxDB, MongoDB, MySQL, PostgreSQL, VCS
+
+2. Terraform use HCL (HashiCorp Configuration Language)
+
+# Example: main.tf
+
+resource "aws_instance" "webserver" {
+ami = "ami-0edab43b6fa892279"
+instance_type = "t2.micro"
+}
+resource "aws_s3_bucket" "finance" {
+bucket = "finanace-21092020"
+tags = {
+Description = "Finance and Payroll"
+    }
+}
+resource "aws_iam_user" "admin-user" {
+name = "lucy"
+tags = {
+Description = "Team Leader"
+    }
+}
+
+terraform init/plan/apply
+
+ 
+
