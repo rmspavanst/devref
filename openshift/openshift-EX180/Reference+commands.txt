@@ -1,0 +1,278 @@
+***********
+
+PODMAN
+
+***********
+
+Build image
+
+======================
+
+podman build -t imagename .
+
+Run container
+
+=========
+
+podman run -d --name=wordpress  <image name>  
+
+If Variable need to be passed and ports to be exposed and pass pod name as well then use below command
+
+podman run -d --pod <podname> --name=mycontainername -e variable1=value1  -e variable2=value2  -p localhostport:containerport   <image name>  
+
+For persistent volume, sample commnad for Mysql
+
+podman run -d -v /srv/mysql:/var/lib/mysql -p 13306:3306 -e MYSQL_ROOT_PASSWORD=password -e MYSQL_USER=linda -e MYSQL_PASSWORD=password -e MYSQL_DATABASE=books registry.access.redhat.com/rhscl/mariadb-101-rhel7
+
+Here -v for volume mount and /srv/mysql is volume mount point in local host and /var/lib/mysql is for mysql container
+
+Stop container
+
+===============
+
+podman stop containername
+
+Remove conatiner
+
+===============
+
+podman rm containername
+
+Container logs
+
+==============
+
+podman logs containername  OR to tail last 50 lines: podman logs --tail=50 containername 
+
+To check images
+
+===============
+
+podman images
+
+Add new tag to container
+
+========================
+
+podman tag image:latest image:newtag
+
+Push image to repo
+
+==================
+
+podman login docker.io OR any other registry/local registry
+
+Before push change the tag from local to destination registry and then push eg.; 
+
+sudo podman login docker.io
+
+Login Succeeded!
+
+sudo podman tag localhost/jboss-eap:6.4.v1 docker.io/openshiftex180practice/jboss-eap:6.4.v1
+
+sudo podman images
+
+REPOSITORY                                  TAG         IMAGE ID      CREATED      SIZE
+
+localhost/jboss-eap                         latest      8skdsw45e452s3 hours ago  1.17 GB
+
+localhost/jboss-eap                         6.4.v1      8skdsw45e452s3 hours ago  1.17 GB
+
+docker.io/openshiftex180practice/jboss-eap  6.4.v1      8skdsw45e452s3 hours ago  1.17 GB
+
+registry.access.redhat.com/ubi8             latest      bc4as8401rk464 3 weeks ago  234 MB
+
+sudo podman push docker.io/openshiftex180practice/jboss-eap:6.4.v1
+
+Getting image source signatures
+
+Copying blob d48f6575373 done
+
+Copying config 3n4855de32 done
+
+Writing manifest to image destination
+
+Storing signatures
+
+Save image to tar file
+
+======================
+
+podman save localhost/testimage:tag -o testimage.tar
+
+Load image from tar file
+
+=========================
+
+podman load -i testimage.tar
+
+persistent volume
+
+==================
+
+sudo podman search mariadb
+
+sudo podman pull registry.access.redhat.com/rhscl/mariadb-101-rhel7
+
+sudo podman inspect registry.access.redhat.com/rhscl/mariadb-101-rhel7 ==> check for user
+
+sudo mkdir /srv/mysql
+
+sudo chown 27:27 /srv/mysql/
+
+sudo semanage fcontext -a -t container_file_t "/srv/mysql(/.*)?"
+
+sudo restorecon -Rv /srv/mysql/
+
+sudo podman run -d -v /srv/mysql:/var/lib/mysql -p 13306:3306 -e MYSQL_ROOT_PASSWORD=password -e MYSQL_USER=linda -e MYSQL_PASSWORD=password -e MYSQL_DATABASE=books registry.access.redhat.com/rhscl/mariadb-101-rhel7
+
+****************
+
+   OPENSHIFT
+
+****************
+
+Create Project
+
+==============
+
+To Create project Myproject with display name "My Test Project" 
+
+Login using token
+
+oc login <API token> -u username 
+
+password: passwordgiven
+
+Then create project 
+
+oc new-project Myproject --display-name="My Test Project"
+
+ 
+
+Create Application
+
+============
+
+oc new-app bitnami/nginx --name=bitnami
+
+Create Application using Image
+
+==============================
+
+oc new-app --docker-image=iamge --name=appname --as-deployment-config -e Variable1=value1 -e Variable2=value2 -e Variable3=value3
+
+Example
+
+oc new-app --docker-image=registry.access.redhat.com/rhscl/mysql-57-rhel7 --name=mysql-openshift2 --as-deployment-config -e MYSQL_USER=user -e MYSQL_PASSWORD=password MYSQL_DATABASE=books
+
+If you need to pass labels use option -l as in below example
+
+oc new-app --docker-image=registry.access.redhat.com/rhscl/mysql-57-rhel7 --name=mysql-openshift2 --as-deployment-config -e MYSQL_USER=user -e MYSQL_PASSWORD=password MYSQL_DATABASE=books -l label1=value1,label2=value2
+
+CREATE APP USING FILE
+
+=====================
+
+Create application using yaml file
+
+oc process -f template.yaml -p parameter1=value1 -p  parameter2=value2 | oc create -f– 
+
+create template first and use the template to create application
+
+To create template
+
+oc create -f template.yaml   to create template
+
+To list templates
+
+oc get template
+
+oc process templatename -p parameter1=value1 -p  parameter2=value2 | oc create -f– 
+
+if you need to pass labels use option -l as in below example
+
+oc process -f template.yaml -p parameter1=value1 -p  parameter2=value2 -l label1=value1,label2=value2 | oc create -f– 
+
+oc process -f template.yaml -p parameter1=value1 -p  parameter2=value2 -l label1=value1,label2=value2 | oc create -f– 
+
+To add labels
+
+=============
+
+oc label pod podname labelname1=labelvalue1
+
+To check parameter in yaml or json file and in templated created
+
+================================================================
+
+In file
+
+oc describe -f template.yaml 
+
+In template
+
+oc describe template templatename
+
+Expose service 
+
+==============
+
+oc expose svc servicename
+
+eg; oc expose svc mysql 
+
+Expose service using URL
+
+=======================
+
+oc expose svc mysql-openshift --hostname=URL
+
+eg; oc expose svc mysql --hostname=testmysqlapp
+
+Pod logs
+
+===========
+
+oc logs -f podname
+
+If pod is continuously restarting and to check pod logs using lables use below command
+
+oc logs -f $(oc get pods -o custom-columns=POD:metadata.name --no-headers -l app=bitnami)
+
+Copy file from pod to pod
+
+===========================
+
+oc cp filename podname:/path/
+
+Login into Application
+
+==================
+
+oc rsh podname
+
+mysql -u root -p
+
+SELECT VERSION();
+
+To get output usig exec
+
+=======================
+
+oc exec podname -it -- cat /etc/os-release
+
+Import image streams
+
+====================
+
+oc import-image imagename
+
+Port forward
+
+============
+
+oc port-forward pod/mypod localhost:applicationport
+
+oc  port-forward pod/mysql-1-ss84l 30306:3306
+

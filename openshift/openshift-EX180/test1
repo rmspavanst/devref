@@ -1,0 +1,110 @@
+sudo podman build -t jboss-eap .
+
+
+test2:
+------------
+
+podman images
+
+podman run -d --name jboss-eap-app -p 8080:8080 -p 9990:9990 -p 9999:9999 localhost/jboss-eap
+
+podman ps -a
+
+
+test3:
+------------
+
+#get last 10lines of logs for container jboss-eap-app
+
+podman logs --tail=10 jboss-eap-app
+
+
+#stop the container jboss-eap-app
+
+podman stop jboss-eap-app
+
+
+$Remove the container jboss-eap-app
+
+podman rm jboss-eap-app
+
+
+test4:
+---------------
+
+# Add a tag "6.4.v1" to the image jboss-eap (Build in Test 1)
+
+podman tag localhost/jboss-eap localhost/jboss-eap:6.4.v1
+podman images
+
+
+# Save the image with new tag to tar file jboss-eap.6.4.v1.tar
+podman save -o image jboss-eap.6.4.v1.tar jboss-eap:6.4.v1
+ls
+ 
+
+
+# Push the image with new tag "6.4.v1 to docker registry
+
+
+create the repo in docker hub "rmspavan/jboss-eap"
+
+sudo podman login docker.io
+username:
+password:
+
+sudo podman tag localhost/jboss-eap:6.4.v1 docker.io/rmspavan/jboss-eap:6.4.v1
+
+sudo podman images
+
+podman push docker.io/rmspavan/jboss-eap:6.4.v1
+
+
+
+test5:
+=========
+
+# Run mysql container using Podman and image registry.access.redhat.com/rhscl/mysql-57-rhel7
+
+1. register the accout in "rehat container registry authentication"
+
+podman login registry.access.redhat.com
+username:
+password:
+
+
+
+
+
+
+
+# Name of the container mydb
+
+#Expose container port 3306 to port 30306 on local host
+
+# Pass the container parameters values{
+  MYSQL_ROOT_PASSWORD=password
+  MYSWL_USER=user1
+  MYSQL_PASSWORD=password
+  MYSQL_DATABASE=books
+}
+
+
+podman run -d --name mydb -p 30306:3306 -e MYSQL_ROOT_PASSWORD=password -e MYSWL_USER=user1 -e MYSQL_PASSWORD=password -e MYSQL_DATABASE=books registry.access.redhat.com/rhscl/mysql-57-rhel7
+
+
+podman image
+podman ps
+
+
+# login into the container
+
+podman exec -it mydb /bib/bash
+
+mysql -u user1 -p
+> SELECT VERISON()
+>exit
+exit
+
+
+

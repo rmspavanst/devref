@@ -1,0 +1,111 @@
+1. Install sh openshift_cli_client_setup.sh
+
+2. register for openshift free trial
+
+3. Start your trial on Developer sandbox and click start using your sandbox
+
+4. click copy login command and copy the login token
+
+5. In vm paste the openshit login token, you can see default projects created.
+
+ex: crt-openshift-ex180-practice-dev
+    crt-openshift-ex180-practice-stage
+
+
+6. switch b/w projects
+
+oc project crt-openshift-ex180-practice-stage
+
+
+test1:
+============
+
+# Create an mysql application as instructed below
+
+# Name of the app is mysql-app
+
+# Use iage registry.access.redhat.com/rhscl/mysql-57-rhel7
+
+# Parameters to be used
+  MYSQL_USER=user
+  MYSQL_PASSWORD=password
+  MYSQL_DATABASE=books
+
+# All resources should have label "aap=mydbapp"
+
+oc new-app --docker-image=registry.access.com/rhscl/mysql-57-rhel7 --name=mysql-app -e MYSQL_USER=user -e MYSQL_PASSWORD=password -e MYSQL_DATABASE=books -l app-mydbapp
+
+oc get all
+oc get all -o wide
+./clean_all.sh
+
+oc new-app --docker-image=registry.access.com/rhscl/mysql-57-rhel7 --name=mysql-app --as-deployment-config -e MYSQL_USER=user -e MYSQL_PASSWORD=password -e MYSQL_DATABASE=books -l app-mydbapp
+
+oc get all
+
+
+test2:
+============
+
+# Expose the service to usr "mysqltestapptesturl.com"
+oc get all
+
+oc expose svc mysql-app --hostname=mysqltestapptesturl.com
+
+oc get all (can see the url in route resource)
+
+# Copy file mytestfile.txt from host to the mysql application path /tmp/
+oc cp <filename> <podname>:/<dir>
+oc cp mytestfile.txt mysql-app-1-m1b7h:/tmp/
+
+# Check pod logs
+oc logs -f <podname>
+oc logs -f mysql-app-1-m1b7h
+
+# Login into application and check the versions of mysql
+oc rsh <podname>
+oc rsh mysql-app-1-m1b7h
+cd /tmp/
+ls
+mysql -u user -P
+SELECT VERSION();
+
+
+test3:
+============
+# Create mysql application as instructed below
+# Use mysql.json or mysql.yaml for application creation
+# variable to be set
+    MYSQL_USER=user1
+    MYSQL_PASSWORD=password
+    MYSQL_DATABASE=books
+
+
+# clean all apps
+./clean_all.sh
+
+oc process -f mysql.yaml -p MYSQL_USER=user1 -p MYSQL_PASSWORD=password -p MYSQL_DATABASE=books | oc create -f -
+
+oc get all
+
+vi mysql.yaml
+
+
+test4:
+============
+
+# Create Template from mysql.json or mysql.yaml file
+# Create mysql application as intructed below:
+  -Use the template created
+  - 
+
+
+
+
+
+
+
+
+
+
+
