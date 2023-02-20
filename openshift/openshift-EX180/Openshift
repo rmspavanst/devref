@@ -97,7 +97,18 @@ test4:
 # Create Template from mysql.json or mysql.yaml file
 # Create mysql application as intructed below:
   -Use the template created
-  - 
+  -Variable to be set
+    MYSQL_USER=user
+    MYSQL_PASSWORD=password
+    MYSQL_DATABASE=books
+
+oc create -f mysql.yaml
+oc get templates
+oc process mysql-persistent -p MYSQL_USER=user -p MYSQL_PASSWORD=password -p MYSQL_DATABASE=books | oc create -f -
+
+oc get all
+
+./clean_all.sh
 
 
 
