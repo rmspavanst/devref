@@ -1,0 +1,94 @@
+# Question 1
+OpenShift 4 master nodes are only supported to run on Red Hat Enterprise Linux CoreOS. Worker nodes run any environment that Red Hat Enterprise Linux runs on.
+TRUE #
+FALSE
+
+# Question 2
+Application instances and components run in containers--with many containers per OpenShift node.
+TRUE #
+FALSE
+
+# Question 3
+Which of the following is NOT true about pods?
+They manage a group of a container's shared resources 
+They are permanent, long term datastores #
+OpenShift schedules deployment of containers by pods
+They allow for individual application components to be easily scaled horizontally
+
+# Question 4
+Services define a logical set of pods and connect application components together.
+TRUE #
+FALSE
+
+# Question 5
+Labels are very important in OpenShift. Which of the following statements are NOT true about labels?
+Labels are used to organize, group, or select API objects
+Most objects can include labels in metadata
+Labels are simple key-value pairs that you choose
+Labels can never be changed #
+
+# Question 6
+The OpenShift master host is the API endpoint and the orchestrator of the system.
+TRUE #      
+FALSE
+
+# Question 7
+What is the purpose of 'etcd'?
+Distributed key-value datastore for cluster state, RBAC rules, application environment information, etc. #
+Responsible for determining pod placement
+Stores and manages container images
+Allows cluster administrators to integrate multiple platforms using a single API specification
+
+# Question 8
+What is the purpose of the scheduler?
+Distributed key-value datastore for cluster state, RBAC rules, application environment information, etc.
+Responsible for determining pod placement #
+Stores and manages container images
+Allows cluster administrators to integrate multiple platforms using a single API specification
+
+# Question 9
+What is the purpose of the registry?
+Distributed key-value datastore for cluster state, RBAC rules, application environment information, etc.
+Responsible for determining pod placement.
+Stores and manages container images #
+Allows cluster administrators to integrate multiple platforms using a single API specification
+
+# Question 10
+Which of the following is NOT true about Operators?
+They are Kubernetes native applications
+Administration, shell scripts, and automation software (like Ansible) are now in Kubernetes pods
+They integratate natively with Kubernetes concepts and APIs
+They are only written and provided by Red Hat, not the ISV community #
+
+# Question 11
+What is the purpose of the OpenShift router (aka Ingress Controller)?
+Provides external access to applications deployed on OpenShift #
+Ensures that the specified number of pod replicas run at all times
+Provides a platform-wide, pluggable routing tier to route traffic to applications
+Monitors application health via user-defined pod probes for liveness and readiness and can scale out pods based on CPU utilization metrics
+
+# Question 12
+The replication controller does which of the following?
+Provides external access to applications deployed on OpenShift
+Ensures that the specified number of pod replicas run at all times #
+Provides a platform-wide, pluggable routing tier to route traffic to applications
+Monitors application health via user-defined pod probes for liveness and readiness and can scale out pods based on CPU utilization metrics
+
+# Question 13
+The OpenShift networking SDN is capable of which of the following?
+Provides external access to applications deployed on OpenShift
+Ensures that the specified number of pod replicas run at all times
+Provides a platform-wide, pluggable routing tier to route traffic to applications #
+Monitors application health via user-defined pod probes for liveness and readiness and can scale out pods based on CPU utilization metrics
+
+# Question 14
+Which of the following tasks is handled by the OpenShift master?
+Provides external access to applications deployed on OpenShift
+Ensures that specified number of pod replicas running at all times
+Provides a platform-wide, pluggable routing tier to route traffic to applications
+Monitors application health via user-defined pod probes for liveness and readiness and can scale out pods based on CPU utilization metrics. #
+
+# Question 15
+A route object consists of a host name, a route name, a service selector, and optional security configurations. An OpenShift router consumes routes and is a deployment of one or more pods that forwards network traffic to the proper pods.
+TRUE #
+FALSE

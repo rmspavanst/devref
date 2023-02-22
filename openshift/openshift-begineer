@@ -13,3 +13,15 @@ scm
 etcd
 
 
+# Setup OPENSHIFT:
+==================
+1. All-in-One (Minishift) or
+2. Single Master, Multiple Nodes or
+3. Multiple Master, Multiple Nodes
+
+deploy in On-Premise/ Cloud/ Package Manager(RPM), Containerized(Docker).
+
+# Openshift setup with Minishift on VM:
+=========================================
+
+
