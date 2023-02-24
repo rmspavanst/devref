@@ -1,3 +1,74 @@
+# What Is DevOps, Anyway?
+
+Approach to culture, automation, and platform design aiming to provide better business value and responsiveness
+Goal: Increase speed and flexibility in delivering new features and services
+
+# Introduction to DevOps and CI/CD
+Red Hat DevOps Vision
+Red Hat culture is built on openness and transparency
+Has worked for more than 25 years
+Red Hat has history to guide customers through making DevOps reality
+Red Hat is building tools, platforms, infrastructure to support customers throughout DevOps journey
+
+# Developers Care About:
+Building applications
+Automating tests
+Continuous integration
+Performance tuning
+Debugging
+
+# Operations Cares About:
+Deploying applications
+Managing applications, infrastructure
+Reliability
+Security
+Compliance
+
+# Deployments
+OpenShift deployments provide fine-grained management over applications
+    Based on user-defined template called "deployment configuration"
+Many different templating forms to fit team’s style
+    Examples: Templates, Helm, Kustomize
+In response to deployment configuration, deployment system creates replication controller to run application
+OpenShift is Kubernetes
+    Kubernetes "deployment" ⇐⇒ OpenShift "deployment configuration"
+    Kubernetes "ReplicaSet" ⇐⇒ OpenShift "replication controller"
+
+
+# CI/CD Workflow:
+
+Verifies build integrity/ Validates test results/ Checks integration among multiple systems/ Identifies problems.
+
+# How Is CI Executed?
+Can execute CI manually, but usually managed by tool
+In DevOps, CI is mandatory and executed by tool
+    Tool runs automation scripts created by developers
+    Avoids human intervention during CI process
+
+# CI Best Practices
+Maintain code repository
+Automate build
+Make build self-testing
+Make sure everyone commits every day
+Keep build fast
+Test in production clone
+Make getting deliverables easy
+Make sure everyone can view build results
+
+
+# OpenShift Enables DevOps
+OpenShift provides "configuration in code"
+Accomplished via standardized environment, Linux® containers, automated provisioning
+Built-in support for Jenkins CI server
+Jenkins provides automated testing, deployment of applications to OpenShift environment
+Features shorten cycle time from idea to deployed product feature
+
+# Pipelines
+Enable you to define entire application life cycle
+Support continuous integration/continuous deployment (CI/CD)
+Pipeline plug-in built with requirements for flexible, extensible, script-based CI/CD workflow
+
+
 1. Satisfy the customer : Highest priority by delivering valuable software.
 2. Welcome Changes : Harness change for the customer's competitive advantage.
 3. Deliver Frequently : Deliver working software frequntly in as short time as possible.

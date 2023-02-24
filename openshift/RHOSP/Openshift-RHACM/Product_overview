@@ -1,0 +1,37 @@
+RHACM= Redhat Advanced Cluster Management
+
+# Question 1
+Which component of application modernization does RHACM support?
+Run
+Manage #
+Observe
+Automate
+
+# Question 2
+Which of the following is a reason for deploying clusters?
+Edge Deployments
+Application Availability
+Data residency guidelines
+All of the above #
+
+# Question 3
+RHACM is part of OpenShift Container Platform.
+TRUE
+FALSE #
+
+# Question 4
+Which of the following is NOT part of RHACM?
+Cluster Lifecycle
+Application Lifecycle
+Governance, Risk, Compliance
+None of the above #
+
+# Question 5
+RHACM can only create an delete new clusters.
+TRUE
+FALSE #
+
+# Question 6
+Applications in RHACM can only be deployed from a single source.
+TRUE
+FALSE #

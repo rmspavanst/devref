@@ -1,0 +1,28 @@
+# Question 1
+A Channel determines the target clusters to which a Subscription will be deployed.
+TRUE
+FALSE #
+
+# Question 2
+Which of the following is NOT a resource type of the Application Lifecycle in RHACM
+Channel
+Policy #
+Subscription
+PlacementRule
+
+# Question 3
+RHACM can deploy applications in both a single cluster and multi-cluster environment.
+TRUE #
+FALSE
+
+# Question 4
+Resources for a Channel can NOT be stored in which of the following?
+Object store
+GitHub repository
+Local filesystem #
+Helm repository
+
+# Question 5
+The PlacementRule clusterSelector is case sensitive.
+TRUE #
+FALSE

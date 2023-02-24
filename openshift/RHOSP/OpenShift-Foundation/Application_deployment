@@ -1,0 +1,133 @@
+ https://github.com/StefanoPicozzi/cotd2
+
+# Question 1
+Which of the following is a true statement about the role of deployment configurations?
+Deployment configurations have triggers that drive automated deployments in response to events
+Deployment configurations allow rollbacks to a previous version, either manually or automatically in case of deployment failure
+Deployment configurations allow manual replication scaling and autoscaling
+All of the above #
+
+# Question 2
+There is no application downtime when using the "Recreate" deployment strategy.
+TRUE
+FALSE #
+
+# Question 3
+Which of the following is NOT a deployment strategy?
+Recreate
+Rolling
+Pipeline #
+Custom
+
+# Question 4
+Which of the following is NOT a typical step in a CI/CD workflow?
+The CI server polls the source code repository for changes
+The developer manually builds code and copies compiled binaries to test the environment #
+The CI server generates feedback by emailing the team members about the build results
+If the build is successful, a deployment is made to a production clone server 
+
+# Question 5
+Which of the following is a benefit of continuous integration?
+Rapid feedback: When a build is executed, the team members are immediately notified about the builds status
+Reduced risk: By integrating many times a day, you can reduce the risks in your project
+Building of deployable software: The build process should generate software that can be deployed
+All of the above #
+
+# Question 6
+OpenShift has built-in support for Jenkins CI server, a popular tool used in the CI/CD for automation of builds.
+TRUE #
+FALSE
+
+# Question 7
+Which of the following statements refers to S2I builds?
+Invokes a Docker build, and expects a repository with a Dockerfile and additional sources required to build the image
+Suitable for deploying an existing container image
+Builds a new image out of a base image and the provided repository's source code #
+Modifies an existing image to contain new RPMs
+
+# Question 8
+What is the role of triggers in a build configuration?
+Define components that need to be triggered to start the build, for example, duplicators
+Specify events for invoking builds, for example when a newer base image is available #
+Describe the ImageStream resource to be created to support a built application
+Define how many replicas should exist for a pod
+
+# Question 9
+To start an S2I build, you must specify the following:
+A container file
+A Git repository URL
+A builder image
+A Git repository URL and a builder image #
+
+# Question 10
+Which command ultimately creates a BuildConfig object?
+oc start-build
+oc new-app ##
+oc adm new-project
+docker build
+
+# Question 11
+A BuildConfig defines which of the following?
+A service and a route for your application
+A replication controller
+Triggers to start a new build process and deployment #
+All of the above
+
+# Question 12
+OpenShift administrators and/or users MUST create their own base/builder images to use with the S2I process.
+TRUE
+FALSE #
+
+# Question 13
+OpenShift can run images from any container registry, including which of the following?
+Red Hat Container Catalog
+Private container registries
+OpenShift internal container registry
+All of the above #
+
+# Question 14
+What is the role of the registry?
+Ingress point for traffic destined for OpenShift services
+Locally stores and manages access to container images #
+Provides abstraction for accessing members of a logical set of pods
+Matches FQDN-destined traffic requests to services and the pods they represent
+
+# Question 15
+Image streams can be used to automatically perform an action when new images are created. Builds and deployments can watch an image stream to receive notifications when new images are added, and react by performing a build or deployment.
+TRUE #
+FALSE
+
+# Question 16
+Which of the following are true?
+OpenShift DeploymentConfigs are basically functional equivalents of Kubernetes deployments
+OpenShift replication controllers are the functionally equivalents of Kubernetes Replica Sets
+Kubernetes deployments and replica sets are available in OpenShift
+All of the above #
+
+# Question 17
+Which of the following are part of the OpenShift Serverless offering?
+Istio - Sidecar Network Proxies for handling service-to-service communication
+Knative Serving - Enables autoscaling and event-driven behaviour from over 200+ sources in the programming language of choice #
+Tekton - A full-lifecycle, flexible, extensible, script-based and GUI-based CI/CD workflow - without an engine
+Jenkins - The most popular CI/CD Engine
+
+# Question 18
+Which of the following are part of the OpenShift Service Mesh?
+Istio - Sidecar Network Proxies for handling service-to-service communication #
+Knative Serving - Enables autoscaling and event-driven behaviour from over 200+ sources in the programming language of choice
+Tekton - App full-lifecycle, flexible, extensible, script-based and GUI-based CI/CD workflow - without an engine
+Jenkins - The most popular CI/CD Engine
+
+# Question 19
+Which of the following are part of the OpenShift Pipelines offering which uses a plug-in to activate script-based workflows?
+Istio - Sidecar Network Proxies for handling service-to-service communication
+Knative Serving - Enables autoscaling and event-driven behaviour from over 200+ sources in the programming language of choice
+Tekton - A full-lifecycle, flexible, extensible, script-based and GUI-based CI/CD workflow - without an engine
+Jenkins - The most popular CI/CD Engine #
+
+# Question 20
+Which of the following are part of the OpenShift Pipelines offering which are 100% Kuberenetes?
+Istio - Sidecar Network Proxies for handling service-to-service communication
+Knative Serving - Enables autoscaling and event-driven behaviour from over 200+ sources in the programming language of choice
+Tekton - A full-lifecycle, flexible, extensible, script-based and GUI-based CI/CD workflow - without an engine #
+Jenkins - The most popular CI/CD Engine
