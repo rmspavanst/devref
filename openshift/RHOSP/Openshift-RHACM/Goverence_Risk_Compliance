@@ -24,3 +24,28 @@ FALSE #
 A certificate policy only looks for certificates stored in secrets.
 TRUE #
 FALSE
+
+
+## Visibility ##
+
+# Question 1
+The Visual Web Terminal only allows you to connect to the hub cluster.
+TRUE
+FALSE #
+
+# Question 2
+How many Deployments exist in your etherpad namespace?
+1
+2 #
+3
+4
+
+# Question 3
+RHACM allows you to save searches.
+TRUE #
+FALSE
+
+# Question 4
+You must use key:value pairs for searching in RHACM.
+TRUE
+FALSE #

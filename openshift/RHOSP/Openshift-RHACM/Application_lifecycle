@@ -26,3 +26,58 @@ Helm repository
 The PlacementRule clusterSelector is case sensitive.
 TRUE #
 FALSE
+
+
+## Goverence,Risks & Compliance ###
+
+# Question 1
+In GRC, you build policies and apply them to a hub cluster.
+TRUE
+FALSE #
+
+# Question 2
+Which of the following is NOT a policy controller?
+Configuration
+Certificate
+IAM
+Namespace #
+
+# Question 3
+GRC requires a PlacementRule to determine which clusters a policy should be deployed to.
+TRUE #
+FALSE
+
+# Question 4
+You cannot exclude a namespace when deploying a policy.
+TRUE
+FALSE #
+
+# Question 5
+A certificate policy only looks for certificates stored in secrets.
+TRUE #
+FALSE
+
+
+## Visibility ##
+
+# Question 1
+The Visual Web Terminal only allows you to connect to the hub cluster.
+TRUE
+FALSE #
+
+# Question 2
+How many Deployments exist in your etherpad namespace?
+1
+2 #
+3
+4
+
+# Question 3
+RHACM allows you to save searches.
+TRUE #
+FALSE
+
+# Question 4
+You must use key:value pairs for searching in RHACM.
+TRUE
+FALSE #

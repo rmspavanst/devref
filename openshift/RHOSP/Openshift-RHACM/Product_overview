@@ -35,3 +35,122 @@ FALSE #
 Applications in RHACM can only be deployed from a single source.
 TRUE
 FALSE #
+
+
+## Cluster Life Cycle ##
+
+# Question 1
+A hub cluster can be managed by RHACM.
+TRUE
+FALSE #
+
+# Question 2
+Which of the following is NOT a cluster lifecycle function in RHACM?
+Deploying OpenShift clusters
+Deploying Kubernetes clusters #
+Importing Kubernetes clusters
+Upgrading OpenShift clusters
+
+# Question 3
+RHACM employs a push-based architectural model.
+TRUE
+FALSE #
+
+# Question 4
+Which of the following statements is true?
+RHACM can be installed on an OpenShift cluster #
+RHACM can be installed on a Kubernetes cluster
+Both of the above are correct
+Both of the above are incorrect
+
+# Question 5
+In RHACM, labels can only be applied to imported clusters at the time of creation.
+TRUE
+FALSE #
+
+
+### Application Life Cycle ##
+
+# Question 1
+A Channel determines the target clusters to which a Subscription will be deployed.
+TRUE
+FALSE #
+
+# Question 2
+Which of the following is NOT a resource type of the Application Lifecycle in RHACM
+Channel
+Policy #
+Subscription
+PlacementRule
+
+# Question 3
+RHACM can deploy applications in both a single cluster and multi-cluster environment.
+TRUE #
+FALSE
+
+# Question 4
+Resources for a Channel can NOT be stored in which of the following?
+Object store
+GitHub repository
+Local filesystem #
+Helm repository
+
+# Question 5
+The PlacementRule clusterSelector is case sensitive.
+TRUE #
+FALSE
+
+
+## Goverence,Risks & Compliance ###
+
+# Question 1
+In GRC, you build policies and apply them to a hub cluster.
+TRUE
+FALSE #
+
+# Question 2
+Which of the following is NOT a policy controller?
+Configuration
+Certificate
+IAM
+Namespace #
+
+# Question 3
+GRC requires a PlacementRule to determine which clusters a policy should be deployed to.
+TRUE #
+FALSE
+
+# Question 4
+You cannot exclude a namespace when deploying a policy.
+TRUE
+FALSE #
+
+# Question 5
+A certificate policy only looks for certificates stored in secrets.
+TRUE #
+FALSE
+
+
+## Visibility ##
+
+# Question 1
+The Visual Web Terminal only allows you to connect to the hub cluster.
+TRUE
+FALSE #
+
+# Question 2
+How many Deployments exist in your etherpad namespace?
+1
+2 #
+3
+4
+
+# Question 3
+RHACM allows you to save searches.
+TRUE #
+FALSE
+
+# Question 4
+You must use key:value pairs for searching in RHACM.
+TRUE
+FALSE #
