@@ -1,0 +1,111 @@
+# Kubernetes Overview
+Kubernetes is an orchestration service that simplifies the deployment, management, and scaling of containerized applications.
+
+The smallest unit manageable in Kubernetes is a pod. A pod consists of one or more containers with their storage resources and IP address that represent a single application. Kubernetes also uses pods to orchestrate the containers inside it and to limit its resources as a single unit.
+
+# Kubernetes Features
+
+Service discovery and load balancing 
+Horizontal scaling 
+Self-healing
+Automated rollout
+Secrets and configuration management
+Operators
+
+# OpenShift Overview
+Red Hat OpenShift Container Platform (RHOCP) is a set of modular components and services built on top of a Kubernetes container infrastructure. RHOCP adds the capabilities to provide a production PaaS platform such as remote management, multitenancy, increased security, monitoring and auditing, application life-cycle management, and self-service interfaces for developers.
+
+Beginning with Red Hat OpenShift v4, hosts in an OpenShift cluster all use Red Hat Enterprise Linux CoreOS as the underlying operating system.
+
+# OpenShift Features
+
+Integrated developer workflow
+Routes
+Metrics and logging
+Unified UI
+
+
+
+# Exploring Root and Rootless Containers:
+
+## Start a container with sudo from the Red Hat UBI 8 image.
+sudo podman run --rm --name asroot -it registry.access.redhat.com/ubi8:latest /bin/bash
+
+
+## Start another container from the Red Hat UBI 8 as a regular user.
+podman run --rm --name asuser -it registry.access.redhat.com/ubi8:latest /bin/bash
+
+
+# Use the podman run command to start a container. Add the -d option to start it in the background, and add the -p option to map port 8080 on the host to port 80 in the container.
+
+ podman run -d -p 8080:80 --name httpd-basic quay.io/redhattraining/httpd-parent:2.4
+
+ curl http://localhost:8080
+
+ podman exec -it httpd-basic /bin/bash
+
+ /var/www/html
+
+ echo "Hello World" > /var/www/html/index.html
+
+ curl http://localhost:8080
+
+
+
+ Any Unix signal can be sent to the main process. Podman accepts either the signal name or number.
+
+The following table shows several useful signals:
+
+Signal	Value	Default Action	Comment
+SIGHUP	1	        Term	Hangup detected on controlling terminal or death of controlling process
+SIGINT	2	        Term	Interrupt from keyboard
+SIGQUIT	3	        Core	Quit from keyboard
+SIGILL	4	        Core	Illegal Instruction
+SIGABRT	6	        Core	Abort signal from abort(3)
+SIGFPE	8	        Core	Floating point exception
+SIGKILL	9	        Term	Kill signal
+SIGSEGV	11	        Core	Invalid memory reference
+SIGPIPE	13	        Term	Broken pipe: write to pipe with no readers
+SIGALRM	14	        Term	Timer signal from alarm(2)
+SIGTERM	15	        Term	Termination signal
+SIGUSR1	30,10,16	Term	User-defined signal 1
+SIGUSR2	31,12,17	Term	User-defined signal 2
+SIGCHLD	20,17,18	Ign	Child stopped or terminated
+SIGCONT	19,18,25	Cont	Continue if stopped
+SIGSTOP	17,19,23	Stop	Stop process
+SIGTSTP	18,20,24	Stop	Stop typed at tty
+SIGTTIN	21,21,26	Stop	tty input for background process
+SIGTTOU	22,22,27	Stop	tty output for background process
+
+
+The default action for each signal is specified as follows:
+
+Default Action	Description
+Term	Terminate the process.
+Core	Terminate the process and generate a core dump.
+Ign	    Signal is ignored.
+Stop	Stop the process.
+
+# Download the MySQL database container image and attempt to start it
+
+podman run --name mysql \
+> -d -e MYSQL_USER=user1 -e MYSQL_PASSWORD=mypa55 \
+> -e MYSQL_DATABASE=items -e MYSQL_ROOT_PASSWORD=r00tpa55 \
+> registry.redhat.io/rhel8/mysql-80:1
+
+podman ps
+
+podman cp ~/DO180/labs/manage-lifecycle/db.sql mysql:/
+
+
+podman exec mysql /bin/bash -c 'mysql -uuser1 -pmypa55 items < /db.sql'
+
+# Create another container using the same container image as the previous container. Interactively enter the /bin/bash shell instead of using the default command for the container image.
+
+podman run --name mysql-2 -it registry.redhat.io/rhel8/mysql-80:1 /bin/bash
+
+bash-4.4$ mysql -uroot
+
+podman exec mysql /bin/bash -c  \
+> 'mysql -uuser1 -pmypa55 -e "select * from items.Projects;"'
+

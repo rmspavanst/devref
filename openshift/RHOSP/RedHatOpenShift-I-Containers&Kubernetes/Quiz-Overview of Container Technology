@@ -1,0 +1,32 @@
+
+1. Which two options are examples of software applications that might run in a container? (Choose two.)
+
+A A database-driven Python application accessing services such as a MySQL database, a file transfer protocol (FTP) server, and a web server on a single physical host. #
+B A Java Enterprise Edition application with an Oracle database, and a message broker running on a single VM. #
+C An I/O monitoring tool responsible for analyzing the traffic and block data transfer.
+D A memory dump application tool capable of taking snapshots from all the memory CPU caches for debugging purposes.
+
+
+2. Which two of the following use cases are best suited for containers? (Choose two.)
+
+A A software provider needs to distribute software that can be reused by other companies in a fast and error-free way. #
+B A company is deploying applications on a physical host and would like to improve its performance by using containers.
+C Developers at a company need a disposable environment that mimics the production environment so that they can quickly test the code they develop. #
+D A financial company is implementing a CPU-intensive risk analysis tool on their own containers to minimize the number of processors needed.
+
+
+3. A company is migrating their PHP and Python applications running on the same host to a new architecture. Due to internal policies, both are using a set of custom made shared libraries from the OS, but the latest update applied to them as a result of a Python development team request broke the PHP application. Which two architectures would provide the best support for both applications? (Choose two.)
+
+A Deploy each application to different VMs and apply the custom-made shared libraries individually to each VM host. #
+B Deploy each application to different containers and apply the custom-made shared libraries individually to each container.#
+C Deploy each application to different VMs and apply the custom-made shared libraries to all VM hosts.
+D Deploy each application to different containers and apply the custom-made shared libraries to all containers.
+
+
+4. Which three kinds of applications can be packaged as containers for immediate consumption? (Choose three.)
+
+A A virtual machine hypervisor
+B A blog software, such as WordPress #
+C A database #
+D A local file system recovery tool
+E A web server #
