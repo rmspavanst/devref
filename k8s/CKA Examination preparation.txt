@@ -1,0 +1,1388 @@
+Certification Details
+Note!
+
+In the video, I said the exam is 3 hours. With the latest version of the exam, it is now only 2 hours. The contents of this course has been updated with the changes required for the latest version of the exam.
+
+Below are some references:
+
+Certified Kubernetes Administrator: https://www.cncf.io/certification/cka/
+
+Exam Curriculum (Topics): https://github.com/cncf/curriculum
+
+Candidate Handbook: https://www.cncf.io/certification/candidate-handbook
+
+Exam Tips: http://training.linuxfoundation.org/go//Important-Tips-CKA-CKAD
+
+Use the code – DEVOPS15 – while registering for the CKA or CKAD exams at Linux Foundation to get a 15% discount.
+
+
+Reference Notes for lectures and labs
+We have created a repository with notes, links to documentation and answers to practice questions here. Please make sure to go through these as you progress through the course:
+
+https://github.com/kodekloudhub/certified-kubernetes-administrator-course
+
+==================================================================
+EXAM Topic : 
+
+25% - Cluster Architecture, Installation & Configuration
+• Manage role based access control (RBAC)
+• Use Kubeadm to install a basic cluster
+• Manage a highly-available Kubernetes cluster
+• Provision underlying infrastructure to deploy a Kubernetes cluster
+• Perform a version upgrade on a Kubernetes cluster using Kubeadm
+• Implement etcd backup and restore
+
+
+15% - Workloads & Scheduling
+• Understand deployments and how to perform rolling update and rollbacks
+• Use ConfigMaps and Secrets to configure applications
+• Know how to scale applications
+• Understand the primitives used to create robust, self-healing, application deployments
+• Understand how resource limits can affect Pod scheduling
+• Awareness of manifest management and common templating tools
+
+20% - Services & Networking
+• Understand host networking configuration on the cluster nodes
+• Understand connectivity between Pods
+• Understand ClusterIP, NodePort, LoadBalancer service types and endpoints
+• Know how to use Ingress controllers and Ingress resources
+• Know how to configure and use CoreDNS
+• Choose an appropriate container network interface plugin
+
+
+10% - Storage
+• Understand storage classes, persistent volumes
+• Understand volume mode, access modes and reclaim policies for volumes
+• Understand persistent volume claims primitive
+• Know how to configure applications with persistent storage
+
+30% - Troubleshooting
+• Evaluate cluster and node logging
+• Understand how to monitor applications
+• Manage container stdout & stderr logs
+• Troubleshoot application failure
+• Troubleshoot cluster component failure
+• Troubleshoot networking
+
+
+==========================================================================
+
+
+
+Master : Manage, plan, schedule, monitor nodes
+worker nodes : host application as container 
+etcd - key value store , its a db that store data in a key value format. 
+kube scheduler - 
+controller manager - node controller & raplpication controller 
+
+How the above manage each other ? thru kube-api-server . It wiwll control the entire. 
+example : docker, controller runtime
+
+Control plane -
+Kubelet - agent that is in worker nodes to send communication with the master
+Kube-proxy - ensure necesary rules in place 
+
+
+ETCD : port 2379 
+./etcdctl set key1 value1 
+./etcdctl get key1 
+value1
+./etcdctl 
+
+etcd.service
+--advertise-client-urls https://${INTERNAL_IP}:2379 \\     <--------------put in your ip so that the url will take effect
+
+kubectl get pods -n kube-system --> you can see all the pods and etcd-master is inside running.
+kubectl exec etcd-master -n kube-system etcdcrl get / --prefix -key-only
+
+
+ETCD – Commands (Optional)
+(Optional) Additional information about ETCDCTL UtilityETCDCTL is the CLI tool used to interact with ETCD.ETCDCTL can interact with ETCD Server using 2 API versions – Version 2 and Version 3.  By default its set to use Version 2. Each version has different sets of commands.
+
+For example ETCDCTL version 2 supports the following commands:
+
+etcdctl backup
+etcdctl cluster-health
+etcdctl mk
+etcdctl mkdir
+etcdctl set
+
+Whereas the commands are different in version 3
+
+etcdctl snapshot save
+etcdctl endpoint health
+etcdctl get
+etcdctl put
+
+To set the right version of API set the environment variable ETCDCTL_API command
+
+export ETCDCTL_API=3
+
+When API version is not set, it is assumed to be set to version 2. And version 3 commands listed above don’t work. When API version is set to version 3, version 2 commands listed above don’t work.
+
+Apart from that, you must also specify path to certificate files so that ETCDCTL can authenticate to the ETCD API Server. The certificate files are available in the etcd-master at the following path. We discuss more about certificates in the security section of this course. So don’t worry if this looks complex:
+
+–cacert /etc/kubernetes/pki/etcd/ca.crt
+–cert /etc/kubernetes/pki/etcd/server.crt
+–key /etc/kubernetes/pki/etcd/server.key
+
+So for the commands I showed in the previous video to work you must specify the ETCDCTL API version and path to certificate files. Below is the final form:
+
+kubectl exec etcd-master -n kube-system — sh -c “ETCDCTL_API=3 etcdctl get / –prefix –keys-only –limit=10 –cacert /etc/kubernetes/pki/etcd/ca.crt –cert /etc/kubernetes/pki/etcd/server.crt –key /etc/kubernetes/pki/etcd/server.key”
+
+
+Kube-apiserver
+
+1) authenticate user
+2) validate request 
+3) retrieve data 
+4) update etcd
+5) scheduler 
+6) Kubelet
+
+kube get pods -n kube-system 
+cat /etc/kubernetes/manifests/kube-apiserver.yaml --> view api server options - kubeadm 
+cat /etc/systemd/system/kube-apiserver.service
+ps -aux | grep kube-apiserver --> to check running process for api-server
+
+=====================================
+
+Kube COntroller manager : 
+
+kube-controller-manager.service 
+kubectl get pods -n kube-system 
+cat /etc/kubernetes/manifests/kube-controller-manager.yaml 
+cat /etc/systemd/system/kube-controller-manager.service 
+ps -aux | grep kube-controller-manager
+
+-===============================
+
+kube-scheduler : - only decide which pods goes to which nodes 
+
+cat /etc/kubernetes/anifests/kube-scheduler.yaml 
+ps -auc | grep kube-scheduller 
+
+====================================
+
+next :
+Certified Kubernetes Administrator (CKA) --> Core Concepts --> Kubelet 
+
+kubectl 
+
+kubectl run nginx --image=nginx
+kubectl get pods 
+
+
+PRACTICE LAB : 
+kubectl get pods --> check how many pods runnning 
+
+kubectl run nginx --image=nginx --> it will create a pod/nginx 
+
+kubectl get pods --> u can see the pods 
+
+kubectl describe pod <name of the pod> | grep -i image
+
+kubectl get pods -o wide 
+
+kubectl get pods webapp 
+
+kubectl describe pod webapp | grep -i image
+
+kubectl describe pod webapp --> search the status of the images --> for event u can check in events section
+
+kubectll get pods webapp
+
+kubectl delete pod webapp --> delete pod 
+
+kubectl run redis --image=redis123 --dry-run=client -o yaml > pod.yaml 
+it will put it to pod.yaml
+
+kubectl apply -f pod.yaml 
+
+kubectl edit pod redis  --> to edit the redis yaml file
+
+kubectl get pods 
+
+kubectl get replicaset or kubectl get rs and count the number of ReplicaSets.
+
+kubectl get deployment and count the number of Deployments.
+
+controlplane ~ ➜  kubectl get deployment
+NAME                  READY   UP-TO-DATE   AVAILABLE   AGE
+frontend-deployment   0/4     4            0           28s
+
+controlplane ~ ➜  kubectl get pods
+NAME                                   READY   STATUS             RESTARTS   AGE
+frontend-deployment-56d8ff5458-c9w7r   0/1     ImagePullBackOff   0          90s
+frontend-deployment-56d8ff5458-68qvk   0/1     ImagePullBackOff   0          90s
+frontend-deployment-56d8ff5458-gr785   0/1     ImagePullBackOff   0          90s
+frontend-deployment-56d8ff5458-xd5q4   0/1     ImagePullBackOff   0          90s
+
+controlplane ~ ➜  
+
+Raplication controller - is the older techology which is being replaced by replicaset 
+replica set - new technology 
+
+==========================
+rc-definition.yml 
+
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: myapp-rc 
+  labels:
+      app: myapp-rc
+	  type: front-end
+	  
+spec:
+  template:
+  
+    metadata:
+	 name: myapp-pod
+	 labels:
+	    app: myapp
+		type: front-end
+	 spec:
+	   containers:
+	   - name: nginx-container
+	     image: nginx
+		 
+  replicas: 3
+=============
+
+kubectl create -f rc-definition.yml
+kubectl get replicationcontroller
+kubectl get pods 
+
+ 
+Raplication controller - is the older techology which is being replaced by replicaset 
+replica set - new technology 
+
+
+ReplicaSets :
+===================================
+replicaset-definition.yml 
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: myapp-replicaset
+  labels:
+      app: myapp
+	  type: front-end
+	  
+spec:
+  template:
+  
+    metadata:
+	 name: myapp-pod
+	 labels:
+	    app: myapp
+		type: front-end
+	spec:
+	  containers:
+	  - name: nginx-container
+	    image: nginx
+		
+  replicas: 3                         ---------> to increase replicaset to 6, just change the number to 6 and run kubectl replace -f replicaset-definition.yml or kubectl scale --replicas=6 replicaset-definition.yml or kubectl scale --replicas=6 replicaset myapp-replicaset 
+  selector: 
+     matchLabels:                     ---------> replicaset will know which label to monitor. 
+	    type: front-end
+
+==================================
+
+kubectl create -f replicaset-refinition.yml
+kubectl get replicaset 
+kubectl get pods
+
+kubectl apply -f replicaset-definition-1.yaml
+kubectl create -f replicaset-definition.yaml   ----> is use to create a replicaset . -f is to provide the input parameter 
+kubectl get replicaset / kubectl get rs       ---->  to see list of replicaset
+kubectl delete replicaset myapp-replicaset    ---->  delete the replicaset
+kubectl delete pod new-replicaset-23432   ---> delete pods
+kubectl replace -f replicaset-definition.yaml  ---->  to replace or update the replicaset 
+kubectl scale -reeplicas=6 -f replicaset.definition.yaml ----> to scale the replicaset without modify the file
+kubectl describe replicaset    ----> get the images or details such as namespace / selector / labels / volume
+kubectl explain replicaset | grep VERSION   ---> this command can check interactive method such as version u should put in the yml file.
+
+============================
+controlplane ~ ✖ kubectl scale --replicas=2 replicaset new-replica-set 
+replicaset.apps/new-replica-set scaled
+
+controlplane ~ ➜  kubectl get pods
+NAME                    READY   STATUS        RESTARTS   AGE
+new-replica-set-tz5rh   1/1     Running       0          9m29s
+new-replica-set-v4mhx   1/1     Running       0          6m33s
+new-replica-set-ft4mr   1/1     Terminating   0          7m10s
+new-replica-set-kk5wd   1/1     Terminating   0          6m40s
+new-replica-set-mzfqv   1/1     Terminating   0          5m25s
+
+=========================
+
+
+
+DEPLOYMENTS : 
+
+Create a new Deployment with the below attributes using your own deployment definition file.
+
+
+
+Name: httpd-frontend;
+Replicas: 3;
+Image: httpd:2.4-alpine
+
+-----
+ANSWER : 
+-----
+
+kubectl create deployment httpd-frontend --image=httpd:2.4-alpine
+kubectl scale deployment --replicas=3 httpd-frontend
+kubectl get deployment httpd-frontend
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpd-frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      name: httpd-frontend
+  template:
+    metadata:
+      labels:
+        name: httpd-frontend
+    spec:
+      containers:
+      - name: httpd-frontend
+        image: httpd:2.4-alpine
+        command:
+        - sh
+        - "-c"
+        - echo Hello Kubernetes! && sleep 3600
+		
+NAMESPACE : 
+
+1)	connect from one namespace to another namespace 
+servicename.namespace.service.domain
+db-service.dev.svc.cluster.local
+<db-service>.<dev>.<svc>.<cluster.local>
+
+2) list of namespace 
+
+kubectl get pods --> this is to list on the default namespace 
+kubectl get pods --namespace=namespace 
+eg: kubectl get pods --namespace=kube-system
+
+3) to create a pod 
+
+kubectl create -f pod-definition.yml   ---> this will create in the default namespace 
+kubectl create -f pod-definition.yml --namespace=dev   --> this will create inside dev namespace 
+
+---
+apiVersion: v1
+kind: Pod
+
+metadata:
+ name: myapp-pod
+ namespace: dev    -------> u can put the namespace here if u don wan to define it in the command line.
+ labels:
+    app: myapp
+	type: front-end
+ spec:
+   containers:
+   - name: nginx-container
+     image: nginx
+	 
+4) create a namespace 
+
+a)	 create namespace-dev.yml 
+
+---------------
+apiVersion: v1
+kind: Namespace
+metadata:
+    name: dev
+	
+---------------
+
+kubectl create -f namespace-dev.yml 
+
+b) 	 kubectl create namespace dev 
+
+5)  to switch namespace : 
+
+dev 
+default
+prod 
+
+a) switch to dev namespace 
+kubectl config set-context $(kubectl config current-context) --namespace=dev
+when u kubectl get pods , it will point to dev namespace .
+If u wan to switch to prod, kubectl get pods --namespace=prod or --namespace=default
+
+b) kubectl get pods --all-namespaces
+
+
+5) Resource Quota 
+
+--------------------------------
+Compute-quota.yaml 
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+    name: compute-quota
+	namespace: dev
+	
+spec:
+  hard:
+    pods: "10"
+	requests.cpu: "4"
+	requests.memory: 5Gi
+	limits.cpu: "10"
+	limits.memory: 10 Gi
+
+------------------------------
+kubectl create -f compute-quote.yaml 
+
+6) to get services running
+kubectl --namespace=dev get svc 
+kubectl -n dev get svc
+
+
+SERVICES :
+
+service-definition.yml 
+
+apiVersion: v1
+kind: Service
+metadata:
+    name: myapp-service
+
+spec:
+    type: NodePort
+	ports:
+	 - targetPort: 80
+	   port: 80
+	   nodePort: 30008
+	selector:
+	   app: myapp
+	   type: front-end
+	   
+
+kubectl create -f service-definition.yml 
+kubectl get services 
+
+curl http://192.168.1.2:30008
+
+
+targetPort = IP inside the POD . example 10.244.0.2 and the port is 80 
+Port = port from target port ---> services port 
+NodePort= from service --> node port  which is 30008.. nodeport range 30000-32767 
+====================================================================================
+
+Services Cluster IP : 
+
+service-definition.yml 
+
+apiVersion: v1
+kind: Service
+metadata:
+    name: back-end
+	
+spec:
+    type: ClusterIP
+	ports:
+	 - targetPort: 80
+	   port: 80
+	   
+	selector:
+	   app: myapp
+	   type: back-end
+
+
+=======================================
+
+kubectl create -f service-definition.yml
+kubectl get services 
+
+
+
+controlplane ~ ➜  kubectl get services
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.43.0.1    <none>        443/TCP   4m22s
+
+controlplane ~ ➜  kubectl describe services
+Name:              kubernetes
+Namespace:         default
+Labels:            component=apiserver    ----> label
+                   provider=kubernetes    ----> label 
+Annotations:       <none>
+Selector:          <none>
+Type:              ClusterIP
+IP Family Policy:  SingleStack
+IP Families:       IPv4
+IP:                10.43.0.1   ---> internal ip inside pod
+IPs:               10.43.0.1   
+Port:              https  443/TCP
+TargetPort:        6443/TCP             ------> target port
+Endpoints:         10.20.72.9:6443      ------> node ip and port that can be access from outside 
+Session Affinity:  None
+Events:            <none>
+
+controlplane ~ ➜  
+
+
+kubectl expose deployment simple-webapp-deployment --name=webapp-service --target-port=8080 --type=NodePort --port=8080 --dry-run=client -o yaml >svc.yaml
+
+
+
+
+Imperative vs Declarative :
+
+Imperative : 
+
+create object :
+kubectl run --image=nginx nginx 
+kubectl create deployment --image=nginx nginx
+kubectl expose deployment nginx --port 80
+
+Update object : 
+kubectl edit deployment nginx
+kubectl scale deployment nginx --replicas=5
+kubectl set image deployment nginx nginx=nginx:1.18
+
+
+kubectl create -f nginx.yaml
+kubectl replace -f nginx.yaml 
+kubectl replace --force -f nginx.yaml 
+kubectl delete -f nginx.yaml
+
+
+
+Declarative :
+
+create objects : 
+kubectl apply -f nginx.yaml 
+kubectl apply -f /path/to/config-files 
+
+update objects :
+kubectl apply -f nginx.yaml 
+
+Certification Tips – Imperative Commands with Kubectl
+While you would be working mostly the declarative way – using definition files, imperative commands can help in getting one time tasks done quickly, as well as generate a definition template easily. This would help save considerable amount of time during your exams.
+
+Before we begin, familiarize with the two options that can come in handy while working with the below commands:
+
+--dry-run: By default as soon as the command is run, the resource will be created. If you simply want to test your command , use the --dry-run=client option. This will not create the resource, instead, tell you whether the resource can be created and if your command is right.
+
+-o yaml: This will output the resource definition in YAML format on screen.
+
+ 
+
+Use the above two in combination to generate a resource definition file quickly, that you can then modify and create resources as required, instead of creating the files from scratch.
+
+ 
+
+POD
+Create an NGINX Pod
+
+kubectl run nginx --image=nginx
+
+ 
+
+Generate POD Manifest YAML file (-o yaml). Don’t create it(–dry-run)
+
+kubectl run nginx --image=nginx --dry-run=client -o yaml
+
+ 
+
+Deployment
+Create a deployment
+
+kubectl create deployment --image=nginx nginx
+
+ 
+
+Generate Deployment YAML file (-o yaml). Don’t create it(–dry-run)
+
+kubectl create deployment --image=nginx nginx --dry-run=client -o yaml
+
+ 
+
+Generate Deployment with 4 Replicas
+
+kubectl create deployment nginx --image=nginx --replicas=4
+
+ 
+
+You can also scale a deployment using the kubectl scale command.
+
+kubectl scale deployment nginx --replicas=4 
+
+Another way to do this is to save the YAML definition to a file and modify
+
+kubectl create deployment nginx --image=nginx --dry-run=client -o yaml > nginx-deployment.yaml
+
+ 
+
+You can then update the YAML file with the replicas or any other field before creating the deployment.
+
+ 
+
+Service
+Create a Service named redis-service of type ClusterIP to expose pod redis on port 6379
+
+kubectl expose pod redis --port=6379 --name redis-service --dry-run=client -o yaml
+
+(This will automatically use the pod’s labels as selectors)
+
+Or
+
+kubectl create service clusterip redis --tcp=6379:6379 --dry-run=client -o yaml (This will not use the pods labels as selectors, instead it will assume selectors as app=redis. You cannot pass in selectors as an option. So it does not work very well if your pod has a different label set. So generate the file and modify the selectors before creating the service)
+
+ 
+
+Create a Service named nginx of type NodePort to expose pod nginx’s port 80 on port 30080 on the nodes:
+
+kubectl expose pod nginx --type=NodePort --port=80 --name=nginx-service --dry-run=client -o yaml
+
+(This will automatically use the pod’s labels as selectors, but you cannot specify the node port. You have to generate a definition file and then add the node port in manually before creating the service with the pod.)
+
+Or
+
+kubectl create service nodeport nginx --tcp=80:80 --node-port=30080 --dry-run=client -o yaml
+
+(This will not use the pods labels as selectors)
+
+Both the above commands have their own challenges. While one of it cannot accept a selector the other cannot accept a node port. I would recommend going with the `kubectl expose` command. If you need to specify a node port, generate a definition file using the same command and manually input the nodeport before creating the service.
+
+
+
+------------------------
+LAB :
+
+1) Deploy a pod named nginx-pod using the nginx:alpine image.
+
+kubectl run nginx-pod --image=nginx:alpine
+kubectl get pods
+kubectl describe pods
+
+2) Deploy a redis pod using the redis:alpine image with the labels set to tier=db.
+Pod Name: redis
+Image: redis:alpine
+Labels: tier=db
+
+kubectl run redis --image=redis:alpine --dry-run=client -oyaml > redis-pod.yaml
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    tier: db
+  name: redis
+spec:
+  containers:
+  - image: redis:alpine
+    name: redis
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  
+  
+----------------------------------
+
+controlplane ~ ➜  vi redis-pod.yaml
+
+controlplane ~ ➜  kubectl apply -f redis-pod.yaml 
+pod/redis created
+
+controlplane ~ ➜  kubectl get pods
+NAME        READY   STATUS    RESTARTS   AGE
+nginx-pod   1/1     Running   0          7m55s
+redis       1/1     Running   0          7s
+
+controlplane ~ ➜  
+
+
+3) Create a service redis-service to expose the redis application within the cluster on port 6379.
+Service: redis-service
+Port: 6379
+Type: ClusterIP
+
+
+controlplane ~ ✖ kubectl expose pod redis --port=6379 --name redis-service
+service/redis-service exposed
+
+controlplane ~ ➜  
+
+controlplane ~ ➜  kubectl get services
+NAME            TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+kubernetes      ClusterIP   10.43.0.1      <none>        443/TCP    23m
+redis-service   ClusterIP   10.43.69.208   <none>        6379/TCP   35s
+
+controlplane ~ ➜  
+
+
+4) Create a deployment named webapp using the image kodekloud/webapp-color with 3 replicas.
+
+Name: webapp
+Image: kodekloud/webapp-color
+Replicas: 3
+
+
+controlplane ~ ✖ kubectl create deployment  webapp --image=kodekloud/webapp-color --replicas=3
+deployment.apps/webapp created
+
+controlplane ~ ➜  kubectl get deployments
+NAME     READY   UP-TO-DATE   AVAILABLE   AGE
+webapp   3/3     3            3           20s
+
+controlplane ~ ➜  
+
+
+---------------------------------------------
+
+5) Create a new pod called custom-nginx using the nginx image and expose it on container port 8080.
+
+controlplane ~ ➜  kubectl run custom-nginx --image=nginx --port=8080
+pod/custom-nginx created
+
+controlplane ~ ➜  kubectl get pods
+NAME                      READY   STATUS    RESTARTS   AGE
+nginx-pod                 1/1     Running   0          27m
+redis                     1/1     Running   0          19m
+webapp-56847f875b-lfclk   1/1     Running   0          3m13s
+webapp-56847f875b-sb92h   1/1     Running   0          3m13s
+webapp-56847f875b-w8r99   1/1     Running   0          3m13s
+custom-nginx              1/1     Running   0          27s
+
+controlplane ~ ➜  
+
+-------------------------------------------
+
+6) Create a new namespace called dev-ns.
+
+controlplane ~ ✖ kubectl create namespace dev-ns
+namespace/dev-ns created
+
+controlplane ~ ➜  kubectl get ns
+NAME              STATUS   AGE
+kube-system       Active   35m
+default           Active   35m
+kube-public       Active   35m
+kube-node-lease   Active   35m
+dev-ns            Active   5s
+
+controlplane ~ ➜  
+
+
+----------------------------------------
+
+7) Create a new deployment called redis-deploy in the dev-ns namespace with the redis image. It should have 2 replicas.
+'redis-deploy' created in the 'dev-ns' namespace?
+replicas: 2
+
+kubectl create deployment redis-deploy --namespace=dev-ns --image=redis --replicas=2
+
+controlplane ~ ➜  kubectl get deployment -n=all
+NAME     READY   UP-TO-DATE   AVAILABLE   AGE
+webapp   3/3     3            3           10m
+
+controlplane ~ ➜  kubectl get pod
+NAME                      READY   STATUS    RESTARTS   AGE
+nginx-pod                 1/1     Running   0          35m
+redis                     1/1     Running   0          27m
+webapp-56847f875b-lfclk   1/1     Running   0          11m
+webapp-56847f875b-sb92h   1/1     Running   0          11m
+webapp-56847f875b-w8r99   1/1     Running   0          11m
+custom-nginx              1/1     Running   0          8m32s
+
+controlplane ~ ➜  kubectl create deployment redis-deploy --namespace=dev-ns --image=redis --replicas=2 --dry-run=client -o yaml > deploy.yaml
+
+controlplane ~ ➜  vi deploy.yaml
+
+controlplane ~ ➜  kubectl apply -f deploy.yaml 
+Warning: resource deployments/redis-deploy is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by kubectl apply. kubectl apply should only be used on resources created declaratively by either kubectl create --save-config or kubectl apply. The missing annotation will be patched automatically.
+deployment.apps/redis-deploy configured
+
+controlplane ~ ➜  kubectl edit deployment
+Edit cancelled, no changes made.
+
+controlplane ~ ➜  kubectl get deployments.apps 
+NAME     READY   UP-TO-DATE   AVAILABLE   AGE
+webapp   3/3     3            3           17m
+
+controlplane ~ ➜  
+
+
+
+
+
+8) Create a pod called httpd using the image httpd:alpine in the default namespace. Next, create a service of type ClusterIP by the same name (httpd). The target port for the service should be 80.
+
+'httpd' pod created with the correct image?
+'httpd' service is of type 'ClusterIP'?
+'httpd' service uses correct target port 80?
+'httpd' service exposes the 'httpd' pod?
+
+controlplane ~ ➜  kubectl run httpd --image=httpd:alpine --port=80 --expose
+service/httpd created
+pod/httpd created
+
+controlplane ~ ➜  
+
+
+-------------------------------
+
+SCHEDULLING :
+
+pod-definition.yaml 
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+	ports:
+	  - containerPort: 8080 
+	  
+	nodeName: node02      ------------------> this wan can only add during creation ..
+	
+--------------------------------------
+
+What if you wanna add nodeName after creation of the yaml file ? 
+
+Pod-bind-definition.yaml 
+apiVersion: v1 
+kind: Binding
+metadata:
+  name: nginx
+target:
+  apiVersion: v1
+  kind: NodePort
+  name: node02   -----------------------> add the node02 here 
+
+----------------------------------------
+
+You must convert the YAML file into its equivalent JSON format. 
+
+curl --header "Content-Type:application/json" --request POST --data
+http://$SERVER/api/v1/namespaces/default/pods/$PODNAME/binding 
+
+
+
+LAB For schedulling : 
+
+1) A pod definition file nginx.yaml is given. Create a pod using the file.
+Only create the POD for now. We will inspect its status next.
+
+root@controlplane:~# kubectl apply -f nginx.yaml 
+pod/nginx created
+root@controlplane:~# 
+
+2) what is the status of the pod ? 
+
+kubectl get pod --> pending 
+
+3) why pending ? 
+
+kubectl -n kube-system get pods 
+the kubesheduller is not there .
+
+4) manually schedule the pod as node01 
+
+kubectl delete pod nginx  --> delete existing pod 
+
+vi nginx.yaml 
+
+----------------------------------
+apiVersion: v1 
+kind: Pod 
+metadata:
+  name: nginx 
+spec: 
+  nodeName: node01 
+  containers: 
+  -  image: nginx 
+     name: nginx 
+	 
+------------------------------------
+
+kubectl apply -f nginx.yaml 
+kubectl get pods 
+
+5) change the nodeName to master node 
+
+kubectl delete pods nginx
+
+vi nginx.yaml 
+
+----------------------------------
+apiVersion: v1 
+kind: Pod 
+metadata:
+  name: nginx 
+spec: 
+  nodeName: master  -----> change this to master 
+  containers: 
+  -  image: nginx 
+     name: nginx 
+	 
+------------------------------------
+
+kubectl apply -f nginx.yaml 
+
+
+
+---------------------------
+
+SCHEDULLING : LABELS AND SELECTORS 
+
+Labels 
+
+pod-definition.yaml 
+------------------
+apiVersion: v1
+kind: Pod
+metadata:
+  name: simple-webapp-deployment
+  labels:
+    app: App1
+	function: Front-end 
+	
+spec:
+  containers:
+  - name: simple-webapp
+    image: simple-webapp 
+	ports:
+	  -containerPort: 8080
+-----------------------------
+
+kubectl get pods --selector app=App1 
+
+
+LABELS IN REPLICA SET :
+
+In replicaset, you will see labels is defined in two places , this is to ensure that the right pods are discovered by the replicaset. If the label match, then the label will be created successfully.
+
+replicaset-definition.yaml 
+-------------------------
+apiVersion: apps/v1 
+kind: ReplicaSet
+metadata:
+  name: simple-webapp
+  labels:   --------------------------------------> labels that u see on the top are the labels of the replicaset itself. 
+    app: App1
+	function: Front-end
+spec:
+  replicas: 3
+  selector:  ------------------------> in order to connect to the replicaset to the pod, we configured the Selector field under the replicaset spec to match the labels defined on the pods
+    matchLabels:
+	  app: App1
+  template:
+    metadata:
+	  labels:    ----------------------------------> this is defined the labels that is configured in the PODS 
+	    app: App1
+		function: Front-end
+	spec: 
+	  containers:
+	  - name: simple-webapp
+	    image: simple-webapp
+		
+---------------------
+	  
+When a services is created, eg : 
+
+-------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    app: App1    ---------------------------> it uses the selector defined in the service definition file to match with the replicaset-definition.yaml selector
+  ports:
+  - protocol: TCP
+    port: 80
+	targetPort: 9376
+
+--------------------------
+
+
+
+Schedulling : ANNOTATIONS : - 
+Annotations are used to record other details for information purpose . eg: name, version and build information 
+
+replicaset-definition.yaml 
+-------------------------
+apiVersion: apps/v1 
+kind: ReplicaSet
+metadata:
+  name: simple-webapp
+  labels:    
+    app: App1
+	function: Front-end
+  annotations:    ------------------------------>ANNOTATIONS
+    buildversion: 1.34 ------------------------->ANNOTATIONS
+spec:
+  replicas: 3
+  selector:  
+    matchLabels:
+	  app: App1
+  template:
+    metadata:
+	  labels:   
+	    app: App1
+		function: Front-end
+	spec: 
+	  containers:
+	  - name: simple-webapp
+	    image: simple-webapp
+		
+---------------------
+
+
+LAB : 
+1) We have deployed a number of PODs. They are labelled with tier, env and bu. How many PODs exist in the dev environment?
+
+controlplane ~ ➜  kubectl get pods --selector env=dev
+NAME          READY   STATUS    RESTARTS   AGE
+app-1-86djl   1/1     Running   0          31m
+db-1-fs8hj    1/1     Running   0          31m
+app-1-k249s   1/1     Running   0          31m
+db-1-dkbw8    1/1     Running   0          31m
+db-1-99tb5    1/1     Running   0          31m
+db-1-fglmx    1/1     Running   0          31m
+app-1-5db5v   1/1     Running   0          31m
+
+controlplane ~ ➜  
+
+
+2) How many PODs are in the finance business unit (bu)?
+
+controlplane ~ ➜  kubectl get pods --selector bu=finance
+NAME          READY   STATUS    RESTARTS   AGE
+app-1-86djl   1/1     Running   0          33m
+app-1-k249s   1/1     Running   0          33m
+app-1-zzxdf   1/1     Running   0          33m
+db-2-rn9s6    1/1     Running   0          33m
+app-1-5db5v   1/1     Running   0          33m
+auth          1/1     Running   0          33m
+
+controlplane ~ ➜  
+controlplane ~ ➜  kubectl get pods --selector bu=finance --no-headers | wc -l
+6
+
+controlplane ~ ➜  
+
+
+3) How many objects are in the prod environment including PODs, ReplicaSets and any other objects?
+
+
+controlplane ~ ➜  kubectl get all --selector env=prod
+NAME              READY   STATUS    RESTARTS   AGE
+pod/app-1-zzxdf   1/1     Running   0          40m
+pod/db-2-rn9s6    1/1     Running   0          40m
+pod/app-2-spt9z   1/1     Running   0          40m
+pod/auth          1/1     Running   0          40m
+
+NAME            TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+service/app-1   ClusterIP   10.43.62.194   <none>        3306/TCP   40m
+
+NAME                    DESIRED   CURRENT   READY   AGE
+replicaset.apps/db-2    1         1         1       40m
+replicaset.apps/app-2   1         1         1       40m
+
+controlplane ~ ➜  
+
+
+4) Identify the POD which is part of the prod environment, the finance BU and of frontend tier?
+
+controlplane ~ ➜  kubectl get all --selector env=prod,bu=finance,tier=frontend
+NAME              READY   STATUS    RESTARTS   AGE
+pod/app-1-zzxdf   1/1     Running   0          43m
+
+controlplane ~ ➜  
+
+
+
+
+5) 
+controlplane ~ ➜  cat replicaset-definition-1.yaml 
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+   name: replicaset-1
+spec:
+   replicas: 2
+   selector:
+      matchLabels:
+        tier: frontend
+   template:
+     metadata:
+       labels:
+        tier: frontend
+     spec:
+       containers:
+       - name: nginx
+         image: nginx
+
+controlplane ~ ➜  
+
+
+TAINTS and Tolerations :
+
+kubectl taint nodes node-name key=value:taint-effect 
+kubectl taint nodes node1 app=blue:NoSchedule
+
+What happens to POD that do not toleratee to this taint ? below are 3 options : 
+
+NoSchedule - the Pod will not be schedule to the node 
+PreferNoSchedule - the POD will try to avoid placing the pod on the node but there is not guaranteed
+NoExecute 
+
+Eg : 
+kubectl taint nodes node1 app=blue:NoSchedule 
+
+pod-definition.yml 
+
+apiVersion:
+kind: Pod
+metadata:
+ name: myapp-pod
+spec:
+  containers:
+  - name: nginx-container
+    image: nginx
+
+  tolerations:
+  - key:"app"
+    operator:"Equal"
+	value:"blue"
+	effect:" NoSchedule"
+
+
+awk {'print $6'}
+
+=============================================
+Scheduling section introduction :
+
+pod-definition.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    name: nginx
+	
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+	ports:
+	  - containerPort: 8080
+	  
+  nodeName: node02    <----------------------- add scheduler by adding nodeName . Can only asssign to the pod during the creation time. 
+==============================================
+
+what if you need to configure after the creation time ? 
+
+create the binding yaml file as below : 
+----------------------------
+Pod-bind-definition.yaml 
+
+apiVersion: v1 
+kind: Binding
+metadata:
+  name: nginx 
+target:
+  apiVersion: v1
+  kind: Node
+  name: node02 
+----------------------------
+then run the below command : 
+
+curl --header "Content-Type:application/json" --request POST --data '{"apiVersion":"v1", "kind": "Binding" ... . } http://$SERVER/api/v1/namespaces/default/pods/$PODNAME/binding/
+
+======================================================
+LAB : 
+
+1) A pod definition file nginx.yaml is given. Create a pod using the file. Only create the POD for now. We will inspect its status next.
+
+root@controlplane:~# kubectl create -f nginx.yaml
+pod/nginx created
+root@controlplane:~# kubectl get pods
+NAME    READY   STATUS    RESTARTS   AGE
+nginx   0/1     Pending   0          24s
+root@controlplane:~# 
+================================================
+
+
+Node Selectors : 
+
+kubectl label nodes <node-name> <label-key>=<label-value>
+kubectl label nodes node-1 size=large
+
+-------------
+pod-definition.yml 
+
+apiVersion:
+kind: Pod
+metadata:
+ name: myapp-pod
+spec:
+  containers:
+  - name: data-processor
+    image: data-processor
+  
+  nodeSelector:
+    size: Large
+
+---------------------
+
+kubectl create -f pod-definition.yml 
+	
+
+Node Affinity : 
+
+
+
+pod-definition.yml 
+
+apiVersion:
+kind: Pod
+metadata:
+ name: myapp-pod
+spec:
+  containers:
+  - name: data-processor
+    image: data-processor
+  
+  affinity:
+   nodeAffinity:
+     requiredDuringSchedulingIgnoredDuringExecution:
+	   nodeSelectorTerms:
+	   - matchExpressions:
+	     - key: size
+		   operator: In
+		   values:
+		   - Large
+
+------------------------------------
+If wan Large and Medium ?
+
+apiVersion:
+kind: Pod
+metadata:
+ name: myapp-pod
+spec:
+  containers:
+  - name: data-processor
+    image: data-processor
+  
+  affinity:
+   nodeAffinity:
+     requiredDuringSchedulingIgnoredDuringExecution:
+	   nodeSelectorTerms:
+	   - matchExpressions:
+	     - key: size
+		   operator: In
+		   values:
+		   - Large
+		   - Medium
+		   
+---------------------------------------------
+or u can use NotIn small , means only accept medium and large 
+
+apiVersion:
+kind: Pod
+metadata:
+ name: myapp-pod
+spec:
+  containers:
+  - name: data-processor
+    image: data-processor
+  
+  affinity:
+   nodeAffinity:
+     requiredDuringSchedulingIgnoredDuringExecution:
+	   nodeSelectorTerms:
+	   - matchExpressions:
+	     - key: size
+		   operator: NotIn
+		   values:
+		   - Small 
+		   
+--------------------------------------
+If there is any size small , medium or large, it will accept.. no label will not accept.		
+		
+apiVersion:
+kind: Pod
+metadata:
+ name: myapp-pod
+spec:
+  containers:
+  - name: data-processor
+    image: data-processor
+  
+  affinity:
+   nodeAffinity:
+     requiredDuringSchedulingIgnoredDuringExecution:
+	   nodeSelectorTerms:
+	   - matchExpressions:
+	     - key: size
+		   operator: Exists
+
+---------------------------------------
+
+Node Affinity Types : 
+
+Available : 
+
+requiredDuringSchedulingIgnoredDuringExecution
+preferredDuringSchedulingIgnoredDuringExecution
+
+Planned : 
+requiredDuringSchedulingRequiredDuringExecution
+preferredDuringSchedulingRequiredDuringExecution
+
+-------------------------------------------
+
+requiredDuringScheduling = the pod will only execute with the given affinity rules. if cant find one or if do not have the given rules, it will not schedule. Hey, if u cant find any matching nodes, please stop it.
+preferredDuringScheduling = incase the matching nodes not found, it will just place it anywhere. Hey, try your best to place the port on matching node, but if no matching nodes, just place in anywhere .
+IgnoredDuringExecution  = Pods will continue to run at any changes in node affinity will not impact them once they are schedule.
+RequiredDuringExecution = will evict/terminate any pods that are running on nodes that do not meet affinity rules .
+
+-------------------------------
+LAB FOR AFFINITY : 
+
+1) How many Labels exist on node node01?  5 
+
+root@controlplane:~# kubectl desire node node01
+Error: unknown command "desire" for "kubectl"
+Run 'kubectl --help' for usage.
+root@controlplane:~# kubectl describe node node01
+Name:               node01
+Roles:              <none>
+Labels:             beta.kubernetes.io/arch=amd64
+                    beta.kubernetes.io/os=linux
+                    kubernetes.io/arch=amd64
+                    kubernetes.io/hostname=node01
+                    kubernetes.io/os=linux
+Annotations:        flannel.alpha.coreos.com/backend-data: {"VNI":1,"VtepMAC":"a6:d8:d9:2a:00:89"}
+                    flannel.alpha.coreos.com/backend-type: vxlan
+                    flannel.alpha.coreos.com/kube-subnet-manager: true
+                    flannel.alpha.coreos.com/public-ip: 10.28.80.12
+                    kubeadm.alpha.kubernetes.io/cri-socket: /var/run/dockershim.sock
+                    node.alpha.kubernetes.io/ttl: 0
+                    volumes.kubernetes.io/controller-managed-attach-detach: true

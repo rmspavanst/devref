@@ -1,0 +1,21 @@
+#Openshift can install and setup in All-in-one/ Single Master Multiple Nodes/ Multiple Master Multiple Nodes. in Onprem/ Cloud/ Package Manager(RPM)/ Containerized (Docker)
+
+
+https://docs.okd.io/3.11/minishift/getting-started/installing.html
+
+https://github.com/minishift/minishift
+
+https://github.com/minishift/minishift/releases
+
+1. Download minishift for windows/linux/mac
+2. extract the tar file and open cmd prompt
+3. run minishift.exe start --vm-driver virtualbox
+      it will provide login url and login details
+
+#  Management - Web, CLI and REST API
+
+
+
+
+
+

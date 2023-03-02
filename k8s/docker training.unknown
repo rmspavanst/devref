@@ -1,0 +1,1133 @@
+docker run ansible
+docker run mongodb
+docker run redis
+docker run nodejs
+docker run nodejs
+docker run nodejs
+
+docker image - package or template like vm
+can get from docker hub repository
+u can just take the image and run on other docker platform
+
+How to get started ?
+2 edition : 
+community or enterprise edition
+
+community edition : 
+
+how to setup on windows ?
+vmbox or setup docker 
+
+How to setup docker ?
+docs.docker.com/install
+
+docker commands : 
+docker run nginx
+
+ps -list 
+docker ps
+
+docker ps -a   to check if it is running
+docker stop <names> or <container id>
+
+docker rm <names> or <container id>
+docker images  --> can see the size and images
+docker rmi nginx  --> reemove images
+docker run nginx  --> download 
+docker pull nginx --> only pull the images
+docker run ubuntu --> cannot cox its os
+docker run ubuntu sleep 5 ==> means ur using ubuntu sleep function
+docker ps -a
+docker exec <names> cat /etc/hosts --> this will print the hosts file of the docker images
+docker run kodekloud/simple-webapp --> it will run and u need to exit in order to do other task
+docker run -d kodekloud/simple-webapp --> it will run in backend
+docker attach <the uid>
+docker run -it centos bash --> this will log you in to the container which runs centos os
+docker ps --> lisst all the running images
+docker run -d centos sleep 20 --> it will run centos and sleep for 20 mins.
+docker ps --> you can see the centos images sleep for 20 second and it will exit
+docker ps -a --> you will see all the images which has been executed.. status will be exited which no more available
+docker run -d centos sleep 2000
+docker ps --> u can see it sleep for 2000 second
+docker stop <container id> or names
+docker ps --> process no more there.
+docker rm <container id or names> --> remove the images to reclaim diskspace
+dcoker rm containerid containerid 
+docker images --> will list down the images which u pull from docker hub
+docker run centos
+docker rmi centos --> it cant delete as centos is running as above commands
+docker rm <centos conainerID>
+docker pull ubuntu
+docker images --> u can see ubuntu is in the images list downloaded
+docker run -d ubuntu sleep 100 --> it will run in the background
+docker ps --> u can see the images
+docker ps 
+docker exec containerID cat /etc/*release*
+
+docker run redis --> it will run latest
+docker run redis:4.0  --> it will run the specific version
+
+how to find version ? dockerhub.com check all the tag and respective docker version tag
+
+docker run kodekloud/simple-prompt-docker
+docker run -i kodekloud/simple-prompt-docker --> interactive mode
+docker run -it kodekloud/simple-prompt-docker --> interactive mode & terminal
+
+docker run kodekloud/webapp
+docker run -p 80:5000 kodekloud/simple-webapp - this will map port 80 on port 5000 
+docker run -p 8000:5000 kodekloud/simple-webapp
+docker run -p 8001:3306 mysql 
+
+docker run mysql --> will install /var/lib/mysql 
+docker stop mysql
+docker rm mysql --> this will remove /var/lib/mysql 
+docker run -v /opt/datadir:/var/lib/mysql mysql  --> this is to avoid dataloss when u delete the docker container which will destroy /var/lib/mysql
+
+docker inspect blissful_hopper --> it will list down the config
+
+docker logs blissful_hopper --> check the logs 
+
+docker ps 
+docker run ubuntu cat /etc/*release*   --> this will get the ubuntu version
+
+go to docker hub site, check the ubuntu tag in respective dockerfile 
+
+run nginx:1.14-alpine and name it as webapp
+docker run --name webapp nginx:1.14-alpine
+
+docker run ubuntu --> it will run latest version 
+docker run ubuntu:17.10 cat /etc/*release* --> it will run 17.1 version
+docker run ubuntu sleep 15  --> in 15 second u cant exit.. 
+docker run ubuntu sleep 1500 --> u cant come out coz its running on the background. u need to open new termninal and stop the container id to kill it.
+docker run -d ubuntu sleep 1500 --> run in background
+docker ps --> u can see the container id and information that is running on background
+docker attach <containerid> --> u will be stuck back coz its sleeping 1500 second
+docker stop <containerid> --> it will stop the process
+docker run timer --> will print time every second
+docker run -d timer --> it will display the container id
+docker ps --> check the container details
+docker attach container id --> it will appear back
+
+docker run -p 8080:8080 -p 50000:50000
+
+docker run jenkins  --> will run latest jenkins
+docker ps --> jenkin is running and u can see the ports
+
+to login inernal ip , 
+
+docker ps 
+docker inspect containerid --> u can check the IP address to access inside the host.
+go to the url in ur vmbox, ip:port
+
+
+for external web browser or ip, u need to add port mapping
+docker run -p 8080:8080 jenkins --> this will map the 8080 port into the docker hosts
+
+jenkins default home directory is /var/jenkuns_home
+if u wanna save , 
+docker run -p 8080:8080 -p 50000:50000 -v /your/home:/var/jenkins_home jenkins
+
+docker run --name myjenkins -p 8080:8080 -p 50000:50000 -v /var/jenkinds_home jenkins
+
+install jenkins by gui
+
+if by half way, u close your browser, all data will be gone. so u need to run the below : 
+docker run -p 8080:8080 -v /root/myjenkins:/var/jenkins_home -u root jenkins -->this will save everything in the /root/myjenkins and use root as the user to run . This will save us from data lost
+
+install jenkins by gui
+
+then cancel it, 
+
+docker run -p 8080:8080 -v /root/my-jenkins-data:/var/jenkins_home -u root jenkins --> this will continue back the old session and no datalost
+it will continue before the session deleted
+
+how to create my own image ?
+====
+FROM Ubuntu
+
+RUN apt-get update
+RUN apt-get install python
+
+RUN pip install flask
+RUN pip install flask-mysql
+
+COPY . /opt/source-code
+ENTRYPOINT FLASK_APP=/opt/source-code/app.py flask run
+
+docker build Dockerfile -t mmumshad/my-custom-app
+docker push mmumshad/my-custom-app
+========
+FROM Ubuntu : 
+all dockerfile need start FROM  a base OS
+
+RUN apt-get update
+RUN apt-get install python
+RUN pip install flask
+RUN pip install flask-mysql
+install all dependencies
+
+COPY . /opt/source-code
+copy source code
+
+ENTRYPOINT FLASK_APP=/opt/source-code/app.py flask run
+specify entrypoint
+
+===============
+DOCKER IMAGE : 
+
+standard layer : 
+1) start from a base OS or another image
+2) install all dependencies
+3) Copy source code
+4) specify entry point 
+
+Layer (with the above example): 
+Layer 1 : OS - Ubuntu
+Layer 2 : Update apt repo 
+Layer 3 : install dependencies using apt
+Layer 4 : Install Python dependenciew using pip 
+Later 5 : Copy source code to /opt folder 
+Layer 6 : Run in web servere using "flask" command
+
+--------------------
+
+docker run -it ubuntu bash
+apt-get update
+apt-get install -y python
+apt-get install python-pip
+pip install flask 
+copy the source code and paste into *.py 
+FLASSK_APP=app.py flask run --host=0.0.0.0
+
+host to dockerize the above  ?
+
+create a docker file. 
+
+mkdir my-simple-webapp
+cd my-simple-webapp
+vi Dockerfile 
+
+=====
+FROM Ubuntu 
+RUN apt-get update
+RUN apt-get install -y python python-pip
+RUN pip install flask
+
+COPY app.py /opt/app.py 
+
+ENTRYPOINT FLASSK_APP=/opt/app.py flask run --host=0.0.0.0
+===
+
+then run :
+docker build . -t my-simple-webapp
+
+==== 
+docker images --> u can see the images listed.
+docker run my-simple-webapp 
+
+how to push to docker hub ?
+
+docker build . -t cklchong/test123   --> tag it into docker hub
+docker login
+docker push my-simple-webapp 
+docker pull my-simple-webapp
+
+
+===========
+Build a new smaller docker image by modifying the same Dockerfile and name it webapp-color and tag it lite.
+
+
+Hint: Find a smaller base image for python:3.6. Make sure the final image is less than 150MB.
+
+Modify Dockerfile to use python:3.6-alpine image, and then build using docker build -t webapp-color:lite .
+
+===
+
+Environment variables
+
+python app.py 
+color = os.environ.get('APP_COLOR')
+
+export APP_COLOR=blue; python app.py 
+docker run -e APP_COLOR=blue simple-webapp-color
+docker inspect blissful_hopper
+
+Run a container named blue-app using image kodekloud/simple-webapp and set the environment variable APP_COLOR to blue. Make the application available on port 38282 on the host. The application listens on port 8080.
+docker run --name=blue-app -e APP_COLOR=blue -p 38282:8080 kodekloud/simple-webapp
+
+Deploy a mysql database using the mysql image and name it mysql-db.
+
+
+Set the database password to use db_pass123. Lookup the mysql image on Docker Hub and identify the correct environment variable to use for setting the root password.
+Name: mysql-db
+Image: mysql
+Env: MYSQL_ROOT_PASSWORD=db_pass123
+
+docker run --name=mysql-db -e MYSQL_ROOT_PASSWORD=db_pass123 mysql
+
+===============
+
+CMD vs entry point for docker
+
+docker run ubuntu --> by default, i will run bash
+docker ps 
+docker ps -a
+
+in the images, modify the ENTRYPOINT 
+ENTRYPOINT ["sleep"]
+CMD ["5"]
+
+docker run ubuntu sleeper
+
+docker run ubuntu sleep 5
+docker 
+
+FROM Ubuntu
+
+CMD sleep 5
+docker build -t ubuntu-sleeper
+docker run ubuntu-sleeper
+
+if i wanna override sleep 5 ?
+docker run ubuntu-spleeper sleep 10
+docker run ubuntu-sleeper 10
+
+FROM Ubuntu
+ENTRYPOINT ["sleep"]
+
+docker run ubuntu-sleeper 10
+
+if run 
+docker rub ubuntu-sleeper
+it will run sleep 0.. means immedietely terminated w error
+
+FROM Ubuntu 
+
+ENTRYPOINT ["sleep"]
+
+CMD ["5"]
+
+so when i run 
+
+docker run ubuntu-sleeper , it will sleep 5.
+
+if i wanna modify override since its sleep 5 ?
+docker run ubuntu-sleeper 10
+
+docker run --entrypoint sleep2.0 ubuntu-sleeper 10
+command at startup : sleep2.0 10
+
+
+Run an instance of the ubuntu image to run the sleep 1000 command at startup
+Run it in detached mode.
+
+docker run -d ubuntu sleep 1000
+
+-------------------------------
+
+docker compose :
+
+voting system :
+
+docker run -d --name=redis redis 
+docker run -d --name=db
+docker run -d --name=vote -p 5000:80 voting-app
+docker run -d --name=result -p 5001:80 result-app
+docker run -d --name=worker worker 
+
+how to link the above together ?
+
+we need to use run --links
+
+docker run -d --name=redis redis 
+docker run -d --name=db
+docker run -d --name=vote -p 5000:80 --link redis:redis voting-app
+docker run -d --name=result -p 5001:80 --link db:db result-app
+docker run -d --name=worker --link db:db --link redis:redis worker 
+
+docker-compose.yml
+
+==============
+
+redis:
+	image:	redis
+db:
+	image:	postgres:9.4
+	
+vote:
+	image:	voting-app
+	ports:
+		- 5000:80
+	links:
+		- redis
+	
+
+result:
+	image: result-app
+	ports:
+		- 5001:80
+	links:
+		- db
+
+
+worker:
+	
+	image:	worker
+	links:
+		- redis
+		- db
+	
+=================
+docker-compose up   ----> this will bring up the stack
+
+Docker Compose -versions :
+
+version 1 -
+
+docker-compose.yml 
+
+redis:
+	image:	redis
+db:
+	image:	postgres:9.4
+	
+vote:
+	image:	voting-app
+	ports:
+		- 5000:80
+	links:
+		- redis
+		
+-----------------
+
+Version 2 : 
+
+docker-compose.yml 
+
+version: 2
+services:
+redis:
+	image:	redis
+db:
+	image:	postgres:9.4
+	
+vote:
+	image:	voting-app
+	ports:
+		- 5000:80
+		
+	depends_on:
+		- redis
+
+-----------------
+
+Version 3 : 
+
+docker-compose.yml
+
+
+
+version: 3
+services:
+	redis:
+		image:	redis
+	db:
+		image:	postgres:9.4
+	
+	vote:
+		image:	voting-app
+		ports:
+			- 5000:80
+
+
+will continue on docker stacks
+------------------------
+network ?
+
+version: 2
+services:
+	redis:
+		image:	redis
+
+		networks:
+			
+			- back-end
+
+	db:
+		image:	postgres:9.4
+		networks:
+		
+			- back-end	
+	vote:
+		image:	voting-app
+		networks:
+			- front-end
+			- back-end			
+	result:
+		image: result
+		networks:
+			- front-end
+			- back-end
+networks:
+	front-end:
+	back-end:
+	
+	
+	
+------------------------
+
+First create a postgress database container called db, image postgres, environmental variable POSTGRES_PASSWORD=mysecretpassword
+docker run --name db -e POSTGRES_PASSWORD=mysecretpassword -d postgres
+
+Next let's create a simple wordpress container called wordpress, image: wordpress, link it to the container db and expose it on host port 8085
+docker run -d --name=wordpress --link db:db -p 8085:80 wordpress
+
+-----
+docker-compose.yml
+
+services:
+  db:
+    environment:
+      POSTGRES_PASSWORD: mysecretpassword
+    image: postgres
+  wordpress:
+    image: wordpress
+    links:
+    - db
+    ports:
+    - 8085:80
+version: '3.0'
+
+---
+docker-compose up
+
+
+=============
+==============
+
+version: "3"
+services:
+	redis:
+		image:	redis
+	
+	db:
+		image:	postgres:9.4
+		environment:
+			POSTGRES_USER: postgres
+			POSTGRES_PASSWORD= postgres
+		
+	
+	vote:
+		image:	voting-app
+		ports:
+			- 5000:80
+
+	worker:
+		image:	worker-app
+		
+	result:
+		image:	result-app
+		ports:
+			-5001:80
+			
+================
+
+docker-compose up
+
+
+
+====================
+
+docker engine :
+
+docker engine got 3 layer: 
+docker cli 
+rest api
+docker deamon
+
+docker -H=remote-docker-engine:2375
+docker -H=10.123.2.1:2375 run nginx
+
+docker run --cpus=.5 ubuntu  --> limit the cpu to 0.5cpu
+
+docker run --memory=100m ubuntu  --> limit memory to 100mb
+
+check docker engine :
+docker version
+
+
+
+===================
+
+docker storage :
+
+default : 
+
+/var/lib/docker 
+	aufs
+	containers
+	image
+	volumes
+
+
+Layered architecture : 
+
+dockerfile : 
+FROM Ubuntu
+
+RUN apt-get update && apt-get -y install python
+
+RUN pip install flask flask-mysql
+
+copy . /opt/source-code
+
+ENTRYPOINT FLASK_APP=/opt/source-code/app.py flask
+run
+
+---
+docker build dockerfile -t mmuumshad/my-custom-app
+
+layer 1 - base Ubuntu Layer
+layer 2 - change in apt packages
+layer 3 - changes in pip packages
+layer 4 - source code 
+Layer 5 - Update ENTRYPOINT
+
+
+===================
+
+dockerfile2
+
+FROM Ubuntu
+
+RUN apt-get update && apt-get -y install python
+
+RUN pip install flask flask-mysql
+
+COPY app2.py /opt/source-code
+
+ENTRYPOINT FLASK_APP=/opt/source-code/app2.py flask
+run
+
+------------
+docker build Dockerfile2 -t bentleyckl/test123/my-custom-app-2
+
+Docker will not use layer 1,2 & 3 because docker can reuse from the dockerfile .
+
+copy-on-write :
+docker image layer is read only. if lets say u wanna modify app.py in the read only, docker will copy to layer 6 which is read write and you can modify.
+-----------
+volume mounting : 
+
+how to save the read write as if process dead, it will all deleted on layer 6.
+docker volume create data_volume 
+it will create /var/lib/docker/volume/data_volume
+
+you can mount your /var/lib/docker/volume/data_volume by using v option.
+docker run -v data_volume:/var/lib/mysql mysql 
+
+this will preserve the data.. incase u wan to continue back, it will refer to the mount point.
+
+docker run -v data_volume2:/var/lib/mysql mysql
+docker will create /var/lib/docker/volume/data_volume2 
+----------
+bind mounting : 
+docker run -v /data/mysql:/var/lib/mysql mysql 
+
+meaning u can mount any mount point to be save.
+
+---------
+docker run \
+--mount type=bind,source=/data/mysql,target=/var/lib/mysql mysql
+
+-------
+
+Storage drivers which docker use :
+aufs
+zfs
+btrfs
+device mapper
+overlay
+overlay2
+
+
+==================
+
+Run a mysql container named mysql-db using the mysql image. Set database password to db_pass123
+Note: Remember to run it in the detached mode.
+docker run -d --name mysql-db -e MYSQL_ROOT_PASSWORD=db_pass123 mysql
+
+
+
+
+Run a mysql container again, but this time map a volume to the container so that the data stored by the container is stored at /opt/data on the host.
+Use the same name : mysql-db and same password: db_pass123 as before. Mysql stores data at /var/lib/mysql inside the container.
+
+docker run --name mysql-db -v /opt/data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=db_pass123 mysql
+
+Read more details here:
+
+Storage in Docker : https://docs.docker.com/storage/
+
+Storage Drivers: https://docs.docker.com/storage/storagedriver/
+
+
+=================
+
+Docker networking
+
+Bridge / none / host
+
+bridge 
+docker run Ubuntu
+- will create internal IP . If need to use outside ip, need to map manually.
+
+none 
+docker run Ubuntu --network=none
+- isolated network. no network at all
+
+host 
+docker run Ubuntu --network=host
+- wil create internal and automaticly extended to external. So cannot clash port.
+
+user-defined networks 
+- we can create another internal network by using the below command
+docker network create \
+	--driver bridge \
+	--subnet 182.18.0.0/16
+	custom-isolated-network
+
+docker network ls	 --> to check the network 
+
+inspect network : 
+docker inspect blissful_hopper
+
+Embedded DNS
+mysql.connect(mysql)  --> it will use network namespace that create container together.
+
+What is the subnet configured on bridge network?
+docker network inspect bridge
+
+create a new name call alpine-2 using alpine image and use none network.
+docker run --name alpine-2 --network=none alpine
+==========================
+Create a new network named wp-mysql-network using the bridge driver. Allocate subnet 182.18.0.1/24. Configure Gateway 182.18.0.1
+docker network create --driver bridge --subnet 182.18.0.1/24 --gateway 182.18.0.1 wp-mysql-network
+
+Name: mysql-db
+Image: mysql:5.6
+Env: MYSQL_ROOT_PASSWORD=db_pass123
+Network: wp-mysql-network
+Deploy a mysql database using the mysql:5.6 image and name it mysql-db. Attach it to the newly created network wp-mysql-network. Set the database password to use db_pass123. The environment variable to set is MYSQL_ROOT_PASSWORD
+
+docker run -d --name mysql-db --network wp-mysql-network -e MYSQL_ROOT_PASSWORD=db_pass123 mysql:5.6
+docker run -d -e MYSQL_ROOT_PASSWORD=db_pass123 --name mysql-db --network wp-mysql-network mysql:5.6
+====================
+Deploy a web application named webapp, using image kodekloud/simple-webapp-mysql. 
+Expose port to 38080 on the host. 
+The application takes an environment variable DB_Host that has the hostname of the mysql database. 
+Make sure to attach it to the newly created network wp-mysql-network
+
+Name: webapp
+Image: kodekloud/simple-webapp-mysql
+Env: DB_Host=mysql-db
+Network: wp-mysql-network
+
+docker run -d --name webapp -e DB_Host=mysql-db --network wp-mysql-network -p 38080:38080 kodekloud/simple-webapp-mysql
+
+
+-------------------
+
+docker registry :
+
+docker run nginx 
+image: docker.io/nginx/nginx
+docker.io = registry
+nginx = user account
+nginx = image/registry 
+
+
+Private Registry :
+docker login private-registry.io 
+login with your username and password
+
+docker login private-registry.io/apps/internal-app
+
+
+Deploy Private registry :
+docker run -d -p 5000:5000 --name registry registry:2
+docker image tag my-image localhost:2000/my-image
+docker push localhost:5000/my-image
+docker pull 192.168.56.100:5000/my-image
+
+----------------------
+
+Docker on windows :
+1) docker on windows using docker toolbox
+2) docker desktop for windows
+
+docker toolbox
+
+oracle virtualbox 
+
+64-bit operating 
+windows 7 or higher
+virtualization is turn on
+
+
+-------------------
+
+why orchestrate ?
+
+docker service create --replicas=100 nodejs
+
+-----------
+
+docker swarm
+
+high availability and load balance
+swarm manager 
+worker 
+
+docker run my-web-server  --> create docker host
+docker service create --replica=3 my-web-server   --> creaate worker node
+docker service create --replicas=3 --network frontend my-web-server 
+docker service create --replicas=3 -p 8080:80 my-web-server
+docker service create --replicas=3 my-web-server 
+
+--------------
+
+kubernetes introduction :
+
+kibectl run --replicas=1000 my-web-server 
+kubectl scale --replicas=2000 my-web-server
+kubectl rolling-update my-web-server --image=web-server:2
+kubectl rolling-update my-web-server --rollback
+
+Nodes : load balance
+master : 
+
+componetns 
+api server -  
+etcd - store data use by cluster. to ensure no conflict
+kubelet - 
+container runtime
+controller - 
+scheduler - 
+
+kubectl run hello-minikube
+kubectl get nodes
+kubectl cluster-info
+kubectl run my-web-app --image=my-web-app --replicas=1000
+
+------------------------
+
+what is YAML ?
+
+Key Value Pair:
+Fruit: Apple
+Vegetable: Carrot
+Liquid: Water
+Meat: Chicken
+
+Array/Lists :
+
+Fruits:
+-	Orange
+-	Apple
+-	Banana
+
+Vegetables:
+-	Carrot
+-	Cauliflower
+-	Tomato
+
+Dictionary/Map
+Banana:
+	Calories:	105
+	Fat:	0.4	g
+	Carbs:	27	g
+
+Grapes:
+	Calories:	62
+	Fat:	0.3	g
+	Carbs:	16	g
+
+
+-------------
+
+Dictionary / Map :
+Banana:
+	Calories:	105
+	Fat:	0.4	g
+	Carbs:	27	g
+
+vs 
+
+Banana:
+	Calories:	105
+	Carbs:	27	g
+	Fat:	0.4	g
+	
+= above Allowed even the fat and carbs not in same order.
+
+
+Array / List :
+
+Fruits:
+-	Orange
+-	Apple
+-	Banana
+
+vs
+
+Fruits:
+-	Orange
+-	Banana
+-	Apple
+
+= The above two array will produce diff result. So array must be in sequence
+
+--------------------
+
+
+Docker Advanced :
+
+Docker on windows :
+
+1) Docker Toolbox
+2) Docker for windows 
+microsoft hyper v isolated container--> centos --> docker 
+windows 10 ent / prof & windows server 2016
+
+docker for windows 
+google docker for windows 
+click docker ce for windows (Stable)
+run the installation package.
+
+need to enable hyper-v 
+reboot 
+then u can use the cmd prompt to run docker
+
+you can see the vm running in hyper v in server manager.
+
+------------------------
+
+Docker architecture :
+
+Docker Engine :
+
+Docker CLI : cli 
+REST API : 
+Docker Deamon : back ground process that incharge of background 
+
+docker cli can be install on other servers.
+just run the below command on the new server.
+docker -H=remote-docker-engine:2375
+
+docker -H=10.123.2.1:2375 run nginx
+
+NameSpace - PID 
+the PID in container is all by itself
+example : 
+docker run -d --rm --rm -p 8888:8080 tomcat:8.0
+docker exec <containerid> ps -eaf 
+your tomcat wil be PID 1
+if u straight run in your current system, u will also get the process but its diff PID
+
+
+
+CGROUP :
+you can adjust the mem and cpu limit on docker container
+docker run --cpu=.5 ubuntu
+docker run --memory=100m ubuntu 
+
+----------------------
+
+Docker storage :
+
+docker storage drive and filesystem
+
+Filesystem :
+/var/lib/docker/
+aufs
+containers
+image
+volumes
+
+Docker layered architecture
+example : 
+
+-----------
+FROM Ubuntu 
+
+RUN apt-get update && apt-get -y install python
+
+RUN pip install flask flask=mysql
+
+COPY . /opt/source-code
+
+ENTRYPOINT FLASK_APP=/opt/source-code/app.py flask run
+---------
+
+docker build Dockerfile -t mmumshad/my-custom-app
+
+Layer 1 - base ubintu layer 120MB
+Layer 2 - changes in apt packages 306MB
+Layer 3 - Changes in pip packages 6.3MB
+Layer 4 - source code 229b
+Layer 5 - update entrypoint  0b
+
+-----------
+FROM Ubuntu 
+
+RUN apt-get update && apt-get -y install python
+
+RUN pip install flask flask=mysql
+
+COPY app2.py /opt/source-code
+
+ENTRYPOINT FLASK_APP=/opt/source-code/app2.py flask run
+---------
+
+docker build Dockerfile2 -t mmumshad/my-custom-app-2 
+
+Layer 1 - base ubintu layer 0mb
+Layer 2 - changes in apt packages 0mb
+Layer 3 - Changes in pip packages 0mb
+***layer 1,2,3 will use back the first file.
+Layer 4 - source code 234b
+Layer 5 - update entrypoint  0b
+
+this is where storage saving comes in.
+
+
+----------------------
+Layer 1 - 5 = read only.
+
+Layer 6 - Container layer  = read & write
+
+COPY-ON-WRITE :
+if u wanna modify app.py, docker will copy app.py from layer 5 to 6 and modify on the 6th layer.
+
+
+VOLUME MOUNT :
+
+docker volume create data_volume 
+/var/lib/docker/volume/data_colume
+
+docker run -v data_volume:/var/lib/mysql mysql
+all data will be created in /var/lib/mysql.. even destroy, data still there ..
+
+if u didnt do docker create data_volume2, but straight run the below :
+docker run -v data_volume2:/var/lib/mysql mysql 
+it will automaticly mount in the /var/lib/docker/volume/data_volume2 .
+if u kill the process, all data will lost.
+
+Bind Mount :
+if you wanna use an external storage as a mount point and mount into /var/lib/mysql : run the below command :
+docker run -v /data/mysql:/var/lib/mysql mysql 
+even mysql image deleted, your data still there.
+
+you can use the below command as well.
+------------------
+docker run \
+
+--mount type=bind,source=/data/mysql,target=/var/lib/mysql mysql 
+----------------------
+
+
+storage drivers :
+aufs
+zfs
+btrfs
+device mapper
+overlay
+overlay2
+
+more info on storage drivers, 
+https://docs.docker.com/storage/storagedriver/select-storage-driver/
+
+----------------
+
+docker storage 
+
+ls -l /var/lib/docker
+docker info | more  --> u will get info of the docker
+docker pull hello-world
+docker history <image id>
+docker build . -f Dockerfile2 -t  --> because by default is Dockerfile.. use -f to run other docker file names
+docker system df
+docker system df -v 
+=====================
+Run a mysql container named mysql-db using the mysql image. Set database password to db_pass123
+Note: Remember to run it in the detached mode.
+docker run -d --name mysql-db -e MYSQL_ROOT_PASSWORD=db_pass123 mysql
+================
+Run a mysql container again, but this time map a volume to the container so that the data stored by the container is stored at /opt/data on the host.
+Use the same name : mysql-db and same password: db_pass123 as before. Mysql stores data at /var/lib/mysql inside the container.
+
+docker run -d -v /opt/data:/var/lib/mysql --name mysql-db -e MYSQL_ROOT_PASSWORD=db_pass123 mysql
+
+-----------------
+Disaster strikes.. again! And the database crashed again. But this time we have the data stored at /opt/data directory. Re-deploy a new mysql instance using the same options as before.
+Just run the same command as before. Here it is for your convinience: 
+
+docker run -v /opt/data:/var/lib/mysql -d --name mysql-db -e MYSQL_ROOT_PASSWORD=db_pass123 mysql
+--------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
