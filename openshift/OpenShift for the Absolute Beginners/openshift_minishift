@@ -184,7 +184,10 @@ https://github.com/dockersamples/example-voting-app
    
 
 	  
-	  
+# to export DB service
+
+oc export service db
+
 	
 	
    
