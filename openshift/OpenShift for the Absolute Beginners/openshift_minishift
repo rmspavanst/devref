@@ -7,15 +7,198 @@ https://github.com/minishift/minishift
 
 https://github.com/minishift/minishift/releases
 
+
+https://github.com/mmumshad
+
+
+
+https://docs.okd.io/3.11/minishift/getting-started/setting-up-virtualization-environment.html
+
 1. Download minishift for windows/linux/mac
 2. extract the tar file and open cmd prompt
 3. run minishift.exe start --vm-driver virtualbox
       it will provide login url and login details
+	  
+OpenShift server started.
+
+The server is accessible via web console at:
+    https://192.168.99.100:8443/console
+
+You are logged in as:
+    User:     developer
+    Password: <any value>
+
+To login as administrator:
+    oc login -u system:admin
+
+
+Could not set oc CLI context for 'minishift' profile: Error during setting 'minishift' as active profile: The specified path to the kube config 'C:\Users\systemizer\.minishift\machines\minishift_kubeconfig' does not exist
+
+
 
 #  Management - Web, CLI and REST API
 
 1. 3 ways to intaract openshift : webconsole/ CLI / Rest API
-2. 
+2. for cli have to use openshift client
+		oc login or
+		oc login -u developer -p develpoer
+3. Rest API: curl https://localhost:8443/oapi/v1/users \
+              -H "Authorization : Bearer <Token>"
+			  to get token " oc whoami -t"
+	minishift oc-env (it will give set path cmd)
+	
+	oc login -u system:admin
+
+#project & Users:
+
+oc get projects
+oc get users
+
+#Build & Deployments:
+
+1. Build Strategy (Docker Build)
+2. S2I
+3. custom build
+
+
+sample app.py
+==============
+
+import os
+from flask import Flask
+app = Flask(_name_)
+
+@app.route("/")
+def main():
+	return "Welcome!"
+	
+@app.route('/how are you')
+def hello():
+	return 'I am good. how about you?'
+	
+if _name_=="_main_":
+	app.run(host="0.0.0.0", port=8080)
+	
+	
+Dockerfile:
+===============
+
+From ubuntu:16.04
+RUN apr-get update && apt-get install -y python python-pip
+RUN pip install flask
+
+COPY app.py /opt/
+
+ENTRYPOINT FLASK_APP=/opt/app.py flask run --host=0.0.0.0
+
+
+
+4. Image Streams
+
+Openshift Registry (ex: 172.30.1.1:5000/myproject/jva:latest)
+Docker Hub         (ex: docker.io/centos/python-27:latest)  
+Other Registry     (ex: other-registry/ruby/ruby:2)
+
+# Build_definition.yml
+-----------------------
+
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: my-build-config
+spec:
+  runPolicy: Serial
+  source:
+      git:
+        ref: master
+        uri: https://github.com/mmumshad/simple-webapp-docker
+      type: Git
+  strategy:
+      dockerStrategy:
+      type: Docker
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'simple-webapp-docker:latest'
+  triggers:
+    - type: ConfigChange
+
+
+#Deployments:
+============
+
+oc rollout latest dc/simple-webapp-docker
+oc roleout history dc/simple-webapp-docker
+oc rollout describe dc simple-webapp-docker
+oc roillout undo dc/simple-webapp-docker
+
+
+
+
+## Sample Voting application:
+==================================
+
+1. voting-app (python)
+2. in-memory-DB(Redis)
+3. Worker (.Net)
+4. DB (PostgreSQL)
+5. result-app(NodeJS)
+
+https://github.com/mmumshad/simple-webapp-docker
+
+https://github.com/mmumshad/example-voting-app
+
+https://github.com/dockersamples/example-voting-app
+
+
+1. Create new Project "voting-application", Display name "Example Voting Apllication"
+
+2. Deploy the Redis service (if not not found in Cataloge, serach in git hub " origin/examples/db-templates/")
+   - select "redis-ephemeral-template.json" copy the content.
+   - open import YAML/JSON and paste the content. (save the template to add the catelog items)
+   - select the Redis in catelog and ennter password "redis_password" create the Redis deployment
+
+3. Deploy the frontend application "voting-app(python)"
+   -  deploy the python application in catelog and select the adv option to add git repository.
+      name: vote, url:https://github.com/dockersamples/example-voting-app.git, Context Dir: /vote, create.
+   -  select the link and can check the voting-app.
+   - go the "vote" in deployment, add new environment variable " REDIS_PASSWORD: redis_password", save.
+   
+4. Deploy the PostgreSQL DB, select the postgres in catelog:
+    Namespace: openshift, Database Service Name: db, postgreSQL Connection Username: postgres_user
+	postgreSQL Connection password: postgres_password, PostgreSQL Database Name: postgres
+	memory limit: 100mi
+	volume capicity: 100mi, create.
+	
+5. Deploy the result-app(NodeJS)
+   - Deploy the NodeJS application in catelog and select the adv option to add git repository.
+      name: result, url:https://github.com/dockersamples/example-voting-app.git, Context Dir: /result, 
+	  Build Configureation and Deployment Cinfiguration add the Environment Variable "PORT:8080" create.
+
+6. Deploy Worker
+   - Deploy the Java application(http server) in catelog and select the adv option to add git repository.
+      name: worker, url:https://github.com/dockersamples/example-voting-app.git, Context Dir: /worker, create.
+   -  go to Build, select worker and click edit YAML, change strategy/ sourceStrategy to dockerStrategy:,
+      and get raid from section, type: Source to type: Docker, save and Build.
+   - open lick check the results.
+   
+
+	  
+	  
+	
+	
+   
+
+   
+   
+
+
+	
+
+		
+		
+
+ 
 
 
 
