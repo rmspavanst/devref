@@ -10,9 +10,19 @@ https://github.com/minishift/minishift/releases
 
 https://github.com/mmumshad
 
+https://www.okd.io/guides/sno/
+https://www.atlantic.net/dedicated-server-hosting/how-to-setup-local-openshift-origin-okd-cluster-on-centos-7/
+
+
 
 
 https://docs.okd.io/3.11/minishift/getting-started/setting-up-virtualization-environment.html
+
+curl -L https://github.com/minishift/minishift/releases/download/v1.33.0/minishift-1.33.0-linux-amd64.tgz -o minishift.tar.gz
+$ tar -xvzf minishift.tar.gz
+$ cd minishift
+$ export PATH=$PWD:$PATH
+
 
 1. Download minishift for windows/linux/mac
 2. extract the tar file and open cmd prompt
