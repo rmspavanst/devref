@@ -1,0 +1,17 @@
+# Get the ID from docker images
+docker run -it <your-image-id>
+
+# control-c will stop the container
+
+# With a tag
+docker build -t your-app .
+
+# See the updated info with latest tag
+docker images
+
+# With a tag
+docker build -t your-app:your-tag .
+
+# See the custom tag
+docker images
+

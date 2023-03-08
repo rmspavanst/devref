@@ -1,0 +1,51 @@
+# Openshift Resouces:
+=====================
+
+1. User
+2. DeploymentConfig
+3. Build
+4. ImageStream
+5. Route
+6. Project
+7. Replication Controller
+8. BuildConfig
+9. Image Stream Tag
+10. Template
+11. Pod
+12. ConfigMap
+13. Secret
+14. Service
+15. Autoscaler (HPA)
+
+
+
+Projects:
+==========
+DeploymentConfig            : Template, ImgeStream, BuildConfig
+ReplicationController       : Route, ImageStreamTag, Build
+Horizontal Pod Autoscaler   : Service, ConfigMap, Secret, Pod
+
+1. Notes for Hosted OpenShift users
+2. Hosted OpenShift Users and Projects
+
+If you are using Hosted OpenShift for this course, there are a couple differences for this projects and users section. You may not be able to follow along with everything, but you should still watch the videos to see how these commands work.
+
+Users:
+---------
+Your username is your RedHat username. However, Hosted OpenShift does not support username / password login. You'll need to get the token from the web console to log in to Hosted OpenShift.
+
+
+Projects:
+------------
+If you try to run oc new-project on Hosted OpenShift, you will get this error from the server:
+
+Error from server (Forbidden): You may not request a new project via this API.
+
+This error comes from a restriction on the Hosted OpenShift environment. Part of the way RedHat manages the free sandbox accounts is by using the project system to limit your resource usage. That means you are restricted to their default projects, <your_user_name>_dev and <your_user_name>_stage.
+
+You can use either one for this course. You'll need to substitute the project name when it comes up in commands. Also, you should run oc delete all --all in between sections to clean up.
+
+You should be able to use oc projects and oc project <your_user_name>_stage to navigate the two projects you do have access to.
+
+
+

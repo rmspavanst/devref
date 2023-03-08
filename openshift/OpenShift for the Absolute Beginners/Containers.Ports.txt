@@ -1,0 +1,5 @@
+# Start the Hello World app with port forwarding
+docker run -it -p 8080:8080 quay.io/practicalopenshift/hello-world
+
+# Check the exposed port
+curl localhost:8080

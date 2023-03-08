@@ -1,0 +1,13 @@
+# Get to the right directory
+cd labs
+cd hello-world-go
+
+# Build the image
+docker build .
+
+# Check the image storage
+docker images
+
+
+
+

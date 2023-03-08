@@ -1,0 +1,10 @@
+# Start hello-world server?
+docker run -it quay.io/practicalopenshift/hello-world
+
+# Get running images
+docker ps
+
+# Stop one
+docker kill <Container ID>
+
+
