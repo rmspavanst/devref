@@ -48,4 +48,74 @@ You can use either one for this course. You'll need to substitute the project na
 You should be able to use oc projects and oc project <your_user_name>_stage to navigate the two projects you do have access to.
 
 
+Lab: Pods
+=========
+Instructions
+
+
+These are the steps you should complete as part of the lab. Labs are open-book. Feel free to examine sources such as the labs project for the course, the cheat sheets, and online documentation to complete these tasks.
+
+In this lab, you will create a custom Pod definition and upload it to OpenShift. This will test your skills in writing and debugging Pod YAML for the OpenShift platform.
+
+
+
+First, create a new file under the labs project. The path will be pods/lab-pod.yaml
+
+Copy the pod definition from another source into lab-pod.yaml
+
+Update the MESSAGE environment variable to a custom message. Update the name.
+
+Start a Pod based on lab-pod.yaml on the server
+
+Forward port 8080 from your computer to the running Pod
+
+You can use oc port-forward pod/lab-pod 8080 to do this
+
+
+
+Checklist
+
+
+Once you meet all of these criteria, you have successfully completed the lab. You will need to run the commands yourself in order to grade this lab.
+
+
+
+Output from oc get pods contains the pod you uploaded in step 5
+
+Output from oc describe pod/lab-pod has the correct name and MESSAGE environment value
+
+curl localhost:8080 prints the message you entered in step 3
+
+
+OpenShift 4 DeploymentConfig notes
+===================================
+This course now supports OpenShift 4 by default. This means that many oc new-app commands use the --as-deployment-config flag. If you try to use this on OpenShift 3, you'll get an error from oc saying that --as-deployment-config is not a valid flag.
+
+
+
+If you want to continue in this course using OpenShift 3, you can omit the --as-deployment-config flag from the commands in this course.
+
+
+
+How to tell what version of oc you have:
+
+$ oc version
+ 
+# Version 3 will have a line like this
+oc v3.11.0+0cbc58b
+ 
+# Version 4 will have a line like this
+Client Version: 4.6.1
+
+
+Here's the difference in the command between versions
+
+# Version 3 to 4.4
+$ oc new-app quay.io/practicalopenshift/hello-world
+ 
+# Version 4.5+
+$ oc new-app quay.io/practicalopenshift/hello-world --as-deployment-config 
+
+
+
 

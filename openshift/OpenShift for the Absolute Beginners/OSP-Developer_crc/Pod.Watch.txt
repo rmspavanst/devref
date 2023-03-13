@@ -1,0 +1,2 @@
+# Watch live updates to pods
+oc get pods --watch

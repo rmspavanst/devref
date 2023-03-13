@@ -1,0 +1,3 @@
+# Get built-in documentation for Pods
+oc explain pod
+
