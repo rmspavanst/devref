@@ -117,5 +117,131 @@ $ oc new-app quay.io/practicalopenshift/hello-world
 $ oc new-app quay.io/practicalopenshift/hello-world --as-deployment-config 
 
 
+Decployment Config:
+--------------------
+
+$ oc new-app https://giturl.com --as-deployment-config
+$ oc logs -f dc/hello-world
+$ oc status
+$ oc describe dc/hello-world
+$ oc delete all -l app=hello-world
+
+Replication Controllers:
+-------------------------
+DeploymentConfig --> ReplicationControllers --> pod/pod/pod....
+
+$ oc new-app quay.io/practicalopenshift/hello-world --as-deplyment-config
+$ oc get -o yaml dc/hello-world (o/p: yaml format)
+$ oc get rc (to see the replicarion controller)
+
+Roll out & Roll Back:
+---------------------
+
+$ oc new-app quay.io/practicalopenshift/hello-world
+$ oc get pods --watch -r oc get pods -w
+$ oc rollout latest dc/hello-world
+$ oc rollback dc/hello-world
+
+
+Lab: DeploymentConfigs
+=========================
+
+Instructions
+These are the steps you should complete as part of the lab. Labs are open-book. Feel free to examine sources such as the labs project for the course, the cheat sheets, and online documentation to complete these tasks.
+
+In the DeploymentConfig lab, you will create a custom DeploymentConfig based on the hello-world image by changing some parameters.
+
+First, use oc new-app to start an application based on quay.io/practicalopenshift/hello-world
+
+Use oc new-app to start a second version of the application using the name "lab-dc", a custom value for the MESSAGE environment variable, and the same hello-world image
+
+You can specify environment variables in oc new-app with a flag. oc new-app --help can help you to find the correct one
+
+Forward port 8080 on your local computer to port 8080 on the second pod you created
+
+
+
+Checklist
+Once you meet all of these criteria, you have successfully completed the lab. You will need to run the commands yourself in order to grade this lab.
+
+Output from oc get pods contains two pods
+
+Output from oc describe dc/lab-dc has the correct name and MESSAGE environment value
+
+curl localhost:8080 prints the message you entered in step 2
+
+
+
+Cleaning Up
+To clean up, use a single command to delete all of the resources created in step 1. You are done when oc get dc just has the lab-dc DeploymentConfig.
+
+
+
+
+Services:
+==============
+
+$ oc explain svc
+$ oc explain svc.spec
+$ oc create -f pods/pod.yaml
+$ oc expose pod/hello-world
+$ oc expose --port 8080 pod/hello-world-pod
+$ oc create -f pods/pod2.yaml
+$ oc rsh hello-world-pod-2 (to open shell on pod2)
+    $ wget -qO- ipadd:8080 (in pod)
+
+Access a service uisng environment variables:
+---------------------------------------------
+env
+
+Route:
+==========
+
+1. Exposing a Route
+
+$ oc new-app quay.io/practicalopenshift/hello-world --as-deployment-config
+$ oc expose svc/hello-world or service/hello-world
+$ oc status
+curl <route from oc status>
+
+What is the command to create a service for a pod?
+$ oc expose --port <port> <pod-name>
+
+
+2. Route Definition:
+
+# Get YAML definition
+oc get -o yaml route/hello-world
+
+
+Lab: Networking:
+--------------------
+Instructions
+These are the steps you should complete as part of the lab. Labs are open-book. Feel free to examine sources such as the labs project for the course, the cheat sheets, and online documentation to complete these tasks.
+
+For networking, you'll need to make some modifications to get a route to load balance between two pods.
+
+First, use oc create to start pods/pod.yaml in the labs project
+
+Create a service for this pod
+
+Modify pods/pod2.yaml so that the service will also hit this pod (hint: check the labels section in the pod and selector section in the service)
+
+Use oc create to start pods/pod2.yaml in the labs project
+
+Expose a route for this service
+
+
+Checklist
+Once you meet all of these criteria, you have successfully completed the lab. You will need to run the commands yourself in order to grade this lab.
+
+Output from oc get pods contains two pods
+
+Output from oc status groups the two pods under the same route
+
+When you run curl <your route> several times, it will return messages from both pod.yaml and pod2.yaml
+
+
+
 
 

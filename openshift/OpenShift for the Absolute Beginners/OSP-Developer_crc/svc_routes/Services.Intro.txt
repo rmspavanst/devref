@@ -1,0 +1,7 @@
+# Access oc explain documentation
+oc explain service
+
+# Get more information about Service's spec
+oc explain service.spec
+
+

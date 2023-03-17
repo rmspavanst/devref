@@ -1,0 +1,3 @@
+# Get YAML definition
+oc get -o yaml route/hello-world
+
