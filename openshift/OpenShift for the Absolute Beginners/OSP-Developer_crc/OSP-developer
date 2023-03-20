@@ -241,7 +241,11 @@ Output from oc status groups the two pods under the same route
 
 When you run curl <your route> several times, it will return messages from both pod.yaml and pod2.yaml
 
+ConfigMaps:
+===========
 
+$ oc explain configmap
 
+$ oc create configmap message-map --from-literal Message='Hello From ConfigMap"
 
 
