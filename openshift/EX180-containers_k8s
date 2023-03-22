@@ -1,0 +1,136 @@
+
+* on developers.redhat.com, create a free developer account.
+* Install vm and run the RHEL using following spec:
+   4 GB Ram, 2 Cpus, 40 GB Storage, Server with GUI, Internet.
+
+
+# Running a Container:
+======================
+
+podman login (username/password)
+
+sudo yum module install container-tools
+sudo podman serach ubi (ubi is universal base image, great container image)
+sudo podman pull ubi8/ubi (registry.access.redhat.com/ubi8/ubi)
+podman images
+podman run ubi8
+podman ps
+podman ps -a
+podman run ubi8/ubi echo hello world
+podman run nginx; Ctrl-C
+podman run -d nginx
+podman run -it ubi8/ubi /bin/bash
+
+Rootless Containers:
+--------------------
+Rootless containers do not get an IP add
+Rootless container con't bind to a privileged port
+Rootless containers have limited access to the file system
+
+On Doker hub, look for bitnami images which run as rootless images
+Redhat container registries as these are rootless by default
+
+ex: podman run -d nginx
+
+podman inspect -l -f "{{.NetworkSettings.IPAddress}}" (-l -f will take latest container details)
+it wont show ip address
+
+now with root privilages
+
+sudo podman run -d nginx
+sudo podman inspect -l -f "{{.NetworkSettings.IPAddress}}"
+it's shows IP address
+
+ps fax | less (runc)
+
+podman run pit ubuntu sh
+cat /etc/os-release
+uname -r
+exit
+uname -r (check both the kernal versions are same)
+
+Providing Variables:
+--------------------
+
+sudo podman run mariadb (will get error, not provided password)
+sudo podman logs containerID
+
+sudo podman run -d -e MYSQL_ROOT_PASSWORD=password mariadb
+
+Lab2:
+-----
+sudo podman serach ubi (can find registry.redhat.io/ubi8)
+podman pull ubi8 or podman pull ubi8-minimal
+
+podman inspect ubi8 | less (to inspect the image)
+podman run -it ubi8 bash
+    cat /etc/os-release
+    uname -r 
+
+
+Managing Container Images:
+==========================
+
+1. Configure registry access
+    /etc/containers/registries.conf file provice access to registries
+     [registries.search] you will list default registries to be used
+     [registries.insecure] private registries that are not protected with TLS keys can be listed
+
+podman login -u username -p password
+podman pull quay.io/bitnami/nginx
+
+2. The images stored in " /var/lib/containers/storage/overlay-images
+
+Manging Images:
+----------------
+podman pull image_name
+podman images
+podma rmi imageID
+podman rmi -a
+
+to save images
+    podman save quay.io/bitnami/nginx:latest -o myswl.tar
+to load image from tar file
+    podman load -i mysql.tar
+
+with tags:
+-------------
+tags are used to further identify images
+to get information about avaliable versions before pulling, use " skopeo inspect"
+
+podman search mariadb
+skopeo inspect -h
+skopeo inspect docker://registry.redhat.io/rhosp15-rhel8/openstack-maridb
+    - you can find RepoTags
+
+podman tag nginx myninx:db (tag to an image)
+
+sharing images:
+-----------------
+
+podman run -d --name newnaginx nginx
+podman ps
+podman exec -it newnginx bash
+    echo hello > /tmp/hello
+    exit
+podman diff newnginx
+podman commit newnginx
+
+Lab3:
+---------
+podman login
+skopeo inspect docker://registry.access.redhat.com/ubi8/ubi-minimal
+podman pull ubi8-minimal
+podman images
+podman image inspect imageID
+podman save -o myimage.tar imageid
+podman rmi imageID
+podman load -i myimage.tar
+
+
+Managing Containers:
+=====================
+
+
+        
+
