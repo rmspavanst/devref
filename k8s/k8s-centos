@@ -1,7 +1,7 @@
 
 https://upcloud.com/resources/tutorials/install-kubernetes-cluster-centos-8
 
-https://tayeh.me/posts/install-kubernetes-cluster-on-centos-8-with-kubeadm-crio/
+c
 
 
 
@@ -127,6 +127,23 @@ kubectl get node -owide
 
 
 kubectl label node <node name> node-role.kubernetes.io/<role name>=<key - (any name)>
+
+
+## Get Kubeadm Join Command for Master Node ###
+
+kubeadm init phase upload-certs --upload-certs --config kubeadm-config.yaml
+
+kubeadm token create --print-join-command
+
+kubeadm join k8s-endpoint:6443 --token 4iegnp.x2tfqdd9gl93zz1o --discovery-token-ca-cert-hash sha256:636786a58df07625167bd7305d56c4cc75bcbedcc474313934aa08c09dc603af
+
+kubeadm join k8s-endpoint:6443 --token 4iegnp.x2tfqdd9gl93zz1o \
+--discovery-token-ca-cert-hash sha256:636786a58df07625167bd7305d56c4cc75bcbedcc474313934aa08c09dc603af \
+--control-plane --certificate-key 6a2f496e172b16584f3700da0427d6e87b3ff06a67383c1bb05cf504128e4465
+
+worker node:
+kubeadm token create --print-join-command
+
 
 
 

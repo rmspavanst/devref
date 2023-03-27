@@ -1,0 +1,438 @@
+https://github.com/sureshchandrarhca15/kubernetes-cluster-files/blob/master/Install%20and%20configure%20a%20multi-master%20Kubernetes%20cluster%20with%20kubeadm.txt#L85
+
+
+# edit /etc/hosts in all nodes
+
+vi /etc/hosts
+10.0.16.190 vip.example.com     vip
+10.0.16.191 lb1.example.com     lb1
+10.0.16.192 lb2.example.com     lb2
+10.0.16.193 master1.example.com master1
+10.0.16.194 master2.example.com master2
+10.0.16.195 worker1.example.com worker1
+10.0.16.196 worker2.example.com worker2
+10.0.16.197 worker3.example.com worker3
+
+Step 1: Do the below tasks to prepare the nodes for Kubernetes Cluster 
+		1.1	Configure IP Address 
+		1.2	Configure Hostname
+		1.4	Stop Firewall 
+		1.7	Update the System 
+		1.8 Reboot the system
+
+hostnamectl set-hostname kubelb01.example.local
+
+vi /etc/sysconfig/network-scripts/ifcfg-ens18
+
+BOOTPROTO=static
+TYPE=:"Ethernet"
+IPADDR=10.0.16.19
+PREFIX=22
+GATEWAY=10.0.16.1
+
+systemctl restart NetworkManager
+
+systemctl stop firewalld
+systemctl disable firewalld
+
+
+Step 2: Once you have prepared the nodes by performing the above mentioned task, follow the below instructions: 
+1.	Install Docker Package on all Nodes
+2.	Start and Enable Docker Service on all Nodes except lb 
+
+sudo yum -y update
+sudo yum -y install epel-release
+
+Add repository to CentOS 8:
+
+VERSION=1.26
+OS=CentOS_8
+curl -L -o /etc/yum.repos.d/devel:kubic:libcontainers:stable.repo https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$OS/devel:/kubic:/libcontainers:/stable.repo
+curl -L -o /etc/yum.repos.d/devel:kubic:libcontainers:stable:cri-o:$VERSION.repo https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/$VERSION/$OS/devel:kubic:libcontainers:stable:cri-o:$VERSION.repo
+
+sudo yum install cri-o 
+
+# Confirm installation of CRI-O on CentOS:
+
+rpm -qi cri-o
+sudo systemctl enable --now crio
+systemctl status crio
+
+Socket file:
+
+/var/run/crio/crio.sock
+
+
+Step 3: Stop and Disable the Swap Partition on all nodes. 
+
+~]# swapoff -a && sed -i 's/.*swap.*/#&/' /etc/fstab
+~]# cat /etc/fstab | grep -i swap
+
+Step 4: Change SELinux Mode to Permissive on all nodes.   
+~]# setenforce 0
+~]# sed -i --follow-symlinks "s/^SELINUX=enforcing/SELINUX=disabled/g" /etc/sysconfig/selinux
+
+
+
+Step 5: configure Network Bridge Setting and Enable Forwarding on all Nodes.
+
+
+modprobe overlay
+modprobe br_netfilter
+
+~]# vi  /etc/sysctl.d/k8s.conf
+
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward = 1
+vm.swappiness=0
+
+
+:wq (save and exit) 
+
+~]# sysctl --system
+
+
+
+
+
+Step 6: Install and Confifure the keepalive and HAProxy load balancer on lb Node
+
+yum -y install kernel-headers kernel-devel
+[root@lb ~]# yum install keepalived 
+yum install haproxy openssl-devel -y
+
+mv /etc/keepalived/keepalived.conf /etc/keepalived/keepalived.conf.bak
+
+# Open configuration file of keepalived in the MASTER Server.
+vi /etc/keepalived/keepalived.conf
+
+! Configuration File for keepalived
+
+global_defs {
+
+}
+
+vrrp_script haproxy {
+  script "pgrep haproxy" # check the haproxy process
+  interval 2 # every 2 seconds
+  timeout 1 # add 2 points if OK
+}
+
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface ens18
+    virtual_router_id 51
+    priority 101
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    virtual_ipaddress {
+        10.0.16.190
+    }
+    track_script {
+        haproxy
+    }
+   
+}
+
+wq!
+
+#### Configurations of Backup Server:
+
+vi /etc/keepalived/keepalived.conf
+
+! Configuration File for keepalived
+
+global_defs {
+
+}
+
+vrrp_script haproxy {
+  script "killall -0 haproxy" # check the haproxy process
+  interval 2 # every 2 seconds
+  timeout 1 # add 2 points if OK
+}
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface ens18
+    virtual_router_id 51
+    priority 100
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    virtual_ipaddress {
+        10.0.16.190 
+    }
+    track_script {
+        haproxy
+    }
+    
+}
+
+wq!
+
+
+
+
+//===================================================================================================================
+sudo vi /etc/keepalived/check_apiserver.sh
+
+#!/bin/sh
+
+errorExit() {
+          echo "*** $@" 1>&2
+          exit 1
+}
+curl --silent --max-time 2 --insecure https://localhost:6443/ -o /dev/null || errorExit "Error GET https://localhost:6443/"
+if ip addr | grep -q 10.0.16.190; then
+curl --silent --max-time 2 --insecure https://10.0.16.190:6443/ -o /dev/null || errorExit "Error GET https://10.0.16.190:6443/"
+fi
+
+sudo chmod +x /etc/keepalived/check_apiserver.sh
+//
+
+or 
+
+vi /etc/keepalived/check_haproxy.sh
+
+#!/bin/sh
+
+VIP=10.0.16.190
+
+if ! nc -z -w 3 localhost 6443
+  then
+  echo "Port 6443 is not available." 1>&2
+  exit 1
+fi
+
+if ip address show secondary | grep -q $VIP
+  then
+  if ! curl --silent --max-time 2 --insecure https://$VIP:6443/ -o /dev/null
+    then
+    echo "https://$VIP:6443/ is not available." 1>&2
+    exit 1
+  fi
+fi
+================================================================================================
+
+
+sudo vi /etc/keepalived/keepalived.conf
+
+
+
+===================================================================================================
+/etc/keepalived/keepalived.conf
+
+global_defs {
+    router_id INAP_LVS
+}
+
+vrrp_script check_haproxy {
+  script "/etc/keepalived/check_haproxy.sh"
+  interval 3
+  weight -2
+  fall 10
+  rise 2
+}
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface ens3
+    virtual_router_id 51
+    priority 101
+    authentication {
+        auth_type PASS
+        auth_pass P@ssw0rd
+    }
+    virtual_ipaddress {
+        10.0.16.190/22
+    }
+    track_script {
+        check_haproxy
+    }
+}
+
+
+
+vrrp_script check_apiserver {
+        script "/etc/keepalived/check_apiserver.sh"
+        interval 3
+        timeout 10
+        fall 5
+        rise 2
+        weight -2
+}
+vrrp_instance VI_1 {
+        state BACKUP
+        interface ens18 # check the int name
+        virtual_router_id 1
+        priority 100
+        advert_int 5
+        authentication {
+        auth_type PASS
+        auth_pass mysecret
+        }
+        virtual_ipaddress {
+                10.0.16.190
+        }
+        track_script {
+                check_apiserver
+        }
+}
+====================================================================================================
+
+systemctl start keepalived.service
+systemctl enable keepalived.service
+systemctl status keepalived.service
+
+
+
+[root@lb ~]# mv /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.orig
+
+
+
+Configure rsyslog to capture haproxy logs
+
+[root@lb ~]# vi /etc/rsyslog.conf
+
+##Add the below two lines in rules section 
+
+### HAProxy Log
+local2.*        /var/log/haproxy.log
+
+
+:wq (save and exit) 
+
+
+[root@lb ~]# systemctl restart rsyslog
+[root@lb ~]# systemctl status rsyslog
+
+
+
+Configure HAProxy to load balance the traffic between the three Kubernetes master nodes.
+
+
+Add the below lines into the files 
+
+[root@lb ~]# vi /etc/haproxy/haproxy.cfg
+
+global
+    chroot      /var/lib/haproxy
+    pidfile     /var/run/haproxy.pid
+    maxconn     4000
+    user        haproxy
+    group       haproxy
+    daemon
+    stats socket /var/lib/haproxy/stats
+
+defaults
+    mode http
+    log global
+    option                  redispatch
+    retries                 3
+    timeout http-request    10s
+    timeout queue           1m
+    timeout connect         10s
+    timeout client          1m
+    timeout server          1m
+    timeout http-keep-alive 10s
+    timeout check           10s
+    maxconn                 3000
+
+frontend kubernetes
+    mode tcp
+    bind *:6443
+    option tcplog
+    default_backend kubernetes-master-nodes
+
+
+backend kubernetes-master-nodes
+       option httpchk GET /healthz
+       http-check expect status 200
+              option ssl-hello-chk
+       balance roundrobin
+
+    mode tcp
+    balance roundrobin
+    option tcp-check
+    server master1 10.0.2.10:6443 check fall 3 rise 2
+    server master2 10.0.2.20:6443 check fall 3 rise 2
+    server master3 10.0.2.21:6443 check fall 3 rise 2
+
+
+:wq (save and exit) 
+
+Start and Enable haproxy service 
+
+[root@lb ~]# systemctl start haproxy
+[root@lb ~]# systemctl enable haproxy
+[root@lb ~]# systemctl status haproxy
+
+
+yum -y install net-tools
+
+[root@lb ~]# netstat -ntlp | grep 6443
+tcp        0      0 0.0.0.0:6443            0.0.0.0:*               LISTEN      3420/haproxy
+
+
+[root@lb ~]# echo "net.ipv4.ip_nonlocal_bind=1" >> /etc/sysctl.conf
+[root@lb ~]# cat /etc/sysctl.conf
+[root@lb ~]# sysctl -p
+
+[root@lb ~]# yum install nmap -y
+
+[root@lb ~]# nc -zv 10.0.16.190 6443
+
+
+
+master1:
+==============
+
+kubeadm init --control-plane-endpoint "10.0.16.190:6443" --upload-certs
+
+
+
+
+  kubeadm join 10.0.16.190:6443 --token si5mzu.9t6dwsc5fk9e2erp \
+        --discovery-token-ca-cert-hash sha256:ab890d5e4a157fdb673b7fda89a671c33f2bf1a7015be346c95145aa1bf147e8 \
+        --control-plane --certificate-key 2c15d7339094059a8f15ca74866177e6c5ebb4a04e3bba9e8b2f894e44b1f9aa
+
+Please note that the certificate-key gives access to cluster sensitive data, keep it secret!
+As a safeguard, uploaded-certs will be deleted in two hours; If necessary, you can use
+"kubeadm init phase upload-certs --upload-certs" to reload certs afterward.
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+kubeadm join 10.0.16.190:6443 --token si5mzu.9t6dwsc5fk9e2erp \
+        --discovery-token-ca-cert-hash sha256:ab890d5e4a157fdb673b7fda89a671c33f2bf1a7015be346c95145aa1bf147e8
+
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+
+
+kubectl get nodes
+kubectl get pods -A -o wide
+
+kubeclt config view
+
+
+
+
+
+
+
+
+
+
