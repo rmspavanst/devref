@@ -68,7 +68,7 @@ podman run -it ubi8 bash
     uname -r 
 
 
-Managing Container Images:
+## Managing Container Images:
 ==========================
 
 1. Configure registry access
@@ -105,8 +105,8 @@ skopeo inspect docker://registry.redhat.io/rhosp15-rhel8/openstack-maridb
 
 podman tag nginx myninx:db (tag to an image)
 
-sharing images:
------------------
+##sharing images:
+==================
 
 podman run -d --name newnaginx nginx
 podman ps
@@ -128,8 +128,59 @@ podman rmi imageID
 podman load -i myimage.tar
 
 
-Managing Containers:
-=====================
+## Managing Containers:
+=============================
+4.1 Getting Container Status Information
+4.2 Executing Commands within Containers
+4.3 Attaching Stirage to Containers
+4.4 Understand SELinux and Containers
+4.5 Exposing Container Workloads
+
+
+podman inspect mycontainer (shows current properties of running container)
+podman image inspect myimage(shows properties about images on the local system)
+podman logs connects to the entrypoint application STDOUT
+
+POdman stop
+podaman stop -a
+podman restart
+podman start
+podman kill is used to send UNIX signals to manipulate container state
+       - by default, SIGKILL is sent
+	   - Use -s to sepisy any other signal number
+podam rm
+
+
+# When a container is started, an ephemeral read/write storage layer is added.
+	   
+container can connect to Bind-mount/ Volume(nfs)/ 	  
+
+podman run -v /hostdir:/dir-in-container myimage
+
+sudo mkdir /srv/dbfiles
+sudo chown -R 27:27 /srv/dbfiles (27 user ID will get in docker inspect myimage)
+sudo semanage gcontext -a -t container_file_t "/srv/dbfiles(/.*)?"
+sudo restorecon -Rv /srv/dbfiles/
+sudo ls -ldz /srv/dbfiles/
+sudo podman run -d -v /srv/dbfiles:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=password mysql
+ls -l /srv/dbfiles/
+
+mkdir dbfiles
+sudo podman run -d -v /root/dbfiles:/var/lib/mysql:Z -e MYSQL_ROOT_PASSWORD=password mysql
+ls -lZ dbfiles
+
+
+# podman networking is accordign to the CNI (Container network interface)
+
+podman run -d -p 8080:80 nginx
+
+ 
+
+
+
+
+
+
 
 
         
