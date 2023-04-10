@@ -1,0 +1,141 @@
+https://github.com/GoogleCloudPlatform/microservices-demo
+
+https://github.com/microservices-demo/microservices-demo
+
+https://github.com/docshome/microservices
+
+What is Container:
+===================
+A container is a unit of software that packages code and its dependencies so the application runs quickly and reliably across computing environments.
+
+Containers are packages of software that contain all of the necessary elements to run in any environment. In this way, containers virtualize the operating system and run anywhere, from a private data center to the public cloud or even on a developer's personal laptop.
+
+
+While the promise of containers is to code once and run anywhere, Kubernetes provides the potential to orchestrate and manage all your container resources from a single control plane. It helps with networking, load-balancing, security, and scaling across all Kubernetes nodes which runs your containers.
+
+
+https://enterprisersproject.com/article/2020/9/pod-cluster-container-what-is-difference
+
+======================================================================================================================================
+
+steps:
+=====
+
+1. src .
+2. Toconfig --> Dockerfile
+3. Build ----> Image
+4. Image ---> Repo
+5. K8s ----> 1. deploy.yaml
+             2. Service.yaml
+
+
+
+1. source: clone repo
+
+https://github.com/devopswithcloud/testingrepo
+
+https://github.com/devopswithcloud/testingrepo.git
+
+cd testingrepo/
+2. config the Dockerfile
+3. Build the docker image
+docker build -t rmspavan/sample_py_flask:ocpdemo .
+4. push the docker image
+docker push rmspavan/sample_py_flask:ocpdemo
+5. deploy to k8s
+
+kubectl create deploy ocpdemo --image rmspavan/sample_py_flask:ocpdemo --dry-run=client -o yaml > deploy.yaml
+
+kubectl apply -f deploy.yaml
+kubectl get pods -A
+kubectl expose deploy ocpdemo --port 8080 --target-port 8080 --type NodePort
+kubectl get svc -A
+
+http://ip:nodeport
+
+# In OCP just clone the repo and click build... 
+
+why k8s?
+
+1. can't live single server for deployment
+2. container to container
+3. Autoscaling
+4. Autohealing
+
+Kubernetes is an open-source container orchestration system for automating software deployment, scaling, and management
+
+APISERVER: Apiserver is the responsible for orchestration all the operation with in your cluster, it will behave like frontend
+
+The Kubernetes API server validates and configures data for the api objects which include pods, services, replicationcontrollers, and others. The API Server services REST operations and provides the frontend to the cluster's shared state through which all other components interact
+
+The API (application programming interface) server determines if a request is valid and then processes it. In essence, the API is the interface used to manage, create, and configure Kubernetes clusters. It's how the users, external components, and parts of your cluster all communicate with each other.
+
+ETCD:
+
+etcd is a consistent and highly-available key value store used as Kubernetes' backing store for all cluster data. If your Kubernetes cluster uses etcd as its backing store, make sure you have a back up plan for those data. You can find in-depth information about etcd in the official documentation.
+
+Kubernetes uses etcd to store all its data – its configuration data, its state, and its metadata. Kubernetes is a distributed system, so it needs a distributed data store like etcd. etcd lets any of the nodes in the Kubernetes cluster read and write data.
+
+Scheduler:
+
+One controller consults the scheduler and makes sure the correct number of pods is running. If a pod goes down, another controller notices and responds. A controller connects services to pods, so requests go to the right endpoints. And there are controllers for creating accounts and API access tokens.
+
+In Kubernetes, scheduling refers to making sure that Pods are matched to Nodes so that Kubelet can run them.
+
+kube-controller-manager:
+The Kubernetes controller manager is a daemon that embeds the core control loops shipped with Kubernetes. In applications of robotics and automation, a control loop is a non-terminating loop that regulates the state of the system. In Kubernetes, a controller is a control loop that watches the shared state of the cluster through the apiserver and makes changes attempting to move the current state towards the desired state. Examples of controllers that ship with Kubernetes today are the replication controller, endpoints controller, namespace controller, and serviceaccounts controller.
+
+The Kubernetes controller manager is a daemon that embeds the core control loops shipped with Kubernetes. In applications of robotics and automation, a control loop is a non-terminating loop that regulates the state of the system.
+
+1. Admin/Developer
+kubectl or oc(tool)
+2. API server
+3. apiserver --> etcd
+4. etcd --> apiserver
+5. apiserver--> scheduler
+6. scheduler--> (API or advance schd)
+7. schdeduler --> APiserver
+8. Apiserver  --> kubelet
+9. kubelet --> CRT (docker/cri-o,Containerd)
+10. crt --> container
+11. container -->pod
+12. kubelet ---> apiserver --> storing the data to etcd service
+13. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
