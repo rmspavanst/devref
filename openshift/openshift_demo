@@ -100,10 +100,82 @@ kubectl or oc(tool)
 10. crt --> container
 11. container -->pod
 12. kubelet ---> apiserver --> storing the data to etcd service
-13. 
+
+
+Openshit can deploy in 
+    - physical machines
+    - Virtual machines
+    - private cloud
+    - public cloud
 
 
 
+CRC-install on minimum requirements:
+=====================================
+
+https://developers.redhat.com/blog/2020/09/09/install-red-hat-openshift-operators-on-your-laptop-using-red-hat-codeready-containers-and-red-hat-marketplace#
+
+https://developers.redhat.com/blog/2019/09/05/red-hat-openshift-4-on-your-laptop-introducing-red-hat-codeready-containers
+
+https://access.redhat.com/documentation/en-us/red_hat_openshift_local/2.16/html/getting_started_guide/installation_gsg
+
+
+# Create cluster:
+===================
+
+openshift features:
+    - HA
+    - Light weight os (core OS)
+    - load balancing
+    - Automatic scaling (pods, Nodes)
+    - Service discovery
+    - Storage
+    - UI
+    - CICD
+
+Day1 tasks: cluster setup, provisioning and infra provisioning
+Day2 tasks: Administartion, Developmnt activities, deploy apps.
+            to verify logs/pod crash, pipeline implementation, build images, App onboard, volumes.
+
+
+# Cluster deployment types:
+ - redhat OP dedicated
+ - redhat op online
+ - redhat OCP
+ - OKD
+ - Origin
+ - CRC
+ - managed k8s 
+
+ 
+ OCP (openshift container platform):
+ ===================================
+
+ Components required:
+  - AWS account
+  - Doiman
+  - EC2 machine with keys
+  - Account in RedHat
+  - Subscription in openshift
+  - OCP installer
+  - OC client (to cnnect api)
+  - have to know what happening in background
+
+
+
+  ## k8s-hardway
+https://github.com/Praqma/LearnKubernetes/blob/master/kamran/Kubernetes-The-Hard-Way-on-BareMetal.md
+
+https://medium.com/@DrewViles/kubernetes-the-hard-way-on-bare-metal-vms-v1-23-2168f5fe70af
+
+https://faun.pub/configuring-ha-kubernetes-cluster-on-bare-metal-servers-with-kubeadm-1-2-1e79f0f7857b
+
+
+
+# create Aws account
+# Create doamin in (godaddy/nacecheap)
+
+ 
 
 
 
