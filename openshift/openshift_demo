@@ -154,7 +154,7 @@ Day2 tasks: Administartion, Developmnt activities, deploy apps.
  Components required:
   - AWS account
   - Doiman
-  - EC2 machine with keys
+  - EC2 machine with keys (1. ec2, 2. keygen(users))
   - Account in RedHat
   - Subscription in openshift
   - OCP installer
@@ -173,10 +173,100 @@ https://faun.pub/configuring-ha-kubernetes-cluster-on-bare-metal-servers-with-ku
 
 
 # create Aws account
-# Create doamin in (godaddy/nacecheap)
+# Create doamin in (godaddy/nacecheap) for free doamin (freenom)
+  - link the domain in AWS Route53 with NS.
+    
+# EC2 machine 
+   - Creating a Jump server in ohio(us-east-2), t2.micro, Amazon Linux 64bit with keypair.
+   - login to jump_server and enable root users (usermod -aG wheel pavan)
+   - 
 
+# Account in Redhat
+  - developers.redhat.com (create account)--> join redhat developer in below
+  - subscription for ocp  
+  - console.redhat.com (openshift--> create cluster: cloud/Datacenter/local)
+       - cloud --> Managed Server/ Run it yourself
+			- Run it yoursef: AWS cloud  AWS(x86_64)
+			- IPI(installer provisioned infra) or UPI(user provision infra) 
+            - select IPI and download installer and oc client tool (installer copy to jump_server or copy url)
+			- go to jump_server
+			   mkdir ocp
+			   wget <url of openshift installer)
+			   tar xvzf openshift.tar.gz
+
+# install oc client tool
+	wget <url of oc client tool installer) 
+	tar xvzf opensift-clint-linux.ta.gz
+	cp oc kubectl /usr/bin/ (copy oc and  kubectl in env path)
+	
+# generate install-config.yaml ( prereq: IAM user with access key, secreat key)
+	./openshift-install create --help
+	aws configure
+		- Access key:
+		- secret key:
+		- region name:
+        - output format: json
+	to test: aws s3 ls
+    ./openshift-install create install-config --dir=/root/ocp
+		> select aws
+		> select region
+		> select the domain
+		> cluster Name: ipi
+		> pull secret (copy the secret from IPI and paste)
+	- now install-config.yaml file will generate
+	vi install-config.yaml
+		change based on your requirement like replicas: master, worker, network.
+		
+before create install-config.yaml
+===================================
+
+generate ssh key pait on your local machine to use for authentication onto your cluster nodes
+$ ssh-keygen -t ed25519 -N '' -f .ssh/id_rsa
+$ ll .ssh
+
+create install-config.yaml file
+$ ./openshift-install create install-config --dir=/root/ocp
+    > SSH public key
+    > aws
+    > us-east-2
+    > domain
+    > cluster name
+    > pull secret (paste)
+
+
+$ vi install-config.yaml (change based on your requirement)
+   compute:
+   - architucture: amd64
+     plaform:
+        aws:
+          type: m5.xlarge (if not provide by default m6.xlarge)
+     replicas: 1 
+
+note:
+-----
+https://access.redhat.com/documentation/en-us/openshift_container_platform/4.9/html/installing/installing-on-aws#installing-aws-customizations
+
+Table 4.5. Minimum resource requirements
+Machine         OS      vCPU  RAM   Storage IOPS 
+Bootstrap       RHCOS   4     16GB  100GB   300
+Controlplane    RHCOS   4     16GB  100GB   300
+Compute     RHCOS,RHEL  2     8GB  100GB   300
+
+
+Create cluster.yaml
+====================
+./openshift-install create cluster --dir=/root/ocp --log-level=info
+it will take 30 to 40mins to create cluster
+
+tail -f .openshift_install.log
+    - will provide openshift cluster url, username and password
+
+to destroy cluster:
+===================
+./openshift-install destroy cluster --dir=/root/ocp --log-level=info		
+	
+                			   
  
-
 
 
 
