@@ -326,6 +326,19 @@ Setp:1
    Project have resource/object
    In one project have multiple resouces
    
+   oc help
+   oc create help
+   oc projects
+   oc get routes -n openshift-console
+   
+   #Create a new-project
+	oc new-project --help
+	oc new-project <project-name> --description="<dev application>" --display-name="<aws dev>"
+	
+   #to switch project
+     oc project <project-name>
+	 oc project (to check project)
+	 
 	
 
 
