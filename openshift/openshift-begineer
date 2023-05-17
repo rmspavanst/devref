@@ -25,3 +25,82 @@ deploy in On-Premise/ Cloud/ Package Manager(RPM), Containerized(Docker).
 =========================================
 
 
+Create Project:
+=================
+oc new-project ,project-name> --description="<description>" --display-name="<dicplay-name>"
+
+View Project:
+===============
+
+oc get projetcs
+oc project <project-name>
+oc new-app https://github.com/openshift/ruby-hello-world.git
+oc get pods
+oc get all
+
+
+Delete Project:
+==================
+oc delete project <project-name>
+
+oc get all
+
+
+Import,Export and configure K8s Resources
+=========================================
+
+Export resources to a yaml file:
+oc get - o yaml <resou ce> > <resource>. yaml
+
+
+Export resources to a j son file:
+oc get - o json <resource> > <resource>. j son
+
+Create a resource from a yaml file:
+oc create - f <resource>. yaml
+
+Create a resource from a j son file:
+oc create - f <resource>. j son
+
+Replace a resource by filename or stdin:
+oc replace
+oc replace -f resources/pod.yaml
+
+Extract secrets or config maps to disk:
+oc extract
+
+Apply a config to a resource by filename or stdin:
+oc apply
+
+Copy files between file system and a pod:
+oc rsync
+
+oc adm top node
+
+Logs:
+==========
+
+Stream the logs of the most recent build config:
+oc logs - f bc/ <buildconfig_name>
+
+
+Stream the logs of the latest deployment:
+oc logs - f dc/ <deplymentconfig_name>
+
+Stream logs of the first deployment:
+oc logs --version=1 dc/<deplymentconfig_name>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

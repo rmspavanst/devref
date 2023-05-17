@@ -136,7 +136,9 @@ podman load -i myimage.tar
 4.4 Understand SELinux and Containers
 4.5 Exposing Container Workloads
 
-
+podman run myimage
+podman run -it myimage sh
+podman run -d myimage
 podman inspect mycontainer (shows current properties of running container)
 podman image inspect myimage(shows properties about images on the local system)
 podman logs connects to the entrypoint application STDOUT
@@ -196,6 +198,7 @@ cicd-e2e:
 
 
 sed -i 's/cicd-e2e:[0-9.]\+/cicd-e2e:${BUILD_NUMBER}/' deploy.yaml
+
 
 
 
