@@ -1,0 +1,61 @@
+# https://pet2cattle.com/2021/04/k3s-join-nodes
+
+# curl -sfL https://get.k3s.io | sh -
+
+The token we can get it from the master node on the following location /var/lib/rancher/k3s/server/node-token:
+
+# cat /var/lib/rancher/k3s/server/node-token
+
+Having the master node IP we just need to specify that it is https protocol on port 6443 for having the URL. To tell the installer we will have to set the following environment variables K3S_URL and K3S_TOKEN as follows:
+
+# curl -sfL https://get.k3s.io | K3S_URL=https://10.12.1.40:6443 K3S_TOKEN="K173832c8dd5a175bf2123d8403d840ad491850199cbd19309ab3b37827047cdd6319b04::server:faddf0a734d338cd66d4ab19fb4bed73" sh -
+
+The last step is to enable and start the k3s-agent (instead of the k3s-server that we would enable on the master):
+
+# systemctl enable --now k3s-agent
+
+Running kubectl get nodes you'll be able to see that the new node has joined the cluster:
+
+# kubectl get nodes
+
+Out of curiosity, we can check how the k3s-agent unit file uses an environment file (/etc/systemd/system/k3s-agent.service.env) to store the variables variables K3S_URL and K3S_TOKEN:
+
+# cat /etc/systemd/system/k3s-agent.service
+[Unit]
+Description=Lightweight Kubernetes
+Documentation=https://k3s.io
+Wants=network-online.target
+After=network-online.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=exec
+EnvironmentFile=/etc/systemd/system/k3s-agent.service.env
+KillMode=process
+Delegate=yes
+# Having non-zero Limit*s causes performance problems due to accounting overhead
+# in the kernel. We recommend using cgroups to do container-local accounting.
+LimitNOFILE=1048576
+LimitNPROC=infinity
+LimitCORE=infinity
+TasksMax=infinity
+TimeoutStartSec=0
+Restart=always
+RestartSec=5s
+ExecStartPre=-/sbin/modprobe br_netfilter
+ExecStartPre=-/sbin/modprobe overlay
+ExecStart=/usr/local/bin/k3s \
+    agent \
+
+
+The contents of the k3s-agent.service.env will look like:
+
+# cat /etc/systemd/system/k3s-agent.service.env
+K3S_TOKEN=K173832c8dd5a175bf2123d840ad491850199cbd19309ab3b37827047cdd6319b04::server:faddf0a734d338cd66d4ab19fb4bed73
+K3S_URL=https://10.12.1.40:6443
+To manually start the k3s agent we can also use the options --server and --token inetad of the environment variables:
+
+# k3s agent --server https://10.12.1.40:6443 --token "K108a732b7cfb59036f2362848d61823733359bbdf152192f7ebc6ad4b3078fd659::server:68e6f6ceae26d8c276e4a1a714f0b1ed"
+

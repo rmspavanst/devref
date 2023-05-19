@@ -1,0 +1,230 @@
+https://www.linuxtechi.com/setup-single-node-openshift-cluster-rhel-8/
+
+https://computingforgeeks.com/install-local-openshift-cluster-using-crc/
+
+https://www.unixarena.com/2022/03/openshift-4-x-single-node-cluster-setup-using-redhat-crc.html/
+
+
+# Install: (https://www.youtube.com/watch?v=7b1pQWfvUvQ&list=PLPmshpW0EvYDOiBMUYa40cLSDyswPFTMA)
+https://tekneed.com/how-to-install-openshift-on-a-laptop-or-desktop/
+https://tekneed.com/deploy-application-in-openshift-container-platform/
+
+
+
+
+sudo dnf -y install wget vim NetworkManager
+
+wget https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/crc/latest/crc-linux-amd64.tar.xz
+
+tar xvf crc-linux-amd64.tar.xz
+
+sudo mv crc-linux-*-amd64/crc /usr/local/bin
+sudo rm -rf crc-linux-*-amd64/
+
+
+crc version
+
+
+crc setup
+
+export XDG_RUNTIME_DIR=/run/user/$(id -u)
+
+loginctl enable-linger $USER
+export XDG_RUNTIME_DIR=/run/user/$(id -u)
+
+
+crc start -p pull-secret
+
+crc oc-env
+export PATH="/home/ansible/.crc/bin/oc:$PATH"
+# Run this command to configure your shell:
+# eval $(crc oc-env)
+
+
+vi .bashrc
+export PATH="/home/ansible/.crc/bin/oc:$PATH"
+# Run this command to configure your shell:
+eval $(crc oc-env)
+
+$ source .bashrc
+
+which oc
+~/.crc/bin/oc/oc
+
+
+sudo virsh list
+
+$ oc completion bash > oc_bash_completion
+$ sudo cp oc_bash_completion /etc/bash_completion.d/
+
+oc login -u kubeadmin -p Wbrer-2s4sm-ZjYGp-iMZvY https://api.crc.testing:6443
+
+$ oc get nodes
+$ oc cluster-info
+$ oc get clusteroperators
+
+
+crc console --credentials
+
+# Install and Connecting to remote OpenShift Local instance
+
+sudo dnf install haproxy /usr/sbin/semanage
+sudo firewall-cmd --add-service={http,https,kube-apiserver} --permanent
+sudo firewall-cmd --reload
+
+sudo semanage port -a -t http_port_t -p tcp 6443
+
+sudo cp /etc/haproxy/haproxy.cfg{,.bak}
+export CRC_IP=$(crc ip)
+
+sudo tee /etc/haproxy/haproxy.cfg<<EOF
+global
+    log /dev/log local0
+
+defaults
+    balance roundrobin
+    log global
+    maxconn 100
+    mode tcp
+    timeout connect 5s
+    timeout client 500s
+    timeout server 500s
+
+listen apps
+    bind 0.0.0.0:80
+    server crc_instance $CRC_IP:80 check
+
+listen apps_ssl
+    bind 0.0.0.0:443
+    server crc_instance $CRC_IP:443 check
+
+listen api
+    bind 0.0.0.0:6443
+    server crc_instance $CRC_IP:6443 check
+EOF
+
+sudo systemctl enable --now haproxy
+systemctl status haproxy
+
+ss -tunelp | egrep '80|443|6443'
+
+
+
+
+# Connect to cluster from client system (RHEL Based system example)
+
+The pre-requisites for this are:
+
+A remote server running Local OpenShift Cluster for the client to connect to
+External IP address of the remote server
+Installed latest OpenShift CLI (oc) in your $PATH on the client.
+
+You can use dnsmasq to connect a client machine to a remote server where OpenShift Container Platform cluster is running. This process assumes you’re using RHEL based system as client.
+
+Install dnsmasq package:
+
+sudo dnf install dnsmasq
+Configure NetworkManager to use of dnsmasq for DNS resolution:
+
+sudo tee /etc/NetworkManager/conf.d/use-dnsmasq.conf<<EOF
+[main]
+dns=dnsmasq
+EOF
+Add remote OpenShift Local Cluster DNS entries to the dnsmasq configuration:
+
+$ sudo vim /etc/NetworkManager/dnsmasq.d/external-crc.conf
+address=/apps-crc.testing/REMOTE_SERVER_IP_ADDRESS
+address=/api.crc.testing/REMOTE_SERVER_IP_ADDRESS
+If at one point you had local OpenShift client in your machine, then comment out any existing entries in /etc/NetworkManager/dnsmasq.d/crc.conf. These entries will conflict with the entries for the remote cluster.
+
+
+Reload NetworkManager after making the changes:
+
+sudo systemctl reload NetworkManager
+We can then test by logging in to the remote cluster as the developer user with oc:
+
+oc login -u developer -p developer https://api.crc.testing:6443
+
+
+
+
+############################################################################################
+# add repositry
+podman login -u kubeadmin -p $(oc whoami -t) default-route-openshift-image-registry.apps-crc.testing --tls-verify=false
+
+podman pull quay.io/libpod/alpine
+
+
+podman tag alpine:latest default-route-openshift-image-registry.apps-crc.testing/demo/alpine:latest
+podman push default-route-openshift-image-registry.apps-crc.testing/demo/alpine:latest --tls-verify=false
+
+oc get is
+
+oc set image-lookup alpine
+oc run demo --image=alpine --command -- sllep 60s
+
+#ex:
+
+podman pull nginx
+podman tag nginx:latest default-route-openshift-image-registry.apps-crc.testing/demo/nginx:latest
+podman push default-route-openshift-image-registry.apps-crc.testing/demo/nginx:latest --tls-verify=false
+
+
+https://access.redhat.com/solutions/6159832
+
+# to create new project
+
+oc new-project <project-name> --description="<dev application>" --display-name="<aws dev>"
+oc new-project st --description="systemizerinc" --display-name="systemizer"
+
+oc project st
+oc projects
+oc project
+
+
+oc get users
+
+# Grant a user access to the project with rolebinding. The syntax to use is:
+
+$ oc adm policy add-role-to-user <role> <user> -n <projectname>
+oc adm policy add-role-to-user edit developer -n st
+
+# For Cluster role use the command:
+
+$ oc adm policy add-cluster-role-to-user edit developer -n st
+
+#To remove role from the user, use:
+$ oc adm policy remove-role-from-user <role> <user> -n <projectname>
+$ oc adm policy remove-cluster-role-from-user <role> <user> -n <projectname>
+
+#If you want to get a list of users who have access to the project run the following command:
+
+$ oc get rolebindings -n <projectname>
+$ oc get rolebindings <rolename> -n <projectname>
+
+oc adm policy add-scc-to-user anyuid -z default
+
+
+
+
+# To test this cluster, let’s deploy nginx based application, run beneath commands,
+oc new-app --name nginx-app --docker-image=nginx
+
+oc get deployment
+
+oc get pods
+
+oc expose service nginx-app
+
+oc get route
+
+curl nginx-app-default.apps-crc.testing
+
+
+
+
+
+
+
+
+
