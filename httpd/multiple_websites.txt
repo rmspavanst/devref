@@ -1,0 +1,231 @@
+setup multiple website s in one server like:
+ 1. 10.0.16.186:8080 route to domain "expamle.com" with ssl
+ 2. 10.0.16.186:8081 route to domin "api.expample.com" with ssh
+ 3. 10.0.16.186:8082 route to domin "scrap.expample.com" with ssh
+ 
+ from start to end step by step
+ ===============================================================================
+ 
+ To set up multiple websites on a CentOS 8 server with different domains and SSL certificates, you can follow these step-by-step instructions:
+
+1. Purchase a domain and configure DNS:
+   a. Purchase the desired domain name from a domain registrar of your choice.
+   b. Log in to your domain registrar's control panel and configure the DNS settings for each domain. Set the DNS records for `example.com`, `api.example.com`, and `scrap.example.com` to point to the public IP address of your CentOS 8 server.
+
+2. Install and configure Apache web server:
+   a. Update the system packages:
+      ```
+      sudo dnf update
+      ```
+   b. Install Apache:
+      ```
+      sudo dnf install httpd
+      ```
+   c. Start and enable the Apache service:
+      ```
+      sudo systemctl start httpd
+      sudo systemctl enable httpd
+      ```
+
+3. Generate SSL certificates using Let's Encrypt:
+   a. Install Certbot:
+      ```
+      sudo dnf install certbot python3-certbot-apache
+      ```
+   b. Generate SSL certificates for each domain. Run the following commands:
+      ```
+      sudo certbot --apache -d example.com -d www.example.com
+      sudo certbot --apache -d api.example.com
+      sudo certbot --apache -d scrap.example.com
+      ```
+      Follow the instructions prompted by Certbot to complete the certificate generation process.
+
+4. Configure Apache virtual hosts:
+   a. Create virtual host configuration files for each domain:
+      ```
+      sudo nano /etc/httpd/conf.d/example.com.conf
+      ```
+      Add the following content:
+      ```
+      <VirtualHost *:8080>
+          ServerName example.com
+          ServerAlias www.example.com
+          DocumentRoot /var/www/html/example.com
+          ErrorLog /var/log/httpd/example.com_error.log
+          CustomLog /var/log/httpd/example.com_access.log combined
+
+          SSLEngine on
+          SSLCertificateFile /etc/letsencrypt/live/example.com/fullchain.pem
+          SSLCertificateKeyFile /etc/letsencrypt/live/example.com/privkey.pem
+      </VirtualHost>
+      ```
+      Repeat the above steps for `api.example.com` and `scrap.example.com`, adjusting the file names, directories, and port numbers accordingly.
+
+   b. Create the respective directories and set the appropriate ownership:
+      ```
+      sudo mkdir -p /var/www/html/example.com
+      sudo chown -R apache:apache /var/www/html/example.com
+      ```
+
+5. Test Apache configuration and restart the service:
+   a. Test the configuration for syntax errors:
+      ```
+      sudo apachectl configtest
+      ```
+      Make sure there are no errors in the output.
+
+   b. If the configuration test is successful, restart Apache:
+      ```
+      sudo systemctl restart httpd
+      ```
+
+6. Firewall configuration:
+   a. Allow incoming traffic on ports 8080, 8081, and 8082:
+      ```
+      sudo firewall-cmd --add-port=8080/tcp --permanent
+      sudo firewall-cmd --add-port=8081/tcp --permanent
+      sudo firewall-cmd --add-port=8082/tcp --permanent
+      sudo firewall-cmd --reload
+      ```
+
+7. Test the websites:
+   a. Open a web browser and navigate to `https://example.com:8080`, `https://api.example.com:8081`, and `https://scrap.example.com:8082`. You should see the respective websites with valid SSL certificates.
+
+Congratulations! You have successfully set up multiple websites with SSL certificates on your CentOS 8 server.
+ 
+ 
+ 
+======================================================================== 
+  
+ 
+ To set up multiple websites on a server with different domains and ports, you will need to configure a web server (such as Apache or Nginx) and perform the necessary DNS settings. Here's a general guide to help you achieve this:
+
+1. Install and configure a web server: Install your preferred web server software (Apache or Nginx) on your server. Follow the appropriate installation instructions for your server's operating system.
+
+2. Configure the web server for each website:
+   a. Open the configuration file for your web server. For Apache, it's usually located at `/etc/apache2/sites-available/` or `/etc/httpd/conf.d/`, depending on the distribution. For Nginx, it's typically located at `/etc/nginx/conf.d/` or `/etc/nginx/sites-available/`.
+   b. Create a new configuration file (e.g., `example.com.conf`) for each website you want to set up.
+   c. In each configuration file, specify the domain, port, SSL settings, and the appropriate DocumentRoot or proxy settings. For example:
+
+   **For example.com on port 8080:**
+   ```
+   <VirtualHost *:8080>
+       ServerName example.com
+       DocumentRoot /var/www/example.com/public_html
+
+       # SSL settings
+       SSLEngine on
+       SSLCertificateFile /path/to/example.com.crt
+       SSLCertificateKeyFile /path/to/example.com.key
+
+       # Additional configuration if needed
+       # ...
+   </VirtualHost>
+   ```
+
+   **For api.example.com on port 8081:**
+   ```
+   <VirtualHost *:8081>
+       ServerName api.example.com
+       DocumentRoot /var/www/api.example.com/public_html
+
+       # SSL settings
+       SSLEngine on
+       SSLCertificateFile /path/to/api.example.com.crt
+       SSLCertificateKeyFile /path/to/api.example.com.key
+
+       # Additional configuration if needed
+       # ...
+   </VirtualHost>
+   ```
+
+   **For scrap.example.com on port 8082:**
+   ```
+   <VirtualHost *:8082>
+       ServerName scrap.example.com
+       DocumentRoot /var/www/scrap.example.com/public_html
+
+       # SSL settings
+       SSLEngine on
+       SSLCertificateFile /path/to/scrap.example.com.crt
+       SSLCertificateKeyFile /path/to/scrap.example.com.key
+
+       # Additional configuration if needed
+       # ...
+   </VirtualHost>
+   ```
+
+   Replace the paths to SSL certificate files and the `DocumentRoot` directory with appropriate values for your setup.
+
+3. Enable the site configurations: Depending on your web server, you may need to enable the site configurations you created. For Apache, you can use the `a2ensite` command to enable the configurations. For Nginx, create a symbolic link to the configuration file in the `/etc/nginx/sites-enabled/` directory.
+
+4. Restart the web server: After making configuration changes, restart the web server to apply the new settings. For Apache, use the `service apache2 restart` or `systemctl restart apache2` command. For Nginx, use `service nginx restart` or `systemctl restart nginx`.
+
+5. DNS settings: Update your DNS settings to point the respective domains (`example.com`, `api.example.com`, `scrap.example.com`) to the server's IP address (`10.0.16.186`).
+
+6. SSL certificate: Obtain SSL certificates for each domain and configure them in the web server configuration files. You can obtain SSL certificates from a certificate authority (such as Let's Encrypt) or use self-signed certificates if you only need encryption without browser trust.
+
+Once you have completed these steps, the web server should route the
+
+
+
+To generate SSL certificates for the domains `example.com`, `api.example.com`, and `scrap.example.com`, you have a couple of options. Here's a general outline of the process:
+
+Option 1: Using Let's Encrypt (recommended)
+1. Install Certbot: Certbot is a command-line tool that simplifies the process of obtaining and installing SSL certificates from Let's Encrypt. Follow the official Certbot installation instructions for your operating system.
+
+2. Generate certificates: Once Certbot is installed, you can use it to generate SSL certificates for your domains. Open a terminal and run the following commands for each domain:
+
+   For `example.com` on port 8080:
+   ```
+   sudo certbot certonly --standalone --preferred-challenges http -d example.com -d www.example.com
+   ```
+
+   For `api.example.com` on port 8081:
+   ```
+   sudo certbot certonly --standalone --preferred-challenges http -d api.example.com
+   ```
+
+   For `scrap.example.com` on port 8082:
+   ```
+   sudo certbot certonly --standalone --preferred-challenges http -d scrap.example.com
+   ```
+
+   Certbot will automatically communicate with Let's Encrypt to verify your domain ownership and generate the SSL certificates.
+
+3. Locate the certificates: Certbot will store the generated certificates in a specific location on your server. The exact path may vary depending on your operating system and Certbot version. Common paths include:
+   - `/etc/letsencrypt/live/example.com/` (for `example.com`)
+   - `/etc/letsencrypt/live/api.example.com/` (for `api.example.com`)
+   - `/etc/letsencrypt/live/scrap.example.com/` (for `scrap.example.com`)
+
+   Note the paths to the certificate files, as you'll need them in the web server configuration.
+
+4. Update the web server configuration: Open the configuration files for each domain (as explained in the previous answer) and update the SSL certificate paths:
+
+   For `example.com`:
+   ```
+   SSLCertificateFile /etc/letsencrypt/live/example.com/fullchain.pem
+   SSLCertificateKeyFile /etc/letsencrypt/live/example.com/privkey.pem
+   ```
+
+   For `api.example.com`:
+   ```
+   SSLCertificateFile /etc/letsencrypt/live/api.example.com/fullchain.pem
+   SSLCertificateKeyFile /etc/letsencrypt/live/api.example.com/privkey.pem
+   ```
+
+   For `scrap.example.com`:
+   ```
+   SSLCertificateFile /etc/letsencrypt/live/scrap.example.com/fullchain.pem
+   SSLCertificateKeyFile /etc/letsencrypt/live/scrap.example.com/privkey.pem
+   ```
+
+   Make sure the paths match the actual locations of the certificate files.
+
+5. Restart the web server: After updating the configuration, restart the web server to apply the changes.
+
+Option 2: Using other certificate providers
+If you prefer to use a different certificate provider or have your own SSL certificates, you'll need to follow their specific instructions for generating and obtaining the certificates. The general process involves generating a Certificate Signing Request (CSR), providing it to the certificate provider, and receiving the SSL certificates in return. Once you have the certificates, you can update the web server configuration files as mentioned in Step 4 of Option 1.
+
+Remember to keep the certificates secure and regularly renew them to maintain a secure HTTPS connection for your websites.
+

@@ -91,6 +91,231 @@ Stream logs of the first deployment:
 oc logs --version=1 dc/<deplymentconfig_name>
 
 
+Events:
+=========
+
+oc get events -n <projetc_name>
+
+
+Manage Users And Policies:
+==============================
+
+
+
+Create or Update your htpasswd file:
+htpasswd -c -B -b </path_to/ htpasswd_file <user_name> <password>
+htpasswd -c -B -b users.htpasswd admin doubletab
+cat users.htpasswd
+
+toadd user:
+-------------
+
+for users in clombus wichita littlerock;
+for> do htpasswd -B -b users.htpasswd $users doubletap;
+for> done
+cat users.htpasswd
+
+oc get secret -n openshift-config
+if have htpass-secret -n openshift-config delete:
+
+oc delete secret htpass-secret -n openshift-config
+
+oc create secret generic htpass-secret --from-file=htpass-secret --from -file-htpasswd=users.htpasswd -n openshift-config 
+
+
+Append to or update crediantials:
+htpasswd -b </path_to/ htpasswd_file <user_name> <password>
+
+Create the HTPasswd secret
+oc create secret generic htpass-secret --from-file=htpasswd=</path_to/htpasswd_file> -n openshift -config
+
+
+
+
+Configure Netqorking Components:
+=================================
+
+1. View CNO deployment status:
+$ oc get - n openshift-network-operator deployment/network-operator
+
+2. view the state of the CNO:
+oc get clusteroperator/network
+
+3. view CNO config:
+oc describe network.config/cluster
+
+4. View CNO logs:
+oc logs --namespace=openshift-network-operator deployment/network-operator
+
+5. Check the DNS Operator:
+oc get -n openshift-dns-operator deployment/dns-operator
+oc get clusteroperator/dns
+
+6. DNS Operator Status:
+oc describe clusteroperator/dns
+
+7. DNS Operator logs:
+oc logs -n openshift-dns-operator deployment/dns-operator
+
+8. Debugging Routes:
+oc get endpoints -n <project>
+oc get pods -n <project> --template='{{range.items}}HostIP:{{status.hostIP}} PodIP: {{.status.PodIP}}{{"\n"}}{{end}}'
+
+oc get route -n <project>
+
+9. Debugging Services
+oc get services -n <project_name>
+oc get endpoints -n <project_name>
+
+
+
+****************************************************************************************************************************************
+========================================================================================================================================
+Prctice exam(cloudguru)
+==========================
+
+cloud_user
+
+&6Mizbyzshmhkkr
+
+yum install curl wget tar -y
+
+
+Install OpenShift on CodeReady Containers:
+-------------------------------------------
+
+This must be installed on your laptop or desktop since we are unable to run the cluster in our lab environment.
+
+1.Create your Red Hat login, or just log in. (copy or download the Secret file)
+2.Download CodeReady Containers.
+wget https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/crc/latest/crc-linux-amd64.tar.xz
+
+tar xvf crc-linux-amd64.tar.xz
+
+sudo mv crc-linux-*-amd64/crc /usr/local/bin
+sudo rm -rf crc-linux-*-amd64/
+
+
+crc version
+
+
+
+3.Set up CodeReady Containers to use 12 GB of memory.
+crc setup
+
+loginctl enable-linger $USER
+export XDG_RUNTIME_DIR=/run/user/$(id -u)
+
+sudo virsh list
+crc config set cpus <number> (optional)
+crc config set memory <number-in-mib> (optional)
+
+
+4.Enable cluster monitoring.
+crc start -p pull-secret
+crc config view
+
+crc oc-env
+export PATH="/home/ansible/.crc/bin/oc:$PATH"
+# Run this command to configure your shell:
+# eval $(crc oc-env)
+
+
+vi .bashrc
+export PATH="/home/ansible/.crc/bin/oc:$PATH"
+# Run this command to configure your shell:
+eval $(crc oc-env)
+
+source .bashrc
+
+which oc
+~/.crc/bin/oc/oc
+
+
+sudo virsh list
+
+5.Start your cluster and enable the OpenShift client tools.
+crc console --credentials
+oc login -u kubeadmin -p Wbrer-2s4sm-ZjYGp-iMZvY https://api.crc.testing:6443
+
+$ oc get nodes
+$ oc cluster-info
+$ oc get clusteroperators
+
+
+
+Set Up htpasswd as the Identity Provider and Add Users and Permissions:
+------------------------------------------------------------------------
+login to Kubeadmin account
+
+1. Create htpasswd file with these users with the password doubletap:
+	columbus
+	wichita
+	littlerock
+	tallahassee
+	admin
+
+
+htpasswd -c -B -b users.htpasswd <user> <passwd>
+htpasswd -c -B -b users.htpasswd admin doubletap
+cat users.htpasswd
+
+to add users:	
+	for users in columbus wichita littlerock tallahassee;
+	for> do htpasswd -B -b users.htpasswd $users <passwd>;
+	for> done;
+cat users.htpasswd
+
+
+oc get secreet -n openshift-config (check htpass-secret file is there or not)-if have delete:
+oc delete secret htpass-secret -n openshift-config
+
+
+2. Create HTPasswd Secret from file.
+oc create secret generic htpass-secret --from-file=htpasswd=users.htpasswd -n openshift-config
+
+3. Download the HTPasswd Custom Resource (using the link provided on the lab page).
+4. Add the name of your HTPasswd Secret to the file.
+5. Apply your custom resource to your cluster.
+
+wget https://raw.githubusercontent.com/linuxacademy/content-openshift-2020/master/htpasswd_cr.yaml
+
+vi htpasswd_cr.yaml
+apiVersion: config.openshift.io/v1
+kind: OAuth
+metadata:
+  name: cluster
+spec:
+  identityProviders:
+  - name: users.htpasswd
+    mappingMethod: claim
+    type: HTPasswd
+    htpasswd:
+      fileData:
+        name: htpass-secret
+		
+oc apply -f htpasswd_cr.yaml		
+
+oc login -u admin -p <passwd> (try for all users)
+oc whoami
+
+#back to kubeadmin account
+
+6. Create a project called zLand.
+
+
+7. Give columbus admin permissions to the zLand project.
+
+8. Give wichita and littlerock edit permissions to the zLand project.
+
+9. Give tallahassee basic user permissions to the zLand project.
+
+10.Give admin cluster admin permissions.
+
+11.Remove the kubeadmin user from the cluster.
+
+
+
 
 
 
