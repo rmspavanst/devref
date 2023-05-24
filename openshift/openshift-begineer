@@ -303,23 +303,206 @@ oc whoami
 
 6. Create a project called zLand.
 
+oc new-project zland
+
 
 7. Give columbus admin permissions to the zLand project.
+oc adm policy add-role-to-user admin columbus -n zland
+
 
 8. Give wichita and littlerock edit permissions to the zLand project.
+oc adm policy add-role-to-user edit wichita -n zland
+oc adm policy add-role-to-user edit littlerock -n zland
 
 9. Give tallahassee basic user permissions to the zLand project.
+oc adm policy add-role-to-user basic-user tallahassee -n zland
 
 10.Give admin cluster admin permissions.
+oc adm policy add-cluster-role-to-user cluster-admin admin 
+
 
 11.Remove the kubeadmin user from the cluster.
+oc login -u admin
+oc delete secrets kubeadmin -n kube-system
+
+
+Role-Based Access and Groups:
+------------------------------
+
+1. Create a project called twinkies.
+oc new-project twinkies
+
+
+2. Create a group called yum.
+oc groups new yum
+
+
+3. Add columbus, wichita, and littlerock to the yum group.
+oc adm groups add-users yum clombus wichita littlerock
+
+4. Grant admin access to the yum group for the project twinkies.
+ocd adm policy add-role-to-group admin yum -n twinkies
+
+5. Create a custom resource that allows tallahassee to get pod information from the twinkies project and call it gettwinkies.
+oc create role gettwinkies --verb=get --respource=pod -n twinkies
+oc adm policy add-role-to-user gettwinkies tallahassee
+
+oc desribe rolebinding.rbac -n twinkies (to check )
+
+
+Quotas and Resource Limits:
+----------------------------
+
+1.Download the quota and resource limit templates (using the links provided on the lab page).
+wget https://raw.githubusercontent.com/linuxacademy/content-openshift-2020/master/quota.yaml
+
+wget https://raw.githubusercontent.com/linuxacademy/content-openshift-2020/master/resource_limits.yaml
+
+
+2.Modify the quota.yaml file with the following values:
+	Max number of pods = 3
+	Max amount of memory = 2 GB
+	Max number of replication controllers = 2
+	Max number of services allowed = 8
+3.Create quota and apply it to the zLand project.
+
+vi quota.yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: core-object-counts
+spec:
+  hard:
+    pods: "3"
+    #cpu: ""
+    memory: "2Gi"
+    replicationcontrollers: "2"
+    services: "8"
+
+oc create -f quota.yaml -n zland
+oc get quota -n zland
+oc desribe quota core-object-counts -n zland
+
+
+4.Modify the resource_limits.yaml file with the following values:
+	Max number of pods = 4
+	Requested cpus = 1
+	Requested memory = 1 GB
+	Requested Ephemeral storage = 2 GB
+	Limit cpus to 4
+	Limit memory to 4 GB
+	Limit Ephemeral storage to 8 GB
+5.Create resource limit and apply it to the twinkies project.
+
+vi resouce_limits.yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-resources
+spec:
+  hard:
+    pods: "4"
+    requests.cpu: "1"
+    requests.memory: : "1Gi"
+    requests.ephemeral-storage: "2Gi"
+    limits.cpu: "3"
+    limits.memory: "4Gi"
+    limits.ephemeral-storage: "8Gi"	
+
+oc create -f resouce_limits.yaml -n twinkies
+oc get quota -n twinkies
+oc desribe quota compute-resources -n twinkies	
 
 
 
 
+Application Creation and Management:
+------------------------------------
+
+Note: Use https://github.com/sclorg/cakephp-ex example app to create applications
+
+1.Create test-app1, test-app2, test-app3, test-app4, and test-app5 projects.
+oc new-project test-app1
+oc new-project test-app2
+oc new-project test-app3
+oc new-project test-app4
+oc new-project test-app5
 
 
+2.Create an application named cake and make sure it is accessible to the outside world in project test-app1.
+oc project test-app1
+oc new-app https://github.com/sclorg/cakephp-ex --name=cake
+oc get pods
+oc expose service cake
+oc get routes
 
+3.Create an application using a route called twinkiesforall in the test-app2 project.
+oc project test-app2
+oc new-app https://github.com/sclorg/cakephp-ex --name=cake2
+oc get pods
+oc expose service cake2 --name=twinkiesforall
+oc get routes
+
+4.Create an application using a secured route called mytwinkie in the test-app3 project. Use self-signed cert from lab repo to secure the route (the links are provided on the lab page).
+oc project test-app3
+oc new-app https://github.com/sclorg/cakephp-ex --name=cake3
+oc get pods
+weget https://raw.githubusercontent.com/linuxacademy/content-openshift-2020/master/test-app3.crt
+weget https://raw.githubusercontent.com/linuxacademy/content-openshift-2020/master/test-app3.key
+oc create route edge --service =cake3 --cert=test.app3.crt --key=test.app3.key --hostname=mytwinkie-test-app3.apps-crc.testing
+oc get routes
+
+
+5.Create an application that can use the dont-tell secret project test-app4.
+oc project test-app4
+oc new-app https://github.com/sclorg/cakephp-ex --name=cake4
+oc get pods
+
+6.Create a secret called dont-tell in the test-app4 project. Download the secret.yaml file (using the link provided on the lab page).
+Populate with the user dXN1ci1uYW11 and password dGHcz4dvCmQ=.
+
+wget weget https://raw.githubusercontent.com/linuxacademy/content-openshift-2020/master/secret.yaml
+
+vi secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dont-tell
+  namespace: test-app4
+type: Opaque
+data:
+  username: dXN1ci1uYW11
+  password: dGHcz4dvCmQ=
+stringData:
+  hostname: cake4-test-app1.apps-crc.testing
+ 
+oc create -f secret.yaml
+oc get secret
+
+  
+7.Create a service account called madison in the test-app5 project.
+oc project test-app5
+oc new-app https://github.com/sclorg/cakephp-ex --name=cake5
+oc get pods
+
+oc create sa madison
+
+
+8.Create an application that can be edited by the madison service account in the test-app5 project.
+oc adm policy add-role-to-user edit system:serviceaccount:test-app5:madison
+oc get sa
+
+
+9.Manually scale the application in the test-app2 project to 2 pods.
+
+oc project test-app2
+oc scale --replicas=2 deployment.apps/cake2
+
+10.Set an autoscaler for min of 1 pod and a max of 3 pods based of 75% CPU utilization for the application in the test-app5 project.
+
+oc get all (copy the deployment name)
+oc autoscale deployment.apps/cake5 --min 1 --max 3 --cpu-percent=75
+oc get hpa
 
 
 
