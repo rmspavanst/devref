@@ -1,0 +1,28 @@
+cd /etc/haproxy/
+mkdir certs
+cd certs/
+openssl req -newkey rsa:2048 -nodes -x509 -days 365 -keyout haproxy2.key -out haproxy2.crt -subj "/CN=<yourServerName>"
+cat haproxy2.crt haproxy2.key haproxy2.pem
+cat haproxy2.crt haproxy2.key > haproxy2.pem
+
+
+bind :::8181 ssl crt /etc/haproxy/certs/haproxy2.pem
+
+
+http-request set-header X-Forwarded-Proto https if { ssl_fc }
+http-request set-header X-Forwarded-Proto http if !{ ssl_fc }
+
+
+frontend mywebsite
+    mode http
+    bind :80
+    bind :443 ssl crt /etc/ssl/certs/ssl.pem
+    http-request redirect scheme https unless { ssl_fc }
+    default_backend servers
+
+
+
+
+
+http-request redirect scheme https code 301 unless { ssl_fc }
+

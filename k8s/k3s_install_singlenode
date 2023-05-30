@@ -1,0 +1,12 @@
+https://blog.while-true-do.io/kubernetes-k3s-on-almalinux/
+
+
+ 
+ curl -sfL https://get.k3s.io | sh -
+
+ systemctl status k3s.service
+ systemctl enable k3s.service
+
+ kubectl get nodes
+ ki=ubectl get nodes
+
