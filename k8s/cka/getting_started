@@ -1,0 +1,18 @@
+kubectl get ns
+
+kubectl create ns robot-shop
+
+kubectl config set-context --current --namespace=robot-shop
+
+git clone https://github.com/linuxacademy/robot-shop.git 
+https://github.com/alok-squareops-dev/robot-shop
+
+
+
+cd robot-shop/k8s/descriptors
+
+kubectl apply -n robot-shop /robot-shop/k8s/descriptors/
+
+
+kubectl get all -n robot-shop
+
