@@ -1,0 +1,132 @@
+ansible/
+├── roles/
+│   ├── create_ec2_instance/
+│   │   └── tasks/
+│   │       └── main.yaml
+│   ├── configure_ec2_instance/
+│   │   └── tasks/
+│   │       └── main.yaml
+│   └── display_message/
+│       └── tasks/
+│           └── main.yaml
+└── playbook.yaml
+
+
+#playbook.yaml:
+
+---
+- name: Create and configure EC2 instance
+  hosts: localhost
+  gather_facts: false
+
+  roles:
+    - create_ec2_instance
+    - configure_ec2_instance
+    - display_message
+
+#roles/create_ec2_instance/tasks/main.yaml:
+
+---
+- name: Launch EC2 instance
+  ec2:
+    aws_access_key: "{{ ansible_aws_access_key }}"
+    aws_secret_key: "{{ ansible_aws_secret_key }}"
+    region: "{{ region }}"
+    instance_type: "{{ instance_type }}"
+    image_id: "{{ ami_id }}"
+    key_name: "{{ key_pair }}"
+    security_groups: "{{ security_group }}"
+    subnet_id: "{{ subnet_id }}"
+    count: 1
+    wait: true
+    instance_tags:
+      Name: "MyEC2Instance"
+  register: ec2_instance
+
+- name: Set EC2 instance facts
+  set_fact:
+    ec2_instance_public_ip: "{{ ec2_instance.instances[0].public_ip }}"
+
+#roles/configure_ec2_instance/tasks/main.yaml:
+
+---
+- name: Update apt cache (for Ubuntu/Debian)
+  apt:
+    update_cache: yes
+  when: ansible_os_family == 'Debian'
+
+- name: Install httpd (Apache HTTP Server)
+  package:
+    name: httpd
+    state: present
+  become: true
+  when: ansible_os_family == 'RedHat'
+
+- name: Start and enable httpd service
+  service:
+    name: httpd
+    state: started
+    enabled: true
+  become: true
+  when: ansible_os_family == 'RedHat'
+
+- name: Install httpd (Apache HTTP Server) (Ubuntu/Debian)
+  apt:
+    name: apache2
+    state: present
+  become: true
+  when: ansible_os_family == 'Debian'
+
+- name: Start and enable Apache service (Ubuntu/Debian)
+  service:
+    name: apache2
+    state: started
+    enabled: true
+  become: true
+  when: ansible_os_family == 'Debian'
+
+- name: Copy code files to the web server root directory
+  copy:
+    src: /path/to/your/code
+    dest: /var/www/html
+  become: true
+
+- name: Restart httpd service
+  service:
+    name: httpd
+    state: restarted
+  become: true
+  when: ansible_os_family == 'RedHat'
+
+- name: Restart Apache service (Ubuntu/Debian)
+  service:
+    name: apache2
+    state: restarted
+  become: true
+  when: ansible_os_family == 'Debian'
+
+
+#roles/display_message/tasks/main.yaml:
+
+---
+- name: Generate URL
+  set_fact:
+    url: "http://{{ ec2_instance_public_ip }}"
+
+- name: Display success or failure message
+  debug:
+    msg: |
+      Code deployed successfully!
+      Access your application at: {{ url }}
+
+
+# Replace /path/to/your/code in roles/configure_ec2_instance/tasks/main.yaml with the actual path to your code files.
+
+#To run this updated playbook, use the ansible-playbook command:
+
+# ansible-playbook playbook.yaml
+
+#This playbook utilizes separate roles for creating the EC2 instance, configuring it, and displaying the message. 
+#Each role has its own set of tasks organized in their respective tasks/main.yaml files. 
+#The playbook.yaml file includes the hosts, gather_facts, and roles sections. 
+#This structure improves modularity and maintainability by separating concerns and promoting code reuse.

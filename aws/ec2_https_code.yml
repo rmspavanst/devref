@@ -1,0 +1,211 @@
+---
+- name: Create and configure EC2 instance
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    region: "us-east-1"
+    instance_type: "t2.micro"
+    ami_id: "ami-xxxxxxxxxxxxx"  # Replace with your desired AMI ID
+    key_pair: "my-key-pair"  # Replace with your desired key pair name
+    security_group: "my-security-group"  # Replace with your desired security group name
+    subnet_id: "subnet-xxxxxxxx"  # Replace with your desired subnet ID
+
+  tasks:
+    - name: Launch EC2 instance
+      ec2:
+        aws_access_key: "{{ ansible_aws_access_key }}"
+        aws_secret_key: "{{ ansible_aws_secret_key }}"
+        region: "{{ region }}"
+        instance_type: "{{ instance_type }}"
+        image_id: "{{ ami_id }}"
+        key_name: "{{ key_pair }}"
+        security_groups: "{{ security_group }}"
+        subnet_id: "{{ subnet_id }}"
+        count: 1
+        wait: true
+        instance_tags:
+          Name: "MyEC2Instance"
+      register: ec2_instance
+
+    - name: Print instance details
+      debug:
+        var: ec2_instance.instances[0]
+
+- name: Configure EC2 instance
+  hosts: "{{ ec2_instance.instances[0].public_ip }}"
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Update apt cache (for Ubuntu/Debian)
+      apt:
+        update_cache: yes
+      when: ansible_os_family == 'Debian'
+
+    - name: Install httpd (Apache HTTP Server)
+      package:
+        name: httpd
+        state: present
+      become: true
+      when: ansible_os_family == 'RedHat'
+
+    - name: Start and enable httpd service
+      service:
+        name: httpd
+        state: started
+        enabled: true
+      become: true
+      when: ansible_os_family == 'RedHat'
+
+    - name: Install httpd (Apache HTTP Server) (Ubuntu/Debian)
+      apt:
+        name: apache2
+        state: present
+      become: true
+      when: ansible_os_family == 'Debian'
+
+    - name: Start and enable Apache service (Ubuntu/Debian)
+      service:
+        name: apache2
+        state: started
+        enabled: true
+      become: true
+      when: ansible_os_family == 'Debian'
+
+    - name: Copy code files to the web server root directory
+      copy:
+        src: /path/to/your/code
+        dest: /var/www/html
+      become: true
+
+    - name: Restart httpd service
+      service:
+        name: httpd
+        state: restarted
+      become: true
+      when: ansible_os_family == 'RedHat'
+
+    - name: Restart Apache service (Ubuntu/Debian)
+      service:
+        name: apache2
+        state: restarted
+      become: true
+      when: ansible_os_family == 'Debian'
+
+...
+
+---
+- name: Create and configure EC2 instance
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    region: "us-east-1"
+    instance_type: "t2.micro"
+    ami_id: "ami-xxxxxxxxxxxxx"  # Replace with your desired AMI ID
+    key_pair: "my-key-pair"  # Replace with your desired key pair name
+    security_group: "my-security-group"  # Replace with your desired security group name
+    subnet_id: "subnet-xxxxxxxx"  # Replace with your desired subnet ID
+
+  tasks:
+    - name: Launch EC2 instance
+      ec2:
+        aws_access_key: "{{ ansible_aws_access_key }}"
+        aws_secret_key: "{{ ansible_aws_secret_key }}"
+        region: "{{ region }}"
+        instance_type: "{{ instance_type }}"
+        image_id: "{{ ami_id }}"
+        key_name: "{{ key_pair }}"
+        security_groups: "{{ security_group }}"
+        subnet_id: "{{ subnet_id }}"
+        count: 1
+        wait: true
+        instance_tags:
+          Name: "MyEC2Instance"
+      register: ec2_instance
+
+    - name: Print instance details
+      debug:
+        var: ec2_instance.instances[0]
+
+- name: Configure EC2 instance
+  hosts: "{{ ec2_instance.instances[0].public_ip }}"
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Update apt cache (for Ubuntu/Debian)
+      apt:
+        update_cache: yes
+      when: ansible_os_family == 'Debian'
+
+    - name: Install httpd (Apache HTTP Server)
+      package:
+        name: httpd
+        state: present
+      become: true
+      when: ansible_os_family == 'RedHat'
+
+    - name: Start and enable httpd service
+      service:
+        name: httpd
+        state: started
+        enabled: true
+      become: true
+      when: ansible_os_family == 'RedHat'
+
+    - name: Install httpd (Apache HTTP Server) (Ubuntu/Debian)
+      apt:
+        name: apache2
+        state: present
+      become: true
+      when: ansible_os_family == 'Debian'
+
+    - name: Start and enable Apache service (Ubuntu/Debian)
+      service:
+        name: apache2
+        state: started
+        enabled: true
+      become: true
+      when: ansible_os_family == 'Debian'
+
+    - name: Copy code files to the web server root directory
+      copy:
+        src: /path/to/your/code
+        dest: /var/www/html
+      become: true
+
+    - name: Restart httpd service
+      service:
+        name: httpd
+        state: restarted
+      become: true
+      when: ansible_os_family == 'RedHat'
+
+    - name: Restart Apache service (Ubuntu/Debian)
+      service:
+        name: apache2
+        state: restarted
+      become: true
+      when: ansible_os_family == 'Debian'
+
+- name: Display success or failure message with URL details
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Get instance public IP
+      set_fact:
+        instance_ip: "{{ ec2_instance.instances[0].public_ip }}"
+
+    - name: Generate URL
+      set_fact:
+        url: "http://{{ instance_ip }}"
+
+    - name: Display success or failure message
+      debug:
+        msg: |
+          Code deployed successfully!
+          Access your application at: {{ url }}
+
