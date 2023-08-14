@@ -4,6 +4,11 @@
    4 GB Ram, 2 Cpus, 40 GB Storage, Server with GUI, Internet.
 
 
+What is Red Hat OpenShift?
+A containerization software distribution that builds on the Kubernetes container platform
+
+
+
 # Running a Container:
 ======================
 
