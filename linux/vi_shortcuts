@@ -1,0 +1,37 @@
+Shortcuts:
+
+
+
+Navigation
+h      - moves the cursor one character to the left
+l      - moves the cursor one character to the right
+k      - moves the cursor up one line
+j      - moves the cursor down one line
+
+0      - moves the cursor to the beginning of the line
+$      - moves the cursor to the end of the line
+
+gg     - moves to the beginning of the file
+G      - moves to the end of the file
+
+
+Insert Text
+o            - begin a new line below the cursor
+O            - begin a new line above the cursor
+a            - insert text after the cursor
+
+
+Delete Text
+x                - delete character at cursor
+dd               - delete line
+dG               - delete to the end of the file
+ 
+
+Undo and Redo
+u              - undo the last operation
+ctrl+r        - redo the last undo
+
+
+Copy and Paste
+yy             - copy current line into storage buffer
+p              - paste storage buffer after current line
