@@ -159,6 +159,10 @@ free -m
 LVM (logical volume Management)
 -------------------------------
 
+Q1. Create a LV named LV1 of size 8GB
+Q2. Extend the LV, LV1 by 2GB
+Q3. Create a LV named LV2 with 10 extent where the size of each extent is 8MB
+
 
 
 
