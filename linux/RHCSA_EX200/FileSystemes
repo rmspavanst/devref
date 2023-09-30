@@ -1,0 +1,19 @@
+Different type of file systems:
+eg: ext3, ext4, xfs, NTFS, FAT etc...
+
+
+Dir listing Attribute:
+=========================
+
+Total columns = 9
+Type, #ofLinks, Owner, Group, Size, Month, Day, Time, Name
+
+• cp
+• rm
+• mv
+• mkdir
+• rmdir or rm -r
+• chgrp
+• chown
+
+

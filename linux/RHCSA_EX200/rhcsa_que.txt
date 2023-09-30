@@ -1,0 +1,322 @@
+Question 1:
+Set up a local yum repository using RHEL-9 ISO image mounted on either /mnt
+
+For a Linux VM it is most likely mounted on /run directory
+
+
+Question 2:
+Modify network interface to static configuration with the following settings:
+
+IPV4 – 192.168.1.211/24
+
+GW – 192.168.1.1
+
+DNS – 8.8.8.8
+
+Question 3:
+Add the following secondary/additional IPV4 address statically to your current running interface. Do this in a way that it does not compromise or change your existing settings:
+
+IPV4 – 10.0.0.211/24
+
+Question 4:
+Configure NTP server to sync the time with test.zone.org
+
+Question 5:
+Find the rows that contain abcde from file /etc/testfile, and write it to the file/tmp/testfile, and the sequence is requested as the same as /etc/testfile
+
+Question 6:
+Create a new 1GiB volume group named “newvg”
+
+Question 7:
+Create a 400MiB logical volume named “newlv” inside the “newvg” volume group
+
+Question 8:
+Format the new “newlv” logical volume with the ext4 filesystem and mount it persistently on the /newlv directory
+
+
+Question 9:
+Extend the ext4 filesystem on “newlv” by 400MiB
+
+
+
+Question 10:
+Use the appropriate utility to create a 50G thin provisioned volume "1thinpool"
+
+
+Question 11:
+Using "thin_pool" create a thin volume "1thinvol" with a size of 1T
+
+Question 12:
+Find all files that are larger than 5MB in the /etc directory and copy them to /tmp/files3m
+
+Question 13:
+Set the system time to “America/New_York” timezone
+
+Question 14:
+Set SELinux to “permissive” mode
+
+Question 15:
+Enable boot messages
+
+Question 16:
+All user passwords should expire after 90 days and must be at least 8 characters in length
+
+Question 17:
+Create users jerry, george, eliane, and kramer, then do the following:
+
+a. Add jerry and george to “friends” group as a secondary group. If the group doesn’t already exist, create it.
+
+b. Add eliane and kramer to “gfandneighbor” group as a secondary group. If the group doesn’t already exist, create it
+
+
+Question 18:
+Only users and group members of the gfandneighbor group should have access to the “/gfandneighbor” directory. Make eliane the owner of this directory. Make the gfandneighbor group the group owner of the “/gfandneighbor” directory
+
+Question 19:
+Create a directory “friends” in /tmp. Change the ownership of the directory to friends group. Only group members and root should have access to that directory
+
+Question 20:
+Make george the owner of /friends directory
+
+Question 21:
+Search the user jerry in the passwd file in /etc directory and send the output in /tmp/users. Then edit the /tmp/users file and change the /bin/bash to /sbin/nologin
+
+Question 22:
+Create a cron job that writes “These pretzels are making me thirsty!” to /var/log/messages log file at 12pm only on weekdays
+
+Question 23:
+The system administrator has just just been laid off, as the new system administrator, reset the root password of the linux server to Password123
+
+Question 24:
+Configure a web server that displays “Welcome to My webserver!” when connected to it over port 80 and 443. Ensure the firewall allows the http/https services
+
+Question 25:
+Create a new 100MB swap partition on /dev/sdb which takes effect auto at boot start
+
+Question 26:
+Set the limit for the number of SSH login attempts to two
+
+
+Question 27:
+Install container-tools
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

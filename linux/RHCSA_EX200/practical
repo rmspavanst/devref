@@ -1,0 +1,178 @@
+a. Manage Basic Networking
+b. Configure the Local Storage (lvm, disk partition, Swap space)
+c. Manage Users and Groups (Create, Passwd,add user to Groups )
+
+
+Categories:
+===========
+1. Understand and use essential tools
+2. Create simple shell scripts
+3. Operate running systems
+4. Configure local storage
+5. Create and configure file systems
+6. Deploy, Configure and maintain systems
+7. Manage basic networking
+8. Manage users and groups
+9. Manage security
+10. Manage containers
+
+
+
+Networking and Hostname:
+========================
+
+1. Configuring Network
+
+imp terms: Ip address(192.168.5.3) and Network mask(255.255.255.0)
+192.168.5.3/24
+255/8.255/8.255/8.0
+
+ip addr show
+ip addr show ens160
+ping
+
+Configuring Network Connection:
+-------------------------------
+nmcli/nmtui
+
+nmcli con add (Create new connection)
+nmcli con mod (Modify existing connection)
+
+parameters: con-name, type, ifname, autoconnect, ip4, gw4
+
+
+nmcli con show(to view connections)
+nmcli con show ens160 (to view all details/ parameters of ens160)
+
+nmcli con add con-name "Default" type ethernet ifname ens160 (to create new con with name:Default using ethernet of ens160)
+nmcli con show (to check)
+
+nmcli con add con-name "Default1" type ethernet ifname ens160 ip4 192.168.1.1/24 gw4 192.168.1.2
+nmcli con mod Default1 ipv4.dns 8.8.8.8
+nmcli con show Default1
+
+nmcli con up "Default1" (to activate)
+
+nmcli con mod  "Default1" connection.autoconnect yes (modify the Default1 connection to autoconnect, autoconnect is yes: after reoot automatically connect to Default1 connection)
+
+
+nmcli con mod Default1 ipv4.addresses 192.168.2.2/16 (updated ip address)
+nmcli con mod Default1 +ipv4.addresses 192.168.3.3/24 (can add multiole ip address)
+nmcli con show Default1
+
+
+
+2. Set Hostname
+
+Changing the Hostname:
+-----------------------
+
+hostnamectl
+/etc/hostname
+
+hostnamectl set-hostname pavan
+
+clear
+
+Questions:
+----------
+
+Q1. Create a new connection named Net of type Ethernet having interface name eth0
+a) ip address: 200.0.0.12/16
+b) Gateway: 20.0.0.1
+c) DNS: 8.8.8.8
+
+
+
+Q2. Configure the network connection
+a) ip: 172.24.5.10
+b) netmask: 255.255.255.0
+c) gateway: 172.24.5.48
+
+Q3. Set hostname to: server
+
+
+Configure local storage:
+=========================
+
+1. Disk Partition
+2. Swap space
+3. LVM (logical volume Management)
+
+Disk Partition:
+------------------
+Q1. Create a partition Par1 od size 1Gb
+
+lsblk or ls /dev (to see all the avaliable disks)
+    2 disks (nvme0n1, nvme0n2)
+    nvme0n1 is used
+    nvme0n2 is not used
+
+fdisk /dev/nvme0n2 (to create new 1Gb partition)
+    :n (n for new partition)
+    :p
+    :1
+    :
+    :+1G
+    :w
+
+partprobe /dev/nvme0n2
+lsblk
+
+mount the partition:
+--------------------
+mkdir /newdisk
+mkfs.xfs /dev/nvme0n2p1
+
+mount /dev/nvme0n2p1 /newdisk/ or
+vi /etc/fstab
+/dev/nvme0n2p1 /newdisk xfs  defaults 0 0
+
+mount -a (tocheck)
+
+Swap Space:
+-------------
+Q2. Add a swap partition of size 750Mb. Do not delete the existing swap
+
+free -m (to show the current swap)
+fdisk /dev/nvme0n2
+    :n
+    :p
+    :3
+    :+750M
+    :t
+    :3
+    :L (list of all codes)
+    :82
+    :w
+
+partprobe /dev/nvme0n2
+lsblk
+mkswap /dev/nvm30nep3
+vi /etc/fstab
+/dev/nvme0n2p3 /swap swap  defaults 0 0
+
+swapon -a (tocheck)
+free -m
+
+
+LVM (logical volume Management)
+-------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
