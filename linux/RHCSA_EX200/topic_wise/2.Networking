@@ -1,0 +1,72 @@
+Networking and Hostname:
+========================
+
+1. Configuring Network
+
+imp terms: Ip address(192.168.5.3) and Network mask(255.255.255.0)
+192.168.5.3/24
+255/8.255/8.255/8.0
+
+ip addr show
+ip addr show ens160
+ping
+
+Configuring Network Connection:
+-------------------------------
+nmcli/nmtui
+
+nmcli con add (Create new connection)
+nmcli con mod (Modify existing connection)
+
+parameters: con-name, type, ifname, autoconnect, ip4, gw4
+
+
+nmcli con show(to view connections)
+nmcli con show ens160 (to view all details/ parameters of ens160)
+
+nmcli con add con-name "Default" type ethernet ifname ens160 (to create new con with name:Default using ethernet of ens160)
+nmcli con show (to check)
+
+nmcli con add con-name "Default1" type ethernet ifname ens160 ip4 192.168.1.1/24 gw4 192.168.1.2
+nmcli con mod Default1 ipv4.dns 8.8.8.8
+nmcli con show Default1
+
+nmcli con up "Default1" (to activate)
+
+nmcli con mod  "Default1" connection.autoconnect yes (modify the Default1 connection to autoconnect, autoconnect is yes: after reoot automatically connect to Default1 connection)
+
+
+nmcli con mod Default1 ipv4.addresses 192.168.2.2/16 (updated ip address)
+nmcli con mod Default1 +ipv4.addresses 192.168.3.3/24 (can add multiole ip address)
+nmcli con show Default1
+
+
+
+2. Set Hostname
+
+Changing the Hostname:
+-----------------------
+
+hostnamectl
+/etc/hostname
+
+hostnamectl set-hostname pavan
+
+clear
+
+Questions:
+----------
+
+Q1. Create a new connection named Net of type Ethernet having interface name eth0
+a) ip address: 200.0.0.12/16
+b) Gateway: 20.0.0.1
+c) DNS: 8.8.8.8
+
+
+
+Q2. Configure the network connection
+a) ip: 172.24.5.10
+b) netmask: 255.255.255.0
+c) gateway: 172.24.5.48
+
+Q3. Set hostname to: server

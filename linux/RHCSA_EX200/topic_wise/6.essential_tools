@@ -1,0 +1,118 @@
+Understand and use essential tools:
+=====================================
+
+ls : list directory contents 
+touch : update time stamp, 
+mkdir : create directory,
+rm  : delete files,
+rmdir : delete directories, 
+cp : copy files/dir, 
+mv : move directories and rename, 
+find : search for files
+
+find / -name passwd ( root dir)
+find . -name trident (current dir)
+find . -user root (root user created files/dir)
+
+# Q1. Find all the files with the name "passwd" and copy them into the dir /mnt/copy
+
+ls /mnt/copy
+mkdir /mnt/copy
+find / -name passwd -exec cp {} /mnt/copy \;
+ls -la /mnt/copy
+
+# Q2. Find all files owned by the user "Rohit" and copy them in the direcory /mnt/Rohith
+
+mkdir /mnt/Rohith
+find . -user Rohith -exec cp -r {} /mnt/root \;
+ls -la /mnt/Rohith
+
+
+
+|| pipes and redirection || chmod and umask || tar ||
+-----------------------------------------------------
+
+# Que:
+a) The user owner should have all rights on diredtory "Dir"
+b) Create a compressed archive of /etc directory and name it as /root/com.gz
+c) Copy the lines containing the word "root" in /etc/paswd and copy them into a file /mnt/pass
+
+
+pipes: "|"
+------------
+ls /etc | wc (shows count of files char lines)
+ls /etc | wc -l (it will only count od files)
+la -l /etc | head (shows top 10 list)
+
+redirection:
+-------------
+ls
+touch text
+ls text text1 (will get error text1: no such file/dir)
+
+ls > out.txt
+cat out.txt
+
+date > out.txt (over writen)
+date >> out.txt (append the outpur)
+
+ls text1 2> out.txt
+cat out.txt
+ls text text1 > out.txt
+ls text text1 2> out.txt
+
+
+chmod and umask:
+----------------
+
+ls -l out.txt
+
+relative:
+chmod u+x out.txt
+chmod o-r out.txt
+
+absolute:
+read:4
+write:2
+exec:1
+
+chmod 631 out.txt
+ls -la
+
+mkdir D1
+ls -ld D1
+
+no permission for new files/dir
+unmask 024
+touch 2file
+mkdir D2
+ls -la
+
+
+tar:
+------
+cat > file
+dddd
+ffff
+gggg
+hhhh
+
+tar cvf file.tar file file1
+ls -la
+tar tf file.tar
+tar xf file.tar
+
+to create compressed archive
+tar cvf /mnt/etc.tar /etc
+tar cvfz file.tar.gz f1 f1
+tar cvfa file1.tar.gz f1 f2
+
+Ans:
+----
+a) mkdir Dir
+   chmod u+x Dir
+
+b) tar cvfz /root/com.gz /etc
+
+c) grep "root" /etc/passwd > /mnt/pass
+cat /mnt/pass

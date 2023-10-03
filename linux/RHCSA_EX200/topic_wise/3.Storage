@@ -1,0 +1,163 @@
+Configure local storage:
+=========================
+
+1. Disk Partition
+2. Swap space
+3. LVM (logical volume Management)
+
+Disk Partition:
+------------------
+Q1. Create a partition Par1 od size 1Gb
+
+lsblk or ls /dev (to see all the avaliable disks)
+    2 disks (nvme0n1, nvme0n2)
+    nvme0n1 is used
+    nvme0n2 is not used
+
+fdisk /dev/nvme0n2 (to create new 1Gb partition)
+    :n (n for new partition)
+    :p
+    :1
+    :
+    :+1G
+    :w
+
+partprobe /dev/nvme0n2
+lsblk
+
+
+
+mount the partition:
+--------------------
+mkdir /newdisk
+mkfs.xfs /dev/nvme0n2p1
+
+mount /dev/nvme0n2p1 /newdisk/ or
+vi /etc/fstab
+/dev/nvme0n2p1 /newdisk xfs  defaults 0 0
+
+mount -a (tocheck)
+
+
+
+
+
+Swap Space:
+-------------
+Q2. Add a swap partition of size 750Mb. Do not delete the existing swap
+
+free -m (to show the current swap)
+fdisk /dev/nvme0n2
+    :n
+    :p
+    :3
+    :+750M
+    :t
+    :3
+    :L (list of all codes)
+    :82
+    :w
+
+partprobe /dev/nvme0n2
+lsblk
+mkswap /dev/nvm30nep3
+vi /etc/fstab
+/dev/nvme0n2p3 /swap swap  defaults 0 0
+
+swapon -a (tocheck)
+free -m
+
+
+
+
+
+
+
+LVM (logical volume Management)
+-------------------------------
+
+Q1. Create a LV named LV1 of size 8GB
+Q2. Extend the LV, LV1 by 2GB
+Q3. Create a LV named LV2 with 10 extent where the size of each extent is 8MB
+
+
+1. Physical Storage - disk partition or full disk or RAID(PD) (physical device 1 sda (6GB)) (physical device 2 sdb (5GB)) (physical device 3 sdc (4GB))
+
+2. Create phsycal volume(pv) (Physical Volume 1 (6GB)) (Physical Volume 2 (5GB)) (Physical Volume 3 (4GB))
+
+3. Create Volume Group(VG) (Volume Group (15GB))
+
+4. Cleate Logical Volume(LV) (Logical Volume 1(8GB)) (Logical Volume 2(7GB))
+
+
+# Q1. Create a LV named LV1 of size 8GB
+ lsblk (to check pd)
+    - nvme0n1 20GB (used)
+    - nvme0n2 6GB (used)
+    - nvme0n3 6GB (notused) pd
+    - nvme0n4 5GB (notused) pd
+    - nvme0n5 4GB (notused) pd
+
+pd change to pv
+ pvcreate /dev/nvem0n3
+ pvcreate /dev/nvem0n4
+ pvcreate /dev/nvem0n5
+ pvs ( to check physical volumes)
+
+pv change to VG
+ vgcreate VG1 /dev/nvem0n3 /dev/nvem0n4
+ vgs (to check VG)
+
+From VG create the LV (LV1 of size 8GB)
+ lvcreate -L 8Gb -n LV1 VG1
+ lvs (to check LV)
+
+now mount the LV
+ vi /etc/fstab
+ /dev/VG1/LV1 /lv xfs defaults 0 0
+
+mkdir /lv
+mkfs.xfs /dev/VG1/LV1
+mount -a
+
+
+# Q2. Extend the LV, LV1 by 2GB
+
+ vgs
+if the spce is avaliable
+ lvs
+ lvextend -r -L +2Gb /dev/VG1/LV1
+ lvs (to vrify)
+
+if the spce is not avaliable
+ vgs
+ vgextend VG1 /dev/nvem0n5
+ vgs
+ lvs
+ lvextend -r -L +2Gb /dev/VG1/LV1
+ lvs (to vrify)
+
+# Q3. Create a LV named LV2 with 10 extent where the size of each extent is 8MB
+
+ vgdisplay (to display the VG and ypou can see "PE size(physical extent)")
+
+to delete LV
+ lvremove /dev/VG1/LV1
+ vi /etc/fstab
+ #/dev/VG1/LV1 /lv xfs defaults 0 0
+
+ unmount /lv
+ lvchange -an /dev/VG1/LV1 (disable LV)
+ lvremove /dev/VG1/LV1 (remove LV)
+ lvs (lv list)
+
+remove VG
+ vgremove VG1
+ vgs
+
+Create a LV named LV2 with 10 extent where the size of each extent is 8MB
+ vgcreate -s 8M VG1 /dev/nvme0n2
+ vgdisplay
+
+ lvcreate -l 10 -n LV2 /dev/VG1
+ lvs

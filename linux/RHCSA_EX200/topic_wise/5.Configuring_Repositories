@@ -1,0 +1,25 @@
+|| Configuring Repositories in Linux || Installing packages in Linux using yum
+===============================================================================
+
+1. Configure repositories
+2. Install packages using yum
+
+# Q. Configure the repositories
+     - http://xyz.server.com/baseos
+     - http://xyz.server.com/appstream
+
+
+vi /etc/yum.repos.d/local.repo
+
+name=baseOS
+baseurl:http://xyz.server.com/baseos
+gpgcheck=0
+enabled=1
+
+name=appstream
+baseurl:http://xyz.server.com/appstream
+gpgcheck=0
+enabled=1
+
+yum install <package_name>
+yum update kernel

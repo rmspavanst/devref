@@ -1,7 +1,33 @@
 Question 1:
 Set up a local yum repository using RHEL-9 ISO image mounted on either /mnt
-
 For a Linux VM it is most likely mounted on /run directory
+
+#mount RHEL-9.iso /mnt (if not mounted)
+cp /mnt/media.repo /etc/yum.repos.d/rhel-9.repo
+chmod 644 /etc/yum.repos.d/rhel-9.repo
+
+vi /etc/yum.repos.d/rhel-9.repo
+[Local_baseOS]
+name=RHEL9-BaseOS
+metadata_expire=1
+gpgcheck=1
+enabled=1
+baseurl:file:///mnt/BaseOS/
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+
+[Local_AppStream
+name=RHEL9-AppStream
+metadata_expire=1
+gpgcheck=1
+enabled=1
+baseurl:file:///mnt/AppStream/
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+
+:wq!
+
+#dnf/yum clean all
+
+
 
 
 Question 2:
@@ -13,19 +39,61 @@ GW – 192.168.1.1
 
 DNS – 8.8.8.8
 
+# nmcli device 
+nmcli connection modify enp0s3 ipv4.addresses 192.168.1.211/24
+nmcli connection modify enp0s3 ipv4.gateway 192.168.1.1
+nmcli connection modify enp0s3 ipv4.method manual
+nmcli connection modify enp0s3 ipv4.dns 8.8.8.8 
+
+nmcli connection down enp0s3 && nmcli connection up enp0s3
+
+ip address show enp0s3
+
+
+
 Question 3:
 Add the following secondary/additional IPV4 address statically to your current running interface. Do this in a way that it does not compromise or change your existing settings:
 
 IPV4 – 10.0.0.211/24
 
+#nmcli device status
+nmcli connection show --active
+ifconfig
+nmcli connection modify enp0s3 +ipv4.addresses "10.0.0.211/24"
+nmcli connection reload
+systemctl reboot
+ip address show
+
+
+
 Question 4:
 Configure NTP server to sync the time with test.zone.org
+
+# dnf install chrony -y
+systemctl start chronyd
+systemctl enable chronyd
+
+vi /etc/chrony.conf
+# commect out the first NTP server and add
+server test.zone.org 
+
+# Allow the IPV4 address. The allow contains the IP of the clients in the local network allow 192.168.0.0/24
+systemctl restart chronyd
+
+
+
 
 Question 5:
 Find the rows that contain abcde from file /etc/testfile, and write it to the file/tmp/testfile, and the sequence is requested as the same as /etc/testfile
 
+#grep 'abcde' /etc/testfile > /tmp/testfile
+
+
+
 Question 6:
 Create a new 1GiB volume group named “newvg”
+
+#
 
 Question 7:
 Create a 400MiB logical volume named “newlv” inside the “newvg” volume group
@@ -49,17 +117,50 @@ Using "thin_pool" create a thin volume "1thinvol" with a size of 1T
 Question 12:
 Find all files that are larger than 5MB in the /etc directory and copy them to /tmp/files3m
 
+#mkdir -p /tmp/files3m
+find /etc -size +5M -exec cp{} /tmp/files3m/\;
+
+
 Question 13:
 Set the system time to “America/New_York” timezone
+
+#timedatectl
+timedatectl list-timezones
+timedatectl list-timezones | grep -o "America/Ne*”
+
+timedatectl set-timezones "America/New_York”
+timedatectl
+
+
 
 Question 14:
 Set SELinux to “permissive” mode
 
+vi /etc/selinux/config
+
+
+
 Question 15:
 Enable boot messages
 
+# vi /etc/default/grub
+ln "GRUB_CMDLINE_LINUX"line, remove "rhgb quiet"
+:wq
+
+grub2-mkconfig -o /boot/grub2/grub.cfg
+systemctl reboot
+
+
+
+
 Question 16:
 All user passwords should expire after 90 days and must be at least 8 characters in length
+
+# vi /etc/login.defs
+Chnage PASS_MAX_DAYS to 90
+Change PASS_MIN_LEN to 8
+:wq
+
 
 Question 17:
 Create users jerry, george, eliane, and kramer, then do the following:
@@ -68,15 +169,48 @@ a. Add jerry and george to “friends” group as a secondary group. If the grou
 
 b. Add eliane and kramer to “gfandneighbor” group as a secondary group. If the group doesn’t already exist, create it
 
+# verify groups friends and gfandneighbor
+
+cat /etc/group | grep gfandneighbor
+cat /etc/group | grep friends
+
+groupadd gfandneighbor
+groupadd friends
+
+useradd -G friends jerry
+useradd -G friends george
+
+useradd -G gfandneighbor eliane
+useradd -G gfandneighbor kramer
+
+grep -e jerry -e george /etc/passwd
+
 
 Question 18:
 Only users and group members of the gfandneighbor group should have access to the “/gfandneighbor” directory. Make eliane the owner of this directory. Make the gfandneighbor group the group owner of the “/gfandneighbor” directory
 
+#mkdir /gfandneighbor
+ls -ld gfandneighbor
+chown eliane /gfandneighbor
+chmod o-x /gfandneighbor
+
+or
+
+chmod 770 /gfandneighbor
+ls -ls /gfandneighbor
+
+
 Question 19:
 Create a directory “friends” in /tmp. Change the ownership of the directory to friends group. Only group members and root should have access to that directory
 
+#mkdir /tmp/friends
+chgrp friends friends
+chmod o-x /tmp/friends
+
 Question 20:
 Make george the owner of /friends directory
+
+
 
 Question 21:
 Search the user jerry in the passwd file in /etc directory and send the output in /tmp/users. Then edit the /tmp/users file and change the /bin/bash to /sbin/nologin
@@ -96,30 +230,170 @@ Create a new 100MB swap partition on /dev/sdb which takes effect auto at boot st
 Question 26:
 Set the limit for the number of SSH login attempts to two
 
+# cd /etc
+vi ssh/sshd_config
+MaxAuthTries 2
+:wq
+
+systemctl restart sshd
+
 
 Question 27:
 Install container-tools
 
+# yum install container-tools -y
+
+Question 28:
+Use podman to search for the official Redis container
+
+#podman search redis --filter=is-official
+
+Question 29:
+Set "container_manage_cgroup" SELinux Boolean value to "on" and make it persistent
+
+# setsebool -P container_manage_cgroup on
+
+Question 30:
+Setup SSH password less root login from ServerA to ServerB
+
+#ssh-keygen
+ssh-copy-id user@serverB
+
+ssh user#serverB
 
 
+Question 31:
+Enable persistent logging for the systemd journal
+
+# vi /etc/ssytemd/journals.conf
+
+#Ensure thet the line containing storage is set to: 
+Storage=persistent
+
+systemctl restart systemd-journald
 
 
+Question 32:
+Scan and analyze the audit.log file for SELinux denials and attempts and save the results to /audit_log.txt file
+
+# cd /var/log/audit
+sealert -a audit.log >/audit_log.txt
+cat /audit_log.txt
 
 
+Question 33:
+Successfully resolve to server1.example.com where your DNS server is 172.24.254.254
+
+#vi /etc/resolve.sonf
+nameserver 172.24.254.254
+host server1.example.com
 
 
+Question 34:
+Create a directory toolbox in /tmp. 
+That directory should be owned by root and the group should be 
+contractors. Create contractor group if it does not exist. 
+Then the directory “toolbox” should give all the access to only root and contractors
 
 
+#mkdir /tmp/toolbox
+groupadd contractors
+chgrp contractors /tmp/toolbox
+chmod o-rwx /tmp/toolbox
 
 
+Question 35:
+In the Linux system you have a mounted iso image /run/example.iso on/mnt/iso directory. Make it permanent mount whenever the system reboots
+
+#vi /etc/fstab
+/run/example.iso /mnt/iso iso9660 loop 0 0 
+
+mount -a
 
 
+Question 36:
+Which command can be used to list all the running processes?
+
+#ps
+
+Question 37:
+Which command can be used to kill a running process?
+#kill
+
+Question 38:
+Which command can be used to create a new user?
+
+#useradd
+
+Question 39:
+Which command can be used to create a new group?
+
+Question 40:
+Which command can be used to add a user to a group?
+
+#usermod -aG
 
 
+Write a script to mount the filesystem /dev/sda1 to the directory /mnt/data.
+
+#!/bin/bash
+
+#mount ther filesystem
+mount /dev/sda1 /mnt/data
+
+Question 42:
+Write a script to create a new firewall rule that allows incoming SSH connections on port 22.
+
+#!/bin/bash
+
+filewall-cmd --permanent --add-rule --zone=public --proto=tcp --dport=22 --action=allow
+firewall-cmd --reload
 
 
+Question 43:
+Write a script to install the Apache web server.
+
+#!/bin/bash/
+
+yum install httpd -y
+
+Question 44:
+How to create a cron job?
+
+#crontab -e
+
+Question 45:
+How to view the cron jobs?
+
+#crontab -l
+
+Question 46:
+How can you check the IP address of a network interface in RHEL 9?
+
+# ip addr show 
+
+Question 47:
+How can you set up a static IP address in RHEL 9?
+
+vi /etc/sysconfig/network-scripts/ifcfg-interface
 
 
+Question 48:
+How can you configure a network interface to start automatically at boot in RHEL 9?
+
+vi /etc/sysconfig/network-scripts/ifcfg-interface
+ONBOOT=yes
+
+Question 49:
+Write a command to change the hostname in RHEL 9.
+
+hostnamectl set-hostname newhostname
+
+
+Question 50:
+How can you check the IP address assigned to a network interface in RHEL 9
+
+ip addr show
 
 
 

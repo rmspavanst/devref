@@ -1,0 +1,61 @@
+Users and Groups || ACL || Sticky Bit || SGID ||
+================================================
+
+# Q1. Create a group newgroup
+    a) create a user harsh and make newgroup as the secondary group
+    b) Create a user nitin, do not add to newgroup as the Seconday group. nitin should no login shell
+    c) Assign all the above users passwords "redhat"
+
+groupadd newgroup
+cat /etc/group
+
+useradd harsh -G newgroup 
+cat /etc/passwd
+cat /etc/group
+
+useradd nitin -s /sbin/nologin
+cat /etc/passwd
+
+passwd harsh
+passwd nitin
+
+# Q2. Copy the file /etc/fstab to /var/fstab
+    a) the user owner of /var/fstab should be root
+    b) the user natasha should have read and write access
+    c) the group Mac should have no access
+
+cp /etc/fstab /var/fstab
+
+ls -l /var/fstab
+chown root /var/fstab
+
+cat /etc/passwd
+useradd natasha
+ls -l /var/fstab
+setfacl -m u:natasha:rw- /var/fstab
+getfacl /var/fstab
+
+groupadd Mac
+setfacl -m g:Mac:--- /var/fstab
+getfacl
+
+# Q3. Create a directory /linux
+    a) Make the group owner to be Mac and
+    b) Ensure that all files within /linux, the group owner is Mac.
+    c) Ensure that for all future files within /linux the group owner is Mac
+    d) Ensure that no user other that the user-owner of /linux is able to delete the content with /linux
+
+mkdir /linux
+
+ls -ld /linux
+chown :Mac /linux
+
+touch /linux/f1 /linux/d1
+chown -R :Mac /linux
+
+chmod g+s /linux
+mkdir /linux/d2
+
+ls -ld /linux
+chmod +t /linux
+ls -ld /linux (can see sticky bit is set)

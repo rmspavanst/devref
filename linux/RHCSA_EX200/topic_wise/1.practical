@@ -1,0 +1,17 @@
+a. Manage Basic Networking
+b. Configure the Local Storage (lvm, disk partition, Swap space)
+c. Manage Users and Groups (Create, Passwd,add user to Groups )
+
+
+Categories:
+===========
+1. Understand and use essential tools
+2. Create simple shell scripts
+3. Operate running systems
+4. Configure local storage
+5. Create and configure file systems
+6. Deploy, Configure and maintain systems
+7. Manage basic networking
+8. Manage users and groups
+9. Manage security
+10. Manage containers
