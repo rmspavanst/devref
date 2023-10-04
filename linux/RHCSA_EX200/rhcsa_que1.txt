@@ -1,0 +1,379 @@
+Question 1:
+(For Redhat 7 and 8) - Assume that you have forgotten the root password. Reset the root password by bringing down your Linux machine into single-user mode
+
+# reboot
+Catch the grub screen
+Stop at your kernal line and press "e" to enter the editing mode
+Find the line that starts with  Linux and go to the end of the line and type
+
+rd.break
+Press Ctrl+x to Enter the rescue mode
+
+#mount -o remount, rw /sysroot or Remount the root filesystem = mount -o remount,rw/
+#chroot /sysroot
+#passwd
+#touch /.autorelabbel
+exit
+exit
+
+https://ostechnix.com/how-to-reset-root-user-password-in-centos-8-rhel-8/
+
+replace 'ro' parameter with 'rw init=/sysroot/bin/sh' or replace "rhgb quiet" with "rd.rbeak enforcing=0" and "mount -o remount, rw /sysroot"
+chroot /sysroot/
+passwd root
+touch /.autorelabel
+exit
+
+
+
+Question 1:
+(For Redhat 7 and 8) - Assume that you have forgotten the root password. Reset the root password by bringing down your Linux machine into single-user mode
+
+#reboot
+#e
+#ro chnage to rw init=/sysroot/bin/sh
+#Ctrl+x
+#chroot /sysroot/
+#passwd root
+#touch /.autorelabel
+#exit
+#reboot
+
+
+
+Question 3:
+Assign static IP to your network interface with the following:
+
+IPV4 – 192.168.1.212/24
+GW – 192.168.1.1
+DNS – 8.8.8.8
+
+#vi /etc/sysconfig/network-scripts/if***
+IPADDR:192.168.1.212
+PREFIX:24
+GATEWAY:192.168.1.1
+DNS:8.8.8.8
+
+systemctl restart NetworkManager
+or 
+
+nmcli device
+nmcli connection modify enp0s3 ipv4.address 192.168.1.212/24
+nmcli connection modify enp0s3 ipv4.gateway 192.168.1.1
+nmcli connection modify enp0s3 ipv4.dns 8.8.8.8
+nmcli connection down enp0s3 && nmcli connection up enp0s3
+
+Question 4:
+Add additional/secondary IPV4 address statically to your current running interface. It should not compromise your existing settings:
+IPV4 – 10.0.0.212/24
+
+nmcli connection modify enp0s3 +ipv4.address "10.0.0.212/24"
+nmcli connection reload
+systemctl reboot
+
+
+Question 5:
+Add the following secondary IPV6 address statically to your current running interface. Do this in a way that doesn’t compromise your existing settings:
+
+IPV6 – fd01::212/64
+
+
+nmcli connection modify enp0s3 +ipv6.address fd01::212/64
+nmcli connection reload
+systemctl reboot
+
+
+Question 6:
+Enable IPV4 packet forwarding. This should persist after a reboot.
+
+
+#sysctl net.ipv4.ip_forward
+
+or 
+
+vi /etc/sysctl.conf
+net.ipv4.ip_forward=1
+
+cat /proc/sys/net/ip_forward"should be 1"
+or
+sysctl net.ipv4.ip_forward"should be 1"
+
+==================================================================
+=======================================================================
+
+Question 7:
+Create a new 4GiB volume group named “vgnewvg”
+ 
+ #lsblk
+ fdisk -c /dev/sdb
+ n (new partition)
+ p (partition type-"p" for primary)
+ 1 (partition number)
+ press enter to confirm the first default sector
+ +4GiB (Last sector or required size)
+ l (List known partition types)
+ t (change a partition type)
+ 8e (partition type code)
+ p (print the partition table)
+ w (Write table to disk and exit)
+ fdisk -l
+ pvs
+ pvcreate /dev/sdb1 (To initialize the physical volumes for use by LVM to be allowed for use in a volume group (VG))
+ pvs
+ vgs
+ vgvreate vgnewvg /dev/sdb1 (to create the volume group)
+ vgs
+ 
+ 
+Question 8:
+Create a 1GiB logical volume named “lvnewlv” inside the “vgnewvg” volume group
+
+#vgs
+lvcreate -n lvnewlv -L 1GiB vgnewvg
+lvs
+
+
+Question 9:
+Setup SSH password less login in linux.lab for the user Simpson
+
+#yum update -y
+yum install openssh-server -y
+firewall-cmd --list-all
+firewall-cmd --add-service=ssh --zone=public --permanent
+ssh-keygen
+ssh-copy-id Simpson@linux.lab
+
+ssh Simpson@linux.lab
+
+
+Question 10:
+The “lvnewlv” logical volume should be formatted with the ext4 filesystem and mount persistently on the /lvnewlv directory
+
+#lvs
+mkfs.ext4 /dev/mapper/vgnewvg-lvnewlv
+mkdir /lvnewlv
+
+vi /etc/fstab
+/dev/mapper/vgnewvg-lvnewlv/lvnewlv ext4 defaults 0 0
+
+mount -a
+lsblk
+
+
+
+Question 11:
+Extend the ext4 filesystem on “lvnewlv” by 500M
+
+#vgs
+lvextend -r -L+500M /dev/mapper/vgnewvg-lvnewlv
+lvs
+
+
+Question 12:
+Configure Apache to serve a basic website that shows the text "Hello World!" and allow firewall to accept http and https connections
+
+#yum install httpd -y
+systemctl enable httpd
+systemctl start httpd
+
+vi /var/www/html/index.html
+Hello World!
+
+systemctl restart httpd
+
+firewall-cmd --list-all
+firewall-cmd --zone=public --add-service-http --permanent
+firewall-cmd --zone=public --add-service-https --permanent
+firewall-cmd --reload
+
+curl http://localhost
+
+
+
+Question 13:
+Write a script named yes-no.sh in /tmp directory that does the following:
+
+a. If the argument is 'yes', the script should run the command echo “that's nice”.
+
+b. If the argument is 'no', the script should run the command echo "I am sorry to hear that".
+
+c. If the argument is anything else, the script should run the command echo "unknown argument provided".
+
+
+#vi /tmp/yes-no.sh
+
+#!/bin/bash
+
+echo "Please choose one of the options below"
+echo 'a) yes'
+echo 'b) no'
+
+read choice
+case $choice in
+    a) echo "that's nice";;
+    b) echo "I am sorry to hear that";;
+    *) echo "unknown argument provided";;
+esac
+
+
+Question 14:
+Set the Linux machine to boot into the multi-user.target by default
+
+#systemctl get-default
+systemctl set-default multi-user.target
+systemctl get-default
+
+
+Question 15:
+Change the hostname of the Linux machine to rhel.server.com and make it persistent
+
+# hostnamectl set-hostname rhel.server.com
+hostnamectl
+
+
+
+Question 16:
+Install the kernel updates with the following requirements:
+
+a. The updated kernel is the default kernel when the system is rebooted.
+
+b. The original kernel remains available and bootable on the system
+
+
+#yum update
+yum update kernel -y
+systemctl reboot
+
+
+Question 17:
+Find the files owned by user root in /usr/bin and copy the files into /tmp/rootfiles/ directory
+
+# mkdir -p /tmp/rootfiles/
+find /usr/bin/ -user root -exec cp {} /tmp/rootfiles/\;
+ls -l /tmp/rootfiles/
+
+Question 18:
+All new users should have a file name “notepad” in their home directory after account creation
+
+
+touch /etc/skel/notepad
+
+
+
+Question 19:
+All user passwords should expire after 100 days and be at least 9 characters in length.
+
+
+# vi /etc/login.defs
+
+change:
+PASS_MAX_DAYS   100
+PASS_MIN_LEN    9
+
+
+Question 20:
+Create a user simpson whose UID is 1500, and he doesn't have access to any interactive shell on the system
+
+#useradd -u 1500 -s /sbin/nologin simpson
+id simpson
+su - simpson
+
+
+Question 21:
+Create user cosmo and peterman
+Copy the file /etc/fstab to /tmp and perform the following:
+a. Configure the permissions of /tmp/fstab so that the file /tmp/fstab is owned by the root user, belongs to the group root, should not be executable by anyone.
+b. The user cosmo should be able to read & write to /tmp/fstab
+c. The user peterman should not have read or write access to /tmp/fstab
+
+
+#mkdir /tmp/fstab
+cp  /etc/fstab /tmp/
+useradd cosmo peterman
+
+chown root:root /tmp/fstab
+chmod a-x /tmp/fstab
+
+setfacl -m u:cosmo:rw- /tmp/fstab
+setfacl -m u:peterman:--- /tmp/fstab
+
+getfacl /tmp/fstab
+
+
+
+Question 22:
+As root create a cron job that deletes empty files and directory from /tmp at 12:45 am daily
+
+#crontab -e
+45 0 * * * find /tmp -type f -empty -delete
+:wq
+
+crontab -l
+
+
+
+Question 23:
+Use bzip2 compression to tar and compress the entire /etc directory as “/backup/newetc.tar.bz2”. Then restore into /restored/newetc directory
+
+mkdir /backup/newetc
+tar -cjvf /backup/newetc.tar.bz2 /etc
+
+mkdir /restored/newetc 
+
+tar -jxvf /backup/newetc.tar.bz2 -C /restored/newetc
+
+
+
+
+
+Question 37:
+Which command can be used to display the contents of a file?
+#cat
+
+Question 38:
+Which command can be used to create a new directory?
+
+Question 39:
+Which command can be used to create a new firewall rule?
+
+firewall-cmd --permanent --add-rule
+
+Question 40:
+Which command can be used to reload the firewall configuration?
+
+Question 41:
+Write a script to create a new user named "testuser" with the password "password" and the home directory /home/testuser.
+
+Question 42:
+Write a script to create a new group named "testgroup" and add the user "testuser" to the group.
+
+Question 43:
+Write a script to start the Apache web server.
+
+Question 44:
+Write a script to enable the Apache web server to start automatically at boot.
+
+Question 45:
+How to create a new user with a specific uid and gid?
+
+Question 46:
+How to change the permissions of a file?
+
+Question 47:
+Write a script to create a new user named new_user with a home directory of /home/new_user and a shell of /bin/bash. The script should also give the user sudo privileges.
+
+
+Question 48:
+Write a script to change the ownership of the file /etc/passwd to the user root and the group root. The script should also set the permissions of the file to 600, which means that only the owner can read and write the file.
+
+Question 49:
+How can you check the running processes in RHEL 9?
+
+Question 50:
+How can you install a package using yum in RHEL 9?
+
+
+
+
+
+
