@@ -1,0 +1,49 @@
+|| cron || grep || Reset Root Password || passwd ||
+=====================================================
+
+Q1.) Exectue the command /usr/local/bin/backup at exactly 10:00am on Feb,4th every year.
+
+# crontab -e
+00 10 4 2 * /usr/local/bin/backup
+mm hr dd mm week cmd
+
+
+
+Q2.) Configure a cron job thet runs for the user baljit at 12:08 every Thruaday and execute /bash/echo hello
+
+#crontab -e  -u baljit
+08 12 * * THU /bash/echo hello
+
+
+
+Q3.) List the lines containing the word root (case insensitive) in /etc/groups file
+
+#grep -i "root" /etc/groups
+
+
+Q4.) Find the word "sbin" in /etc/passwd and copy it into the file /tmp/pass
+
+#grep "sbin" /etc/passwd > /tmp/pass
+
+Q5.) Reset the root password to 12345
+
+#reboot
+:e
+:rd.break
+:Ctrl+x
+:mount -o remount,rw /sysroot/
+:chroot /sysroot/
+:passwd
+:12345
+:touch /.autorelable
+:exit
+:reboot
+
+Q6.) Create a user named Test.
+Set the password of the user Test to 12345
+
+useradd Test
+passwd Test
+12345
+
+

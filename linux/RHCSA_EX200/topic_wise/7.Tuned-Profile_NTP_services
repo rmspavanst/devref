@@ -1,0 +1,54 @@
+
+Tuned Profile in Linux || NTP || managing services using systemctl
+==================================================================
+
+Tuned:
+=======
+Tuned is a Linux feature that monitors a system and optimizes its performance under certain workloads. 
+Tuned uses profiles to do this. A profile is a set of rules that defines certain system parameters such as disk settings, 
+kernel parameters, network optimization settings, and many other aspects of the system.
+
+Profile-based system for static and dynamic tuning of system settings
+By default, tuned will not dynamically adjust system settings, Tp modify manually use tuned-adm command line tool.
+
+imp cmd's:
+---------------
+yum installed tuned -y
+tuned-adm list (list all the available profiles)
+tuned-adm active (shows which is active profile)
+tuned-adm profile <profile_name> (to change active profile to another profile)
+tuned-adm recommend (recommend profile for the system)
+tuned-adm off 
+
+
+NTP:
+=====
+Network Time Protocol
+NTP will help to sync your system with any time server
+NTP will use the Chrony Service
+
+Configure the NTP server to run at xyz.com:
+
+#yum install chrony
+vi /etc/chrony.conf  
+commentout  "pool 2.rhel.pool.ntp.org ibrust"
+add "server <ip> ibrust"
+
+systemctl restart chronyd
+
+chronyc sources -c or -v
+timedatectl set-ntp true
+
+
+Systemctl:
+============
+
+systemctl strat/restart/enable/disable <service>
+
+
+
+
+
+
+
+

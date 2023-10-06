@@ -1,0 +1,106 @@
+
+ls -lZ /NEW 
+semanage fcontext -a -t httpd_sys_content_t "/NEW(.*)?"
+restorcon -Rv /NEW
+
+
+SeLinux have 3 modes
+Disbled/ Permissive/ Enforcing
+
+getenforce
+setenforce 1 (enforcing)
+setenforce 0 (Permissive)
+
+vi /etc/sysconfig/seLinux
+SELINUX=disabled
+
+reboot
+
+getsebool -a (list out all the bools)
+
+getsebool -a | grep "httpd_enable"
+
+setsebool -P httpd_enable_homedirs on
+
+
+
+Exam:
+-----------
+
+SELinux Modes / SELinux Booleans/ SELinux port/ SELinux Context
+
+Q1.) SELinux Modes change to Enforcing/Premissive/Disabled
+
+getenforce 
+setenforce 0 (it will change tp Premissive)
+setenforce 1 (it will change to Enforcing)
+
+vi /etc/sysconfig/seLinux
+SELINUX=disabled (to disable)
+
+reboot (to disable)
+
+Q2.) Ensure that httpd is able to access the user home directory
+
+getsebool -a | grep "httpd_enable"
+setsebool -P httpd_enable_homedirs on
+
+
+
+Q3.) The system is not able to connect to httpd service at port 82.
+It should be accesiable at port 82 and should start at boot time.
+
+semanage port -a -t http_port_t -p tcp 82
+
+
+Q4.) Ensure that the httpd.service is able to access and host files from the /test directory
+
+
+curl localhost/index.html
+cd /var/www
+ls -lZ html
+cd html
+ls -lZ index.html
+
+mkdir /test
+ls -lZ /test (compare both the dir html dir and test dir)
+touch /test/index.html
+
+semanage fcontext -a -t httpd_sys_content_t "/test(.*)?"
+restorcon -Rv /test
+ls -lZ /test
+
+
+vi /etc/hhtpd/conf/httpd.conf
+
+add the DocumentROOT :/test"
+
+systemctl restart httpd
+
+curl localhost/index.html
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

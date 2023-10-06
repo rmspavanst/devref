@@ -23,3 +23,79 @@ enabled=1
 
 yum install <package_name>
 yum update kernel
+
+============================================================================================
+
+#mount RHEL-9.iso /mnt (if not mounted)
+cp /mnt/media.repo /etc/yum.repos.d/rhel-9.repo
+chmod 644 /etc/yum.repos.d/rhel-9.repo
+
+vi /etc/yum.repos.d/rhel-9.repo
+[Local_baseOS]
+name=RHEL9-BaseOS
+metadata_expire=1
+gpgcheck=1
+enabled=1
+baseurl:file:///mnt/BaseOS/
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+
+[Local_AppStream
+name=RHEL9-AppStream
+metadata_expire=1
+gpgcheck=1
+enabled=1
+baseurl:file:///mnt/AppStream/
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+
+:wq!
+
+#dnf/yum clean all
+
+=================================================================================================
+
+Mount the downloaded RHEL installation ISO to a directory like /media/rheldvd,
+
+mkdir /media/rheldvd
+
+# mount -o loop <downloaded iso name> /media/rheldvd
+
+Example:
+# mount -o loop rhel-server-8.0-x86_64-dvd.iso /media/rheldvd
+If you use DVD media, you can mount like below.
+
+# mount /dev/sr0  /media/rheldvd
+
+Create new repo file like below. There are two repositories in RHEL 8, named BaseOS and AppStream.
+
+
+# cat /etc/yum.repos.d/my.repo 
+[dvd-BaseOS]
+name=DVD for RHEL - BaseOS
+baseurl=file:///media/rheldvd/BaseOS
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+
+[dvd-AppStream]
+name=DVD for RHEL - AppStream
+baseurl=file:///media/rheldvd/AppStream
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+
+
+
+As a final step, it might be a good idea to run the command yum clean all once
+
+# yum clean all
+
+Check whether you can get the packages list from the DVD repositories.
+
+# yum  --noplugins list
+
+
+df -h
+
+/etc/fstab:
+
+/dev/loop0  /media/rheldvd xfs defaults 0 0

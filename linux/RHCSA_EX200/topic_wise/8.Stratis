@@ -1,0 +1,43 @@
+Stratis:
+=========
+
+Stratis is a local storage management solution.
+Focuses on simplycity and improved usability.
+PRovides advanced storage features.
+It uses the XFS file system.
+
+Features:
+---------
+Thin provisioning--> File system snapshots--> Tiering--> Pool-based management--> Monitoring.
+
+Components of a Stratis Volume:
+-------------------------------
+blockdev (min. size required is 1Gb)
+pool
+filesystem
+
+
+yum install stratis-cli stratisd
+
+systemctl start stratisd &&  systemctl enable stratisd
+
+stratis pool create pool1 /dev/nvme0n5 (to create pool)
+stratis pool list
+stratis pool add-data pool1 /dev/nvme0n5
+stratis pool list
+
+stratis filesystem create pool1 fs1 (Device:/dev/stratis/pool1/fs1 UUID: d54ft562547893217752317)
+stratis filesystem list
+stratis filesystem create pool1 fs2 (Device:/dev/stratis/pool1/fs2 UUID: cd25478932147g452217785)
+stratis filesystem list
+
+# Now mount to the mount point permanently
+
+mkdir /fs1
+
+vi /etc/fstab
+UUID=d54ft562547893217752317 /fs1 xfs defaults,x-systemd.requires=stratisd.service 0 0
+
+mount -a
+
+

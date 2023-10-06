@@ -1,0 +1,361 @@
+Ensure that all the tasks are implemented with firewalld and SELinux enabled. Your server should be able to survive the reboot.
+
+1. Interrupt the boot process and reset the root password, change it to “redhat” to gain
+access to the system.
+
+
+replace "rhgb quiet" with "rd.rbeak enforcing=0" and 
+mount -o remount, rw /sysroot
+chroot /sysroot/
+passwd root
+touch /.autorelabel
+exit
+
+==================================================================================================================
+
+
+2. Repositories are available on the repo server at:
+http://repo.eight.example.com/BaseOS
+http://repo.eight.example.com/AppStream
+
+dnf repolist all
+cd /etc/yum.repo.d/
+ll
+dnf config-manager --add-repo http://repo.eight.example.com/BaseOS
+dnf config-manager --add-repo http://repo.eight.example.com/AppStream
+
+or 
+
+# vi /etc/yum.repos.d/local
+==================================================================================================================
+
+
+3. The system time should be set to your time-zone and ensure that NTP sync in
+configured.
+
+timedatectl
+timedatectl list-timezones | grep "Asia/Kuala*"
+timedatectl set-timezone "Asia/Kuala_Lumpur"
+timedatectl set-ntp yes
+
+rpm -qa | grep chrony
+
+dnf install -y chrony
+systemctl status chronyd.service
+
+vi /rtc/chrony.conf (to check which pool is using)
+:q
+
+timedatectl
+
+=================================================================================================================
+
+4. Verify that server1 is using the network, IP, DNS & GW settings as mentioned above
+in the instructions. If not then make necessary corrections.
+ip: 192.168.55.150/24
+DNS: 8.8.8.8
+GW: 192.168.1.1
+
+ip aadr
+
+cat /etc/sysconfig/network-scripts/ifcfg-eth01
+
+=================================================================================================================
+
+5. Add the following secondary IP Address statically to your currently running interface,
+it should be done in such a way that it doesn’t compromise your existing settings.
+IPv4 – 10.0.0.6/24
+IPv6 - fd01::100/64
+
+nmcli connection show
+nmcli connection modify eth01 +ipv4.addresses 10.0.0.6/26
+nmcli connection modify eth01 +ipv4.Addresses fd01::100/64
+nmcli connection reload
+nmcli connection show eth01
+
+=================================================================================================================
+
+6. Enable packet forwarding on server1, it should persist after reboot.
+
+vi /etc/sysctl.conf
+net.ipv4.ip_forward=1
+
+cat /proc/sys/net/ipv4/ip_forward
+ if get "0" reboot
+ after rebbot shows "1"
+
+=================================================================================================================
+
+7. Server1 should boot in multi-user target by default and boot messages should be
+present there (not silenced).
+
+#systemctl get-default
+systemctl set-default multi-user.target
+systemctl get-default
+
+now enable the boot messages:
+
+vi /etc/default/grub
+
+go to GRUB_CMDLINE_LINUX="******* rhgb quiet"
+remove the "rhgb quiet" and save the file.
+
+grub2-mkconfig -o /boot/grub2/grub.cfg
+reboot
+
+after rebbot you can the boot messages.
+
+=================================================================================================================
+
+8. Create a new volume group of 3 GB having name as “vgexam”.
+
+# lsblk
+
+sda (used disk)
+sdb (not used disk)
+sdc (not used disk)
+
+# fdisk -l (to see more details)
+fdisk -l /dev/sdb
+
+Create partition:
+#fdisk /dev/sdb
+:n (new)
+:p (primary) / :e (extended)
+:1 (partition number)
+: (press enter)
+:3072M (mention the size)
+:t (type)
+:8e (Hex Code)
+:w
+
+#partprobe /dev/sdb
+
+to check:
+#fdisk /dev/sdb or lsblk
+
+Now create the Physical volume:
+#pvcreate /dev/sdb1
+pvs
+
+Now Create volume group:
+#vgcreate vgexam /dev/sdb1
+#vgs
+
+#pvs
+
+=================================================================================================================
+
+9. Create a new logical volume of 1 GB having name as “lvexam” on “vgexam” volume
+group.
+
+#lvcreate -L 1G -n lvexam vgexam
+#lvs
+
+#lsblk
+
+=================================================================================================================
+
+10. The “lvexam” logical volume should be formatted with XFS filesystem and mount
+persistently on the /mnt/lvexam directory.
+
+#mkfs.xfs /dev/vgexam/lvexam
+#lsbls -f (copy the UUID)
+
+Now mount with dir: /mnt/lvexam 
+# mkdir -p /mnt/lvexam 
+
+vi /etc/fstab
+UUID=f******2c /mnt/lvexam  xfs defaults 0 0 
+:wq!
+
+mount -a
+df -hT (can see the mount volume)
+
+=================================================================================================================
+
+11. Extend the XFS filesystem on “lvexam” by 1 GB.
+
+# vgs
+lvs
+lvextend -L +1G /dev/vgexam/lvexam
+lvs
+vgs
+xfs_growfs /mnt/lvexam
+df -h
+
+=================================================================================================================
+
+12. Use the appropriate utility create a 4TiB thin provisioned volume.
+
+# lsblk (sdc)
+
+is sdc has mounted, unmount
+umount /dev/sdc
+lsblk
+fdisk -l /dev/sdc
+
+dnf install -y vdo kmod-kvdo
+
+vdo create --name=vdo1 --device=/dev/sdc --vdoLogicalSize=4T --writePolicy-auto --force
+
+fdisk -l /dev/mapper/vdo1
+lsblk
+
+
+=================================================================================================================
+
+13. Configure a basic web server that displays “Welcome To Nehra Classes” once
+connected to it. Ensure the firewall allows the http/https services.
+
+# yum update -y
+yum install httpd -y
+
+systemctl enable httpd && systemctl start httpd
+vi /var/www/html/index.html
+Welcome To Nehra Classes
+:wq!
+
+
+#semanage port -a -t http_port_t -p tcp 80 (optional)
+
+
+firewall-cmd  --list-all
+firewall-cmd  --permanent --add-service={http,https}
+firewall-cmd  --reload
+
+systemctl restart httpd
+
+curl http://localhost
+
+
+=================================================================================================================
+
+14. Find all files that greater than 4 MB in the /etc directory & copy them to /find/largefiles directory.
+
+# mkdir -p /find/largefiles
+
+find /etc/ -type f -size +4M > /find/largefiles
+cat /find/largefiles
+
+=================================================================================================================
+
+15. Write a script named as nehraclasses.sh in the root directory on server1:
+a) If “NehraClasses” is given as argument, then the script should give the output as
+“NehraClasses are awesome.”
+b) If “Subscribers” is given as argument, then the script should give the output as
+“Our subscribers are great.”
+c) If the argument is anything else or empty, then the script should give the output
+as “Please use ./nehraclasses.sh NehraClasses|Subscribers to get the output.”
+
+# vi nehraclasses.sh
+#!/bin/bash
+
+if [ "$1" == "NehraClasses" ] ; then
+     echo “NehraClasses are awesome.”
+
+elif [ "$1" == "Subscribers" ] ; then
+     echo “Our subscribers are great.”
+
+else 
+     echo “Please use ./nehraclasses.sh NehraClasses|Subscribers to get the output.”
+
+fi
+
+chmod 700 nehraclasses.sh
+
+./nehraclasses.sh
+./nehraclasses.sh NehraClasses
+
+
+=================================================================================================================
+
+16. Create users vikas, harish, john & andrew.
+a) All the new users should have a file named as “welcome” in their respective home
+directories after accounts creation.
+b) All user passwords should expire after 45 days and there should be at least 8
+characters in the passwords.
+c) Users vikas & harish should be there in “Indian” group, if group doesn’t already
+exist, create it.
+d) Users john & andrew should be there in “UK” group, if group doesn’t already exist,
+create it.
+
+
+# cd /etc/skel/
+echo "Wlcome" > welcome
+
+vi /etc/login.defs
+PASS_MAX_DAYS 45
+PASS_MIN_LEN  8
+
+
+#useradd vikas 
+useradd harish 
+useradd john 
+useradd andrew
+
+#groupadd Indian
+groupadd UK
+
+#usermod -aG Indian vikas
+usermod -aG Indian harish
+
+usermod -aG UK john
+usermod -aG UK andrew
+
+=================================================================================================================
+
+17. Only the members of the Indian group should have access to the /Indian directory.
+Make vikas the owner of this directory, make the Indian group the group owner of this
+directory.
+
+# mkdir /Indian
+
+chown vikas:Indian /Indian/
+ls -ld /Indian/
+
+chmod 770 /Indian/
+ls -ld /Indian/
+
+=================================================================================================================
+
+18. Only the members of the UK group should have access to the /UK directory. Make john
+the owner of this directory, make the UK group the group owner of this directory.
+
+#mkdir /UK/
+
+chown john:UK /UK/
+chmod 770 /UK/
+
+ls -ld /UK/
+
+=================================================================================================================
+
+19. The new files should be owned by the group owner and only the file creators should
+have the permissions to delete their own files.
+
+# use stickybit
+
+#chmod +t /Indian/
+ls -ld /Indian/
+
+#chmod +t /UK/
+ls -ld /UK/
+
+
+
+
+=================================================================================================================
+
+20. Create a cron job that writes “The practice exam was very easy & I am ready to clear
+the RHCSA certification, Thanks Nehra Classes” to /var/log/messages file at 01:00 PM
+at weekdays only.
+
+#crontab -e
+00 13 * * 1-5 echo “The practice exam was very easy & I am ready to clear the RHCSA certification, Thanks Nehra Classes” >> /var/log/messages
+:wq!
+#crontav -l
+# tail -f /var/log/cron
+
+
+=================================================================================================================
