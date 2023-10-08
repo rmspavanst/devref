@@ -1,0 +1,317 @@
+Shell Scripting:
+======================
+
+* Sequence of commands in a file called script.
+
+want to execute 3 or more cmd's at a time like: ls, date, cal, etc...
+
+Steps to write a shell script:
+------------------------------
+
+create: create a script using an editor (extension is not necessary)
+Make: make the script executable
+Run: run the script
+
+vi script1
+ls
+date
+cal
+echo "This is the last command"
+
+ls -l script1
+
+chmod u+x script1
+./script1
+
+
+vi script2
+for ((i=1;i<=10;i++))
+do
+echo "hello"
+done
+
+bash script1
+
+she-bang:
+-------------
+
+#!/bin/sh
+#!/bin/bash
+#!/bin/bin/perl
+#!/usr/bin/enc python
+
+vi script2
+#!/bin/bash
+
+for ((i=1;i<=10;i++))
+do
+echo "hello"
+done
+
+./script2
+==================================================================================================================
+
+Variables:
+--------------
+Variable is noting more than a label
+it can hold some value
+var=20
+
+vi variable.sh
+#!/bin/bash
+var1=20
+echo "the value of the variable is:$var1
+
+sh variable.sh
+
+#variable are untyped
+# Bash does not segregate its variables by "type"
+# Variables are character strings
+    - depending on context, Bash permits arithmetic operations and
+      conparisons on variables.
+
+vi variable1.sh
+
+var1=20
+var2=test
+var3="test 1"
+var4=20.4
+var5=3+3
+
+echo $var1 
+echo $var2
+echo $var3
+echo $var4
+echo $var5
+
+chmod u+x variable1.sh
+./variable1.sh
+
+#Special variable Types:
+
+local variables
+    - Variables visable only with in a code block or function.
+
+Environmental Variables
+    - Variables that affesct the behaviour of the shell and user interface.
+
+Positional Parameters
+    - Arguments pased to the script from the command line.
+
+
+vi env-varibales.sh
+
+echo "the home directory os the user is: $HOME"
+echo " the default shell: $SHELL
+
+sh env-variables.sh
+
+vi variable3.sh
+echo "Enter the name of the file"
+read name
+touch  $name
+echo "File created"
+
+sh variable3.sh
+Enetr the name of a file
+New_file
+File created
+
+Q1. Write shell script to create two directories. The name of the 
+   directories will be passed by the user.
+
+vi q1.sh
+
+echo " Enter the two directories names"
+read dir1 dir2
+mkdir $dir1 $dir2
+
+echo " $dir1 $dir2 directories created"
+
+sh q1.sh
+
+Q2. Write script to change the name of a file. Ask user, the old file name and new file name.
+
+
+
+Positional Parameters: also called Cmd line Arguments
+------------------------------------------------------
+$0 - name of the script
+$1 - First argument
+$2 - Second argument
+$3 - third argument
+$# - total number of arguments
+$* - value of all the arguments
+
+vi pp.sh
+touch $1 $2
+echo "File creats"
+
+sh pp.sh file1 file2
+
+vi pp1.sh
+touch $1 $2
+echo "File creats"
+echo "total arguments passed are: $#"
+echo "Each argument value is: $*"
+
+sh pp1.sh file1 file2
+
+Q3. Write a script to rename a file. The old name and the new name must be passed at command line.
+
+vi Q3.sh
+
+mv $1 $2
+echo "name updates"
+
+sh Q3.sh file1 file11
+
+=============================================================================================================
+
+if-else || Comparison  Operators
+--------------------------------
+if - else:
+-----------
+ex:
+
+if [ condition ]
+then
+    statement1
+    statement2
+else
+    statement3
+    statement4
+fi
+
+Q1. Check if the number entered by the user is greater than 10 or not
+
+vi Q1.sh
+
+echo "Enter the number"
+read number
+
+if [ $number -gt 10 ]
+then
+    echo "well done"
+else
+    echo "number is small" 
+fi
+
+sh Q1.sh
+Enter the number
+15
+
+Comparison          Expression(exp)
+------------------------------------
+Equal to            exp1 -eq exp2
+Not equal to        exp1 -ne exp2
+Greater than        exp1 -gt exp2
+Greater than or equal to  exp1 -ge exp2
+Less than           exp1 -lt exp2
+Less than or equal to     exp1 -le exp2
+if expression is false    ! exp
+
+
+Q4. Write a script to check if a file exists. if not, then create it..
+
+vi Q4.sh
+echo "Enter name of a file"
+read name
+if [ -f $name ]
+then
+    echo " file exists"
+else
+    touch $name
+    echo "New file created"
+fi
+
+Q5. Write a script that takes two command line arguments.
+    Cheeck whether the name passed as first argument is of a directory or not.
+    if not, then create a new direcotry with the name passed as second argument.
+
+if [ -d $1 ]
+then
+    echo "Dir exists"
+else
+    mkdir $2
+    echo "Directory Created"
+fi
+
+Q6. Write a shell script which checks the total number of arguments passed. if the argument count is greater than 5 display the message "Too many arguments"
+
+elif:
+---------
+ex:
+
+if [ condition ]
+then
+    statement1
+elif [ condition2 ]
+then
+    statement2
+else
+    statement3
+    statement4
+fi
+
+Q6. Write a script that checks if the argument passed at command line is whether of a file or a directory.
+
+vi Q6.sh
+
+if [ -f $1 ]
+then
+    echo "name is ofa file"
+elif
+then
+    echo "name is of a directory"
+else
+    echo "Neither file nor directory exists"
+
+fi
+
+Q7. Write a shell script to read a month name from the user.
+    Check if the name entered is either August or October.
+
+
+Logical Comparison:
+-----------------------
+
+or -> ||
+And -> &&
+
+if [ -f $1 ] || [ -d $1 ]
+then
+    echo "Entry exists"
+else
+    echo "no such entry"
+fi
+
+
+if [ -f $1 ] && [ -r $1 ]
+then
+    echo "Both are true"
+else
+    echo "Partially true"
+fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
