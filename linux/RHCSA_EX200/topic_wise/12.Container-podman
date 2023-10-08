@@ -1,1 +1,176 @@
 || Managing Containers with podman||
+
+1. Pull a container image
+
+# yum install podman container-tools
+
+podman login registry.redhat.io
+username:
+password:
+
+podman search httpd
+
+podman pull docker.io/library/httpd
+podman images
+podma rmi image-name/Image-ID
+
+
+
+2. Run a container
+
+podman run -d --name web1 -p 8080:80 image-name
+podman ps -a
+curl localhost:8080
+
+podman stop web1
+podman rm web1
+
+podman run -it image-name /bin/bash
+
+find / -name index.html
+cat /usr/local/**/index.html
+exit
+
+
+3. Map the container to a local directory
+
+mkdir /web
+
+touch /web/mypage.html
+vi /web/mypage.html
+this is my web page
+
+podman run -d --name web2 -p 8081:80 -v /web:/usr/local/apache2/htdocs image-name
+podman ps -a
+
+curl localhost:8081/mypage.html
+
+
+
+4.Run the container as a service.
+
+podman generate systemd container-name > /etc/systemd/system/container-name.service (can run in root)
+
+systemctl daemon-reload
+systemctl start container-name
+systemctl status container-name
+systemctl enable container-name
+
+ for Users:
+
+ podman run -d --name web3 -p 8082:80 image-name
+ mkdir -p ~/.config/systemd/user
+
+ podman generate systemd container-name > ~/.config/systemd/user/container-name.service
+systemctl --user daemon-reload
+vi ~/.config/systemd/user/container-name.service
+[Install]
+WantedBy=default.service (change this)
+
+systemctl --user start container-name &&  systemctl --user enable container-name
+systemctl --user status container-name
+
+
+or 
+
+DA is docker run --restart=always
+PA is podman run --restart=always
+DU is docker run --restart=unless-stopped
+PU is docker run --restart=unless-started
+
+sudo docker update --restart=no
+=======================================================================================================================================
+
+podman inspect image-name/image-id
+
+
+Container Management with Podman:
+Run a Container:
+Use Podman to run a container from an image:
+
+podman run <options> <image_name>
+
+List Running Containers:
+List all currently running containers:
+
+podman ps
+
+List All Containers:
+List all containers, including stopped ones:
+podman ps -a
+
+Stop a Container:
+Stop a running container by its ID or name:
+
+podman stop <container_id_or_name>
+
+Remove a Container:
+Remove a stopped container by its ID or name:
+podman rm <container_id_or_name>
+
+Inspect a Container:
+Get detailed information about a container:
+podman inspect <container_id_or_name>
+
+Logs from a Container:
+View the logs of a running container:
+podman logs <container_id_or_name>
+
+Container Shell:
+Start an interactive shell within a running container:
+podman exec -it <container_id_or_name> /bin/sh
+
+Container Image Management with Skopeo:
+Copy Images:
+Use Skopeo to copy container images between registries or from a local source to a registry:
+skopeo copy <source> <destination>
+
+List Images:
+List images in a container registry:
+skopeo list-tags <source>
+
+Inspect Images:
+Get detailed information about a container image:
+skopeo inspect <source>
+
+Delete Images:
+Delete an image from a container registry (if you have appropriate permissions):
+skopeo delete <source>
+
+Sync Images:
+Synchronize images between two container registries:
+skopeo sync <source> <destination>
+
+
+#Build a container from a Containerfile
+
+# Use a base image
+FROM fedora:latest
+
+# Set some environment variables
+ENV MY_VAR=my_value
+
+# Run some commands to install software
+RUN dnf update -y
+RUN dnf install -y httpd
+
+# Expose a port
+EXPOSE 80
+
+# Set the default command to start the service
+CMD ["/usr/sbin/httpd", "-D", "FOREGROUND"]
+
+
+podman build -t my_container_image:latest .
+podman images
+podman run -d -p 8080:80 my_container_image:latest
+
+
+#Attach persistent storage to a container
+
+docker volume create my_volume
+docker run -d -v my_volume:/path/in/container my_image
+
+
+
+

@@ -1,0 +1,68 @@
+Autofs:
+===================
+Autofs is an automount daemon that manages mount points as needed. 
+In short, it only mounts a given share when that share is being accessed and are unmounted after a defined period of inactivity
+
+
+Advantages:
+-------------
+
+* NFS shared directories are not permanently connected.
+    - This frees network and system resources
+* The automounter is configured on the client machine
+    - No server configuration is required
+* NFS shares are avaliable to all users
+    - Subject to access permissions
+
+
+
+server                              client
+192.168.43.237                      192.168.43.22
+/share                              /auto_mount
+
+
+@server:
+yum install nfs* -y
+mkdir /share
+touch /share/f1 /share/f2
+cd /share
+vi f1
+this is the test for nfs
+chmod 777 /share
+
+vi /etc/exports
+/share <clientip>(ro.sync) ex: /share 192.168.43.22(ro.sync)
+
+exportfs -avr
+firewall-cmd --add-service={nfs,mountd,rpc-bind} --permanent
+firewall-cmd --reload
+
+
+
+@clint:
+yum install nfs-utils autofs -y
+
+showmount -e 192.168.43.237
+
+vi /etc/auto.master
+
+comment #/misc /etc/auto.misc
+add line: /auto_mount /etc/auto.misc 
+
+
+vi /etc/auto.misc
+addline: access  -rw,soft,intr   192.168.43.237:/share
+
+ls /
+systemctl enable autofs --now
+
+ls /
+
+cd auto_mount
+ls
+cd access
+ls
+can see f1 and f2
+cat f1
+
+@ in exam we hav eto do client configuration....

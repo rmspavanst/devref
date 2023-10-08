@@ -1,0 +1,7 @@
+SSH
+========
+
+systemctl status sshd
+yum install openssh-server -y
+
+ssh root@serverb
