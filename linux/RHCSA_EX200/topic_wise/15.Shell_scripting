@@ -294,6 +294,199 @@ else
     echo "Partially true"
 fi
 
+==========================================================================
+
+For loop:
+---------------
+
+why loops? to repeat code
+
+types: for/while/until
+
+for variable in values
+do
+    statement1
+    statement2
+    :
+    :
+    statementn
+done
+
+vi for1.sh
+
+for x in abc def ghi
+do
+    touch $x
+    echo "$x File created"
+done
+
+
+for((initialization;condition;dev/inc))
+do
+    statement1
+    statement2
+    :
+    :
+    statementn
+done
+
+vi for2.sh
+
+#print date and time 10times, once after each sec
+
+for ((i=0;i<10;i++)) 
+do
+    date
+    sleep 1
+done
+
+vi for3.sh
+
+for x in $*
+do
+    touch $x
+    echo "$x file created"
+done
+
+$* give the variables in cmd line
+
+./for3.sh 11 22 33 44 q5
+
+
+Q1. Write a shell script to print long list of all the file names passed at command line.
+
+vi Q1.sh
+for x in $*
+do
+    if [ -f $x ]
+    then
+        ls -l $x
+    else
+        echo "$x is not a file"
+    fi    
+done
+
+Q2. Wirte a shell script to count the number of file names passed at command line.
+
+vi Q2.sh
+
+vi Q1.sh
+count=0
+for x in $*
+do
+    if [ -f $x ]
+    then
+        count=$(($count+1))
+    fi    
+done
+echo "Total file names were: $count"
+
+======================================================================================================
+
+Q1. Write a shell script to check if the present month is October or not?
+
+x=$(date +"%m")
+if [ $x -eq 10 ]
+then
+    echo "month is october"
+else
+    echo "Not"
+fi
+
+
+Q2. Write a shell script to count the number of files having read permission in the current working directory.
+
+count=0
+for x in *
+do 
+    if [ -f $x ] && [ -r $x ]
+    then
+        count=$(($count+1))
+    fi
+done
+echo "Total files having read permissions are $count"
+
+
+Q3. Write a shell script to check the current user is the root user or not?
+
+x=$(whoami)
+for [ $x = "root" ]
+then
+    echo " you are root"
+else
+    echo "you are a regular user"
+fi
+
+
+Q4. Write a shell script to copy a file into a directory.
+    The file name is passed as firest argument and the directory name is passed
+    as second srgument.
+
+cp $1 $2
+echo "file copied"
+
+
+Q5. Write a shell script to check the total arguments passed at command line.
+    if the arguments are more than 3 then list the arguments else 
+    print "type more next time"
+
+if [ $# -gt 3 ]
+then
+    echo "The arguments were $*"
+else
+    echo "type more next time"
+fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
