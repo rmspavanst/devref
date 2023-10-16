@@ -69,7 +69,7 @@ IPv6 - fd01::100/64
 
 nmcli connection show
 nmcli connection modify eth01 +ipv4.addresses 10.0.0.6/26
-nmcli connection modify eth01 +ipv4.Addresses fd01::100/64
+nmcli connection modify eth01 +ipv6.addresses fd01::100/64
 nmcli connection reload
 nmcli connection show eth01
 
@@ -92,6 +92,7 @@ present there (not silenced).
 #systemctl get-default
 systemctl set-default multi-user.target
 systemctl get-default
+systemctl --type=target --all
 
 now enable the boot messages:
 

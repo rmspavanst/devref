@@ -58,3 +58,4 @@ On ServerA, create a NetworkManager connection profile named "myprofile1" for th
 - IPv6 DNS server: fd01::111
 - DNS search domain: example.com
 
+ 

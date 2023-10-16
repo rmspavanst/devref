@@ -1,0 +1,595 @@
+Reset root password:
+===========================
+#reboot
+:e
+:rd.break
+:Ctrl+x
+:mount -o remount,rw /sysroot/
+:chroot /sysroot/
+:passwd
+:12345
+:touch /.autorelable
+:exit
+:reboot
+
+
+
+================================================================================================================================================
+Networking:
+====================
+
+nmcli dev status
+nmcli con show
+nmcli con add con-name "Default1" type ethernet ifname ens160 ip4 192.168.1.1/24 gw4 192.168.1.2
+nmcli con mod Default1 ipv4.dns 8.8.8.8
+nmcli con show Default1
+
+nmcli con up "Default1" (to activate)
+
+nmcli con mod  "Default1" connection.autoconnect yes (modify the Default1 connection to autoconnect, autoconnect is yes: after reoot automatically connect to Default1 connection)
+
+
+nmcli con mod Default1 ipv4.addresses 192.168.2.2/16 (updated ip address)
+nmcli con mod Default1 +ipv4.addresses 192.168.3.3/24 (can add multiole ip address)
+nmcli con reload
+nmcli con show Default1
+
+
+6. Enable packet forwarding on server1, it should persist after reboot.
+
+vi /etc/sysctl.conf
+net.ipv4.ip_forward=1
+
+cat /proc/sys/net/ipv4/ip_forward
+ if get "0" reboot
+ after rebbot shows "1"
+
+
+=======================================================================================================================================================
+repo's:
+==========================
+
+dnf repolist all
+cd /etc/yum.repo.d/
+ll
+dnf config-manager --add-repo http://repo.eight.example.com/BaseOS
+dnf config-manager --add-repo http://repo.eight.example.com/AppStream
+
+or
+
+vi /etc/yum.repos.d/local.repo
+
+name=baseOS
+baseurl:http://repo.eight.example.com/BaseOS
+gpgcheck=0
+enabled=1
+
+name=appstream
+baseurl:http://repo.eight.example.com/AppStream
+gpgcheck=0
+enabled=1
+
+or
+
+
+mkdir /media/rheldvd
+
+Example:
+# mount -o loop rhel-server-8.0-x86_64-dvd.iso /media/rheldvd
+# mount /dev/sr0  /media/rheldvd
+
+
+# vi /etc/yum.repos.d/my.repo 
+[dvd-BaseOS]
+name=DVD for RHEL - BaseOS
+baseurl=file:///media/rheldvd/BaseOS
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+
+[dvd-AppStream]
+name=DVD for RHEL - AppStream
+baseurl=file:///media/rheldvd/AppStream
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+
+
+
+#As a final step, it might be a good idea to run the command yum clean all once
+yum clean all
+
+#Check whether you can get the packages list from the DVD repositories.
+yum  --noplugins list
+
+df -h
+vi /etc/fstab:
+/dev/loop0  /media/rheldvd xfs defaults 0 0
+
+
+
+or
+
+
+sudo mount /dev/cdrom /mnt
+sudo mkdir -p /yumrepo
+sudo cp -r /mnt/* /yumrepo/
+sudo vi /etc/yum.repos.d/local.repo
+
+[BaseOS]
+name=dvd baseos
+baseurl=file:///yumrepo/BaseOS
+enabled=1
+gpgcheck=0
+
+[AppStream]
+name=dvd appstream
+baseurl=file:///yumrepo/AppStream
+enabled=1
+gpgcheck=0
+
+
+sudo chmod -R 755 /yumrepo
+
+sudo yum clean all
+sudo yum update
+
+
+==============================================================================================================================================
+
+
+Storage:
+=============
+
+Disk Partition:
+------------------
+Q1. Create a partition Par1 od size 1Gb
+
+lsblk or ls /dev (to see all the avaliable disks)
+    2 disks (sda, sdb, sdc)
+    sda is used
+    sdb, sdc is not used
+
+fdisk /dev/sdb (to create new 1Gb partition)
+    :n (n for new partition)
+    :p
+    :1
+    :
+    :+1G
+    :w
+
+partprobe /dev/sdb
+lsblk
+
+
+mount the partition:
+--------------------
+mkdir /newdisk
+mkfs.xfs /dev/sdb1
+
+mount /dev/sdb1 /newdisk/ 
+or
+vi /etc/fstab
+/dev/sdb1 /newdisk xfs  defaults 0 0
+
+mount -a (tocheck)
+
+
+Swap Space:
+-------------
+Q2. Add a swap partition of size 750Mb. Do not delete the existing swap
+
+free -m (to show the current swap)
+fdisk /dev/sdb
+    :n
+    :p
+    :3
+    :+750M
+    :t
+    :3
+    :L (list of all codes)
+    :82
+    :w
+
+partprobe /dev/sdb
+lsblk
+mkswap /dev/sdb2
+vi /etc/fstab
+/dev/sdb2 /swap swap  defaults 0 0
+
+swapon -a (tocheck)
+free -m
+
+
+
+
+
+LVM (logical volume Management)
+-------------------------------
+
+Q1. Create a LV named LV1 of size 8GB
+Q2. Extend the LV, LV1 by 2GB
+Q3. Create a LV named LV2 with 10 extent where the size of each extent is 8MB
+
+
+1. Physical Storage - disk partition or full disk or RAID(PD) (physical device 1 sda (6GB)) (physical device 2 sdb (5GB)) (physical device 3 sdc (4GB))
+
+2. Create phsycal volume(pv) (Physical Volume 1 (6GB)) (Physical Volume 2 (5GB)) (Physical Volume 3 (4GB))
+
+3. Create Volume Group(VG) (Volume Group (15GB))
+
+4. Cleate Logical Volume(LV) (Logical Volume 1(8GB)) (Logical Volume 2(7GB))
+
+
+# Q1. Create a LV named LV1 of size 8GB
+ lsblk (to check pd)
+    - sda 128GB (used)
+    - sdb 15GB (used)
+    - sdc 10GB (notused) pd
+    - sdd  5GB (notused) pd
+    - sde  4GB (notused) pd
+
+pd change to pv
+ pvcreate /dev/sdc
+ pvcreate /dev/sdd
+ pvcreate /dev/sde
+ pvs ( to check physical volumes)
+
+pv change to VG
+ vgcreate VG1 /dev/nvem0n3 /dev/nvem0n4
+ vgs (to check VG)
+
+From VG create the LV (LV1 of size 8GB)
+ lvcreate -L 8Gb -n LV1 VG1
+ lvs (to check LV)
+
+now mount the LV
+ vi /etc/fstab
+ /dev/VG1/LV1 /lv xfs defaults 0 0
+
+mkdir /lv
+mkfs.xfs /dev/VG1/LV1
+mount -a
+
+
+# Q2. Extend the LV, LV1 by 2GB
+
+ vgs
+if the spce is avaliable
+ lvs
+ lvextend -r -L +2Gb /dev/VG1/LV1
+ lvs (to vrify)
+
+if the spce is not avaliable
+ vgs
+ vgextend VG1 /dev/nvem0n5
+ vgs
+ lvs
+ lvextend -r -L +2Gb /dev/VG1/LV1
+ lvs (to vrify)
+
+# Q3. Create a LV named LV2 with 10 extent where the size of each extent is 8MB
+
+ vgdisplay (to display the VG and ypou can see "PE size(physical extent)")
+
+to delete LV
+ lvremove /dev/VG1/LV1
+ vi /etc/fstab
+ #/dev/VG1/LV1 /lv xfs defaults 0 0
+
+ unmount /lv
+ lvchange -an /dev/VG1/LV1 (disable LV)
+ lvremove /dev/VG1/LV1 (remove LV)
+ lvs (lv list)
+
+remove VG
+ vgremove VG1
+ vgs
+
+Create a LV named LV2 with 10 extent where the size of each extent is 8MB
+ vgcreate -s 8M VG1 /dev/nvme0n2
+ vgdisplay
+
+ lvcreate -l 10 -n LV2 /dev/VG1
+ lvs
+
+
+
+
+Q.) Create a 512M partition, make it as ext4 file system, mounted automatically under /mnt/data and which take effect automatically at boot-start.
+
+Explanation:
+# fdisk /dev/vda
+n
++512M
+w
+# partprobe /dev/vda
+# mkfs -t ext4 /dev/vda5
+# mkdir -p /data
+# vim /etc/fstab
+/dev/vda5 /data ext4 defaults 0 0
+# mount -a
+
+=======================================================================================================================================
+
+Users and Groups || ACL || Sticky Bit || SGID ||
+================================================
+
+useradd harsh -G newgroup 
+useradd -u 1234 alex
+groupadd -g 600 admin 
+useradd nitin -s /sbin/nologin
+usermod -a -G examplegroup exampleusername
+
+
+The chage command -per user
+• Example chage [-m mindays] [-M maxdays] [-d lastday] [-I inactive] [-E 
+expiredate] [-W warndays] user
+• File = /etc/login.def
+• PASS_MAX_DAYS   99999
+• PASS_MIN_DAYS   0
+• PASS_MIN_LEN    5
+• PASS_WARN_AGE   7
+
+
+
+b) the user natasha should have read and write access
+setfacl -m u:natasha:rw- /var/fstab
+getfacl /var/fstab
+
+c) the group Mac should have no access
+groupadd Mac
+setfacl -m g:Mac:--- /var/fstab
+getfacl
+
+setfacl -m u:natasha:rw- /var/tmp/fstab 
+setfacl -m u:haryy:--- /var/tmp/fstab
+
+c) Ensure that for all future files within /linux the group owner is Mac
+mkdir /linux
+chmod g+s /linux
+mkdir /linux/d2
+
+d) Ensure that no user other that the user-owner of /linux is able to delete the content with /linux
+ls -ld /linux
+chmod +t /linux (stickybit)
+ls -ld /linux (can see sticky bit is set)
+
+Q) Create a shared directory /home/admins, make it has the following characteristics:
+/home/admins belongs to group adminuser
+This directory can be read and written by members of group adminuser Any files created in /home/ admin, group automatically set as adminuser.
+
+mkdir /home/admins
+chgrp -R adminuser /home/admins
+chmod g+w /home/admins
+chmod g+s /home/admins
+
+
+List of commands for setting up ACL :
+1) To add permission for user
+setfacl -m u:user:rwx /path/to/file
+2) To add permissions for a group
+setfacl -m g:group:rw /path/to/file 
+3) To allow all files or directories to inherit ACL entries from the directory it is within
+setfacl -dm "entry" /path/to/dir
+4) To remove a specific entry
+setfacl -x u:user /path/to/file (For a specific user)
+5) To remove all entries
+setfacl -b path/to/file (For all users)
+
+
+
+
+
+
+==================================================================================================================
+
+TimeDate:
+===========
+
+3. The system time should be set to your time-zone and ensure that NTP sync in
+configured.
+
+timedatectl
+timedatectl list-timezones | grep "Asia/Kuala*"
+timedatectl set-timezone "Asia/Kuala_Lumpur"
+timedatectl set-ntp yes
+
+rpm -qa | grep chrony
+
+dnf install -y chrony
+systemctl status chronyd.service
+
+vi /rtc/chrony.conf (to check which pool is using)
+:q
+
+timedatectl
+
+=================================================================================================================
+
+7. Server1 should boot in multi-user target by default and boot messages should be
+present there (not silenced).
+
+#systemctl get-default
+systemctl set-default multi-user.target
+systemctl get-default
+systemctl --type=target --all
+
+now enable the boot messages:
+
+vi /etc/default/grub
+
+go to GRUB_CMDLINE_LINUX="******* rhgb quiet"
+remove the "rhgb quiet" and save the file.
+
+grub2-mkconfig -o /boot/grub2/grub.cfg
+reboot
+
+after rebbot you can the boot messages.
+
+=================================================================================================================
+
+
+
+=====================================================================================================================
+
+HTTPD||SELINUX:
+==================
+
+13. Configure a basic web server that displays “Welcome To Nehra Classes” once
+connected to it. Ensure the firewall allows the http/https services.
+
+# yum update -y
+yum install httpd -y
+
+systemctl enable httpd && systemctl start httpd
+vi /var/www/html/index.html
+Welcome To Nehra Classes
+:wq!
+
+
+#semanage port -a -t http_port_t -p tcp 80 (optional)
+
+
+firewall-cmd  --list-all
+firewall-cmd  --permanent --add-service={http,https}
+firewall-cmd  --reload
+
+systemctl restart httpd
+
+curl http://localhost
+
+
+semanage:
+-------------
+ls -Z /var/www/html/*
+man semange fcontext
+man semanage port
+
+semanage fcontext -m -t httpd_sys_content_t "/var/www/html/file1"
+restorecon -R -v /var/www/html/file1`
+semanage port -a -t http_port_t -p tcp 82
+
+semanage port -l | grep http
+
+
+
+
+
+
+=================================================================================================================
+
+Find || grep:
+===============
+
+14. Find all files that greater than 4 MB in the /etc directory & copy them to /find/largefiles directory.
+
+# mkdir -p /find/largefiles
+
+find /etc/ -type f -size +4M > /find/largefiles
+cat /find/largefiles
+
+find /etc -size 10k -exec cp {} /tmp/findfiles \; 
+find / -user lucy -exec cp -a {} /tmp/findfiles \; 
+
+
+Q. Find the files owned by harry, and copy it to catalog: /opt/dir
+
+# cd /opt/ 
+# mkdir dir 
+# find  / -user harry -exec cp -rfp {} /opt/dir/ \; 
+
+
+Q. Find the rows that contain abcde from file /etc/testfile, and write it to the file/tmp/testfile, and the 
+sequences requested as the same as /etc/testfile.
+
+# cat /etc/testfile | while read line; 
+do 
+echo $line | grep abcde | tee -a /tmp/testfile 
+done 
+OR 
+grep ‘abcde’ /etc/testfile > /tmp/testfile 
+
+
+
+
+=================================================================================================================
+Others:
+============
+
+FTP:
+------
+Q. Install a FTP server, and request to anonymous download from /var/ftp/pub catalog. (it needs you 
+to configure yum direct to the already existing file server) 
+
+# cd /etc/yum.repos.d 
+#vim local.repo 
+    [local]  
+    name=local.repo  
+    baseurl=file:///mnt 
+    enabled=1 
+    gpgcheck=0 
+ 
+# yum makecache 
+# yum install -y vsftpd 
+# service vsftpd restart 
+# chkconfig vsftpd on 
+# chkconfig --list vsftpd 
+# vim /etc/vsftpd/vsftpd.conf 
+anonymous_enable=YES
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+### 5. Create and configure file systems
+------------------------------------------------------
+
+#### SAMBA
+
+[server]
+$ yum install -y samba
+$ vi /etc/samba/smb/conf - edit config
+$ systemctl start smb - start samba service
+$ useradd samba_user - add a new linux user for samba
+$ smbpasswd -a samba_user
+```
+
+[client]
+$ yum install -y samba-client cifs-utils
+$ mount -t cifs //server_ip/samba_shared_dir /mnt/samba_mountpoint -ousername=samba_user,password=samba_password
+
+
+The files written on the client with any user will appear on the server in the ownership of the user "samba_user".
+
+#### Network File System
+[server]
+$ yum install nfs-utils
+$ systemctl start rpcbind
+$ systemctl start nfs-server
+
+cat /etc/exports: 
+`/nfs-share-directory   CLIENT_IP(*,rw,sync, permissions etc)` 
++ 
+`$ exportfs -a`  - to export al exports in file
+
+[client]
+$ yum install -y nfs-utils
+$ systemctl start rpcbind.service
+
+Show file system exports on the client: 
+`$ showmount -e SERVER_IP`
+
+**Mounting the NFS on client**
+$ mount -t nfs SERVER_IP:/nfs-share /mounted-nfs-share	
+
+$ vi /etc/fstab : 
+SERVER_IP:/nfs-share       /mounted-nfs-share      nfs4    defaults 0 0
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
