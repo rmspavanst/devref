@@ -4,7 +4,7 @@ VDO(Virtual Data Optimizer):
 Q1:) Create a vdo named V1 od size 50Gb and mount it at /V1
 
 What is vdo?
-VDP provides inline data reduction for Linux in the form
+VDO provides inline data reduction for Linux in the form
     * deduplication
     * Compression
     * thin provisioning

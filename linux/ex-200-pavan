@@ -1,3 +1,9 @@
+https://github.com/chlebik/rhcsa-practice-questions/blob/master/questions/001_restore_root_password.md
+https://github.com/aggressiveHiker/rhcsa9/blob/main/exam_prep/solutions_ordered_task_list.md
+
+
+
+
 Reset root password:
 ===========================
 #reboot
@@ -379,6 +385,11 @@ setfacl -b path/to/file (For all users)
 
 
 
+touch /etc/skel/newfile
+
+
+
+
 
 
 
@@ -447,12 +458,16 @@ vi /var/www/html/index.html
 Welcome To Nehra Classes
 :wq!
 
+#semanage port -l
+#semanage port -a -t http_port_t -p tcp 82 (optional)
+# ls -lZ /var/www/html/
+# chcon -t httpd_sys_content_t file1
 
-#semanage port -a -t http_port_t -p tcp 80 (optional)
 
 
 firewall-cmd  --list-all
 firewall-cmd  --permanent --add-service={http,https}
+firewall-cmd  --permanent --add-port=80/tcp
 firewall-cmd  --reload
 
 systemctl restart httpd
@@ -585,6 +600,119 @@ $ vi /etc/fstab :
 SERVER_IP:/nfs-share       /mounted-nfs-share      nfs4    defaults 0 0
 
 -----------------------------------------------------------------------------------------------------------------------------------------------
+
+AutoFS:
+==========
+
+Q.) Using automounter service mount RemoteuserX onto the provided folder /ourhome/RemoteuserX
+
+
+yum install autofs -y
+
+id remoreuserX
+
+vi /etc/auto.master.d/filename.autofs
+/-      /etc/auto.misc
+
+vi /etc/auto.misc
+#remoteuserX -(permissions),soft,intr servername:(full path of home directory of remoteuser)
+/ourhome/remoteuserX -rw,soft,intr 192.168.0.168:/ourhome/remoteuserX
+
+systemctl restart autofs
+systemctl enable autofs
+
+--------------------------------------------------------------------------------------------------------------
+sudo:
+==========
+
+Q.) a groupname is "elite", they have to give administrative permission without password.
+
+getent group elite
+
+vi /etc/sudoers.d/elite
+%elite ALL=(ALL) NOPASSWD:ALL
+
+or
+
+visudo
+%elite ALL=(ALL) NOPASSWD:ALL
+
+
+Q.) Build an application "testapp" that prints the message when user1 logged in "welcome user1"
+
+vi /usr/bin/testapp
+#!/bin/bash
+
+if [ -f ~/.testapp/testapp.conf ]
+ then
+  cat ~/.testapp/testapp.conf
+else
+  echo "There is no mesahe for you"
+fi
+
+chmod a+x /usr/bin/testapp
+useradd user1
+
+cd /home/user1
+mkdir .testapp
+cd .testapp
+vi testapp.conf
+welcome to user1
+
+
+su - user1
+testapp
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Container:
+============
+
+1.) Create a container on node1 as Andrew
+    using https://github.com/sachinyadav3496/Text-To-PDF/archive/refs/heads/master.zip
+    build the container image name is watcher
+    don't change the Containerfile content.
+
+
+podman image build -t myapp .
+
+2.) Create a container using an image "watcher".
+    create a container using Andrew user and container image should be watcher.
+    Container should run as a systemd service, so configure as a servicename container-watcher.service
+    Container should run at boot time
+    container name should be watcher
+    mount /opt/files directory to /opt/files in container and /opt/processes to /opt/processes in container.
+ Note: this container will convert ascii test file into pdf format.
+
+podman container run -d --name myapp -v /data/input/:/data/input/:Z -v /data/output/:/data/output/:Z myapp
+
+
+ mkdir -p .config/systemd/user
+ cd .config/systemd/user
+ podman generate systemd --name myapp --new --files
+ ls
+ systemctl --user daemon-reload
+ systemctl --user enable container-myapp.service
+ systemctl --user start container-myapp.service
+ systemctl --user restart container-myapp.service
+ loginctl enable-linger
+
+
+ --------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+ Q.) Set a recommended tuning profile for your system.
+
+ yum install tuned
+
+ systemctl is-enabled tuned enabled
+ tunded-adm list
+ tuned-adm recommended
+ tuned-adm active
+
+
+
+
+
+
 
 
 
