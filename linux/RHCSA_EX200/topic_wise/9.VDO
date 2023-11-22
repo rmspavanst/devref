@@ -25,7 +25,7 @@ mkdir /V1
 
 vi /etc/fstab
 
-/dev/mapper/VDO1 /V1 auto defaults,x-systemd.requires=vdo.service 00
+/dev/mapper/VDO1 /V1 auto defaults,x-systemd.requires=vdo.service 0 0
 
 mount -a
 

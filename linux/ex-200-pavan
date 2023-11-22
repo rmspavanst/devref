@@ -316,6 +316,28 @@ w
 /dev/vda5 /data ext4 defaults 0 0
 # mount -a
 
+
+Q. Use the appropriate utility to create a 5Tib thin Provisioned volume
+
+#yum install vdo kmod-kvdo -y
+
+
+lsblk /dev/nvme0n2 (if the size shoe 10Gb using VDO will extend to 50Gb)
+
+vdo create --name VDO1 --device=/dev/nvme0n2 --vdoLogicalSize=50G
+
+vdo list
+
+mkfs.xfs /dev/mapper/VDO1
+
+mkdir /V1
+
+vi /etc/fstab
+
+/dev/mapper/VDO1 /V1 auto defaults,x-systemd.requires=vdo.service 00
+
+mount -a
+
 =======================================================================================================================================
 
 Users and Groups || ACL || Sticky Bit || SGID ||
