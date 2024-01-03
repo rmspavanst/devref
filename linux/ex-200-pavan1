@@ -1,0 +1,129 @@
+1. Reset the root password
+
+2. configure network and set static hostname.
+   hostname "servera.lab.example.com"
+   ipv4=172.25.250.10
+   subnetmask= 255.255.255.0
+   gw= 172.25.250.254
+   dns= 172.25.254.254
+   dns-search=lab.example.com
+
+   
+
+
+
+
+
+1. Setup an ip address for primary vm ip addr 172.25.x.11 subnet mask 255.255.255.0 gw 172.25.x.254
+   nameserver and hostname as primary.netX.example.com
+
+
+   nmcli con mod ens08 ipv4.address 172.25.x.11/24 ipv4.gw 172.25.x.254 ipv4.dns 8.8.8.8
+   nmcli con down ens08
+   nmcli con up ens08
+
+   hostnamectl set-hostname primary.netX.example.com
+
+
+2.yum repo confiruration on both machines
+
+    dnf config-manager --add-repo http://repo.eight.example.com/BaseOS
+    dnf config-manager --add-repo http://repo.eight.example.com/AppStream
+
+    or
+
+    vi /etc/yum.repos.d/local.repo
+
+    [BaseOS]
+    name=BaseOS
+    baseurl=http://repo.eight.example.com/BaseOS
+    enabled=1
+    gpgcheck=0
+
+    [AppStream]
+    name=AppStream
+    baseurl=http://repo.eight.example.com/AppStream
+    enabled=1
+    gpgcheck=0
+
+
+    yum clean all
+    yum repolist all
+
+
+
+
+3. Configure a cron job on primary machine
+   the user natasha must configure a cron job that runs daily at 14:23 local time and executes /bin/echo hiya
+
+   crontab -e -u natasha
+   23 14 * * * /bin/echo hiya
+
+
+4. Add a user john with uid 1800 and set password thuctive
+
+   useradd -u 1800 john
+   passwd john
+
+
+5. Create the following users, groups and group memberships:
+   A group named sysadmin.
+   A user natasha who belongs to sysadmin as a secondry group.
+   A user sarah who belongs to sysadmin as a secondry group.
+   A user harry who does not have access to an interactive shell on the system and who is not a member of sysadmin.
+   Natasha, Sarah and Harry shoud all have the password of thuctive.
+
+
+
+6. Create a collaborative directiry "/common/admin" with the following charcteristics:
+    Group ownership of /common/admin is sysadmin. The dir shoild be readable, writable and accesiable to members os sysadmin, but not to any other users.( it is understood that root has access to all files and directories on the system)
+    Files creates in /common/admin automatically have group ownership set to sysadmin group.
+
+
+
+7. Copy the file /etc/fstab to /var/tmp. Configure the permissions of /var/tmp/fstab so that:
+   The file /var/tmp/fstab is owned by the root user.
+   The file /var/tmp/fstab belong to the group root.
+   The file /var/tmp/fstab should not be executable by anyone. The user natasha is able to read and write /var/tmp/fstab
+   The user sarah can nethir write nor read /var/tmp/fstab.
+   note: all other users have the ability to read /var/tmp/fstab
+
+
+8. Start httpd service. your apache is configure on 82 port.
+   set selinux context respectively to start httpd service.
+
+
+9. Configure NTP in your system so that it is an NTP client of classroom.example.com
+
+
+10. Find hte files in your system which id=s owned by Simeone user & copy all the file on /root/found directory
+
+11. Find the string strato from /usr/share/dict/words/file and save the result in /searchfile.
+
+12. Uisng automounter service mount RemoteuserX onto the provided folder /ourhome/RemoteuserX
+
+
+13. Set default permissions for  user alex for all newly created files nad folders.
+    Set permissions to the all newly created files r--r--r--
+    set permissions to the all newly created directory r-xr-xr-x
+
+
+ 14. write a script mysearch to list the contents of /usr that are below 10Mib.
+     The script should be present in /usr/local/bin.
+     Afetr execution the script automatically write all the lines and save it to /root/lines.
+
+15. Create users phil, laura, stewart, and kevin.
+      All new users should have a file named “Welcome” in their home folder after account creation.
+      All user passwords should expire after 60 days and be atleast 8 characters in length.
+      phil and laura should be part of the “accounting” group. If the group doesn’t already exist, create it.
+      stewart and kevin should be part of the “marketing” group. If the group doesn’t already exist, create it.
+
+16. Write a script named awesome.sh in the root directory on client1.
+    a. If “me” is given as an argument, then the script should output “Yes, I’m awesome.”
+    b. If “them” is given as an argument, then the script should output “Okay, they are awesome.”
+    c. If the argument is empty or anything else is given, the script should output “Usage ./awesome.sh me|them”
+
+
+
+
+

@@ -46,9 +46,22 @@ nmcli con show Default1
 vi /etc/sysctl.conf
 net.ipv4.ip_forward=1
 
+
+or
+
+# sysctl -w net.ipv4.ip_forward=0
+OR
+# sysctl -w net.ipv4.ip_forward=1
+
 cat /proc/sys/net/ipv4/ip_forward
  if get "0" reboot
  after rebbot shows "1"
+
+
+—> mask the iptable servervice before starting exam.
+
+systemctl mask iptables.service
+systemctl mask ip6tables.service
 
 
 =======================================================================================================================================================
@@ -322,7 +335,7 @@ Q. Use the appropriate utility to create a 5Tib thin Provisioned volume
 #yum install vdo kmod-kvdo -y
 
 
-lsblk /dev/nvme0n2 (if the size shoe 10Gb using VDO will extend to 50Gb)
+lsblk /dev/nvme0n2 (if the size show 10Gb using VDO will extend to 50Gb)
 
 vdo create --name VDO1 --device=/dev/nvme0n2 --vdoLogicalSize=50G
 
@@ -337,6 +350,56 @@ vi /etc/fstab
 /dev/mapper/VDO1 /V1 auto defaults,x-systemd.requires=vdo.service 00
 
 mount -a
+
+
+Q) Resize the logical volume, logical-data and it filesystem to 400MB.
+
+
+Make sure that the filesystem contents remain intact.
+(Note: partitions are seldom exactly  the size requested,so any thing within the range of 370MB to 430MB is acceptable)
+df -Th -------> get the mount point of it
+ 
+umount /datasource
+e2fsck f /dev/datacontainer/datacopy
+resize2fs /dev/datacontainer/datacopy 400M
+lvreduce L 400M /dev/datacontainer/datacopy
+mount -a
+
+
+Q) create a new physical volume, create a new volume group in the name of datacontainer, vg extent is 16.00MB
+
+
+create a new logical volume in the name of datacopy with the size of 50 extents and file system must vfat then
+mount it under /datasource
+
+fdisk /dev/vdb ----- > Create the Partition of 802M[ (16*50) + 2 ] and set it's type 8e (which is LVM type)
+
+partx /dev/vdb --- If you didn't get the partition, just reboot the system, don't get panic
+
+pvcreate /dev/vdb5
+
+vgcreate -s 16M datacontainer /dev/vdb5
+
+vgdisplay -----> Check the vg extent size, its should be this (PE Size 16.00 MiB)
+
+lvcreate -l 50 -n datacopy datacontainer
+
+lvdisplay ------------> Check the size of extents and it should be(Current LE 50)
+
+mkfs.vfat /dev/datacontainer/datacopy ------> Make a filesystem on it
+
+mkdir -p /gluster -----> Create Directory to mount on it
+blkid /dev/datacontainer/datacopy -----> get the UUID of /dev/datacontainer/datacopy
+
+vim /etc/fstab --------> Create the mount point inside the fstab
+
+UUID=C553-2BF5 /datasource vfat defaults 0 0
+
+mount -a
+
+Verification:
+df -hT ----> verify it is mounted
+
 
 =======================================================================================================================================
 
@@ -548,6 +611,11 @@ OR
 grep ‘abcde’ /etc/testfile > /tmp/testfile 
 
 
+Q) Find all files that are larger than 5MB in the /etc directory and copy them to /find/largefiles
+
+sudo find /etc -type f -size +5M -exec cp {} /find/largefiles \;
+
+
 
 
 =================================================================================================================
@@ -730,6 +798,71 @@ podman container run -d --name myapp -v /data/input/:/data/input/:Z -v /data/out
  tuned-adm recommended
  tuned-adm active
 
+
+
+ ----------------------------------------------------------------------------------------------------------------------------------------
+
+ Q) Write a script named awesome.sh in the root directory on client1.
+    a. If “me” is given as an argument, then the script should output “Yes, I’m awesome.”
+    b. If “them” is given as an argument, then the script should output “Okay, they are awesome.”
+    c. If the argument is empty or anything else is given, the script should output “Usage ./awesome.sh me|them”
+
+
+#!/bin/bash
+
+# Check if the number of arguments is exactly 1
+if [ "$#" -eq 1 ]; then
+    case "$1" in
+        "me")
+            echo "Yes, I'm awesome."
+            ;;
+        "them")
+            echo "Okay, they are awesome."
+            ;;
+        *)
+            echo "Usage: $0 me|them"
+            ;;
+    esac
+else
+    echo "Usage: $0 me|them"
+fi
+
+/root/awesome.sh me
+/root/awesome.sh them
+/root/awesome.sh
+
+
+
+Q. Create users phil, laura, stewart, and kevin.
+All new users should have a file named “Welcome” in their home folder after account creation.
+All user passwords should expire after 60 days and be atleast 8 characters in length.
+phil and laura should be part of the “accounting” group. If the group doesn’t already exist, create it.
+stewart and kevin should be part of the “marketing” group. If the group doesn’t already exist, create it.
+
+
+# Create accounting group if it doesn't exist
+getent group accounting || sudo groupadd accounting
+
+# Create marketing group if it doesn't exist
+getent group marketing || sudo groupadd marketing
+
+# Create users with home directories and the "Welcome" file
+sudo useradd -m -p "$(openssl passwd -1 password)" -e $(date -d "+60 days" +"%Y-%m-%d") -g accounting -s /bin/bash phil
+sudo useradd -m -p "$(openssl passwd -1 password)" -e $(date -d "+60 days" +"%Y-%m-%d") -g accounting -s /bin/bash laura
+sudo useradd -m -p "$(openssl passwd -1 password)" -e $(date -d "+60 days" +"%Y-%m-%d") -g marketing -s /bin/bash stewart
+sudo useradd -m -p "$(openssl passwd -1 password)" -e $(date -d "+60 days" +"%Y-%m-%d") -g marketing -s /bin/bash kevin
+
+# Create the "Welcome" file in their home directories
+sudo -u phil touch /home/phil/Welcome
+sudo -u laura touch /home/laura/Welcome
+sudo -u stewart touch /home/stewart/Welcome
+sudo -u kevin touch /home/kevin/Welcome
+
+# Set password expiry and minimum length
+sudo chage -M 60 -m 0 phil
+sudo chage -M 60 -m 0 laura
+sudo chage -M 60 -m 0 stewart
+sudo chage -M 60 -m 0 kevin
 
 
 

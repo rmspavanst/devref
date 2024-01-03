@@ -19,6 +19,10 @@ cat /etc/passwd
 passwd harsh
 passwd nitin
 
+
+useradd -m -d /var/www/tarunika -s /bin/zsh -c "TecMint Technical Writer" -u 100 -g 1000 tarunika
+
+
 # Q2. Copy the file /etc/fstab to /var/fstab
     a) the user owner of /var/fstab should be root
     b) the user natasha should have read and write access
