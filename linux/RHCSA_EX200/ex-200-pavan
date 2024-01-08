@@ -169,7 +169,7 @@ lsblk or ls /dev (to see all the avaliable disks)
     sda is used
     sdb, sdc is not used
 
-fdisk /dev/sdb (to create new 1Gb partition)
+fdisk /dev/sdb (to create new 1Gb partition) or cfdisk /dev/sdb
     :n (n for new partition)
     :p
     :1
@@ -337,7 +337,7 @@ Q. Use the appropriate utility to create a 5Tib thin Provisioned volume
 
 lsblk /dev/nvme0n2 (if the size show 10Gb using VDO will extend to 50Gb)
 
-vdo create --name VDO1 --device=/dev/nvme0n2 --vdoLogicalSize=50G
+vdo create --name VDO1 --device /dev/nvme0n2 --vdoLogicalSize 50G
 
 vdo list
 

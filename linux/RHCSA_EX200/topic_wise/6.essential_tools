@@ -89,6 +89,31 @@ mkdir D2
 ls -la
 
 
+Below we can see how each octal value of unmask affects new files created.
+
+0: read and write.
+1: read and write.
+2: read.
+3: read.
+4: write. 
+5: write.
+6: execute only.
+7: no permissions.
+
+
+Here are the values for directories.
+
+0: read, write and execute.
+1: read and write.
+2: read and execute.
+3: read only.
+4: write and execute.
+5: write only.
+6: execute only.
+7: no permissions.
+
+
+
 tar:
 ------
 cat > file

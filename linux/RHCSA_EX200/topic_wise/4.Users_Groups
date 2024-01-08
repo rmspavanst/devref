@@ -63,3 +63,6 @@ mkdir /linux/d2
 ls -ld /linux
 chmod +t /linux (stickybit)
 ls -ld /linux (can see sticky bit is set)
+
+
+

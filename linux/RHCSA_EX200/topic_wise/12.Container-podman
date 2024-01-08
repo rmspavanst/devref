@@ -2,7 +2,7 @@
 
 1. Pull a container image
 
-# yum install podman container-tools
+# yum install podman @container-tools
 
 podman login registry.redhat.io
 username:
@@ -58,8 +58,12 @@ systemctl enable container-name
 
  for Users:
 
+
+
  podman run -d --name web3 -p 8082:80 image-name
  mkdir -p ~/.config/systemd/user
+
+  loginctl enable-linger user
 
  podman generate systemd container-name > ~/.config/systemd/user/container-name.service
 systemctl --user daemon-reload
@@ -69,6 +73,10 @@ WantedBy=default.service (change this)
 
 systemctl --user start container-name &&  systemctl --user enable container-name
 systemctl --user status container-name
+
+
+serfacl -m u:user:rwx /opt/input
+semanage fcontext -a -t container_file_t "/opt/input(/.*)?"
 
 
 or 

@@ -125,5 +125,14 @@
 
 
 
+17. Set default permissions / Umask:
+   Configure default permissions for user aclan such that
+   All newly created files for user aclan should have -rw-r----- as hte default permissions.
+   All newly created directories for the same uses should have drwxr-x--- as the default permissions
 
+
+
+18. Create lv and mount it permanently:
+   - create the lv with name "wshare" by using 50PE's from     
+     the VG "wgroup"
 
