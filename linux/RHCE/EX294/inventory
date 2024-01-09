@@ -1,0 +1,58 @@
+Q1. Install and Configure Ansible on the control server name "workstation.lab.example.com" as below:
+        Install required packages
+        Create a statis manifest file named /home/admin/ansible/inventory so that:
+            system1 is member of dev host group
+            system2 is member of test host group
+            system3 and system4 are member of prod  host group
+            system5 is member of balancer host group
+        The prod group is a member of the webservers host group
+        Create a configuration file calls /home/admin/ansible/ansible.cfg
+        The host inventory file is /home/admin/ansible/inventory 
+        The location of role used used in playbooks include /home/admin/ansible/roles
+
+
+# inventory
+vi inventory
+
+[dev]
+10.0.16.157
+
+[test]
+10.0.16.160
+
+[prod]
+#10.0.16.160
+#10.0.16.157
+
+[balancer]
+#10.0.16.157
+
+
+ansible all --list-hosts -i inventory
+ansible dev --list-hosts -i inventory
+
+
+#Configuration
+
+vi ansible.cfg
+
+[defaults]
+inventory   = /home/ansible/rhce/ansible/inventory
+collections = /home/ansible/rhce/ansible/collection
+roles_path  = /etc/ansible/roles:/home/ansible/rhce/ansible/roles
+remote_user = ansible
+ask_pass    = false
+
+[privilege_escalation]
+become          = True
+become_method   =   sudo
+become_user     = root
+become_ask_pass = False
+
+ansible --version
+
+ansible-inventory --graph
+
+
+
+
