@@ -1,0 +1,52 @@
+# Create a playbook called package.yml that:
+    -Install the php and mariaDB packages on hots in the dev, balancers, and prod host group.
+    -Install the Development Tools package group on hots in the dev host group.
+    -Updates all packages to the latest version onhosts in the dev host group.
+
+vi.package.yml
+---
+- name: Playbook to install and update packages
+  hosts: all #dev, balancers,prod
+  remote_user: admin
+  become: true
+  tasks:
+    - name: install php and mariadb package
+      yum:
+        name:
+          - php
+          - mariadb
+        state: latest
+
+    - name: install Development Tools group package
+      yum:
+        name: '@Developmemt Tools'
+        state: latest
+      when: inventory_hostname in groups['dev']
+
+    - name: update all the packages
+      yum:
+        name: '*'
+        state: latest
+      when: inventory_hostname in groups['dev']  
+
+ansible-playbook package.yml --syntax-check
+ansible-playbook package.yml --check #dry running
+ansible-playbook package.yml
+
+
+
+
+
+
+
+
+#Install the RHEL system roles package and create a playbook called timesync.yml that:
+    - Runs on all managed hosts
+    - Uses the timesync role
+    - Configures the role to use the time server 172.25.254.254
+    - Configures the role to set the iburst parameter as enabled.    
+
+
+
+
+vi timesync.yml

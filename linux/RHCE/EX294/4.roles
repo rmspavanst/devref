@@ -1,0 +1,12 @@
+#Create a role called apache that meets following requirements:
+    -Is placed at /home/admin/ansible/roles/.
+    -Installs httpd and firewalld packages
+    -Allows ports 80 and 443 to be accessible through firewall
+    -Ensures that httpd and firewalld services are started at boot time
+    -A template file index.html.j2 exists (you have to create this file) and is used to create the file /var/www/html/index.html with parameters
+    - Deploys an index page that presents following message: Welcome to <hostname> in <Ipaddr>
+
+    - where Hostme is the fully qualified domain name of the managed node and IPaddr is the ipaddress host name
+Create a playbook called httpd.yml 
+Is placed at  /home/admin/ansible/apache.yml.
+Runs role apache against webservers hosts group.
