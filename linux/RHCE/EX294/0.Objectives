@@ -75,3 +75,14 @@
 
     Create and use templates to create customized configuration files
     Use Ansible Vault in playbooks to protect sensitive data
+
+
+
+# Introducing Ansible core components
+    Ansible Configuration Files - Defines various default values to be used by Ansible. Almost all default values can be overwritten in ansible ad-hoc commands and playbooks.
+    Ansible Inventories - Defines hosts and groups of hosts on which ansible operates.
+    Ansible Modules - Module is small python program which is designed to execute specific task on ansible managed nodes or local node.
+    Ansible Variables - Variables used in playbook .
+    Ansible Facts - Represent data about remote systems gathered by Ansible which can be used in playbooks as variables. Ansible facts are also very important for conditional playbook execution.
+    Ansible Plays - Ansible play basically defines target hosts and specific task(s) to be executed on target hosts. Ansible play is written in YAML.
+    Ansible Playbooks - List of ansible plays

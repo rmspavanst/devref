@@ -1,0 +1,57 @@
+ssh root@control
+
+vi /etc/hosts
+
+192.168.0.180  repo.ansi.example.com    repo
+192.168.0.181  node1.ansi.example.com   node1
+192.168.0.182  node2.ansi.example.com   node2
+192.168.0.183  node3.ansi.example.com   node3
+192.168.0.184  node4.ansi.example.com   node4
+192.168.0.185  control.ansi.example.com control
+
+
+getent hosts node1.ansi.example.com
+
+# Add repo
+sudo cp -r /etc/yum.repos.d /etc/yum.repos.d.backup
+sudo vim /etc/yum.repos.d/centos8.repo
+
+[centos8]
+name=CentOS 8 Repository
+baseurl=http://mirror.centos.org/centos/8/BaseOS/x86_64/os/
+gpgcheck=1
+gpgkey=http://mirror.centos.org/centos/8/BaseOS/x86_64/os/RPM-GPG-KEY-CentOS-Official
+enabled=1
+
+# Import the GPG key for the CentOS repository:
+sudo rpm --import http://mirror.centos.org/centos/8/BaseOS/x86_64/os/RPM-GPG-KEY-CentOS-Official
+sudo dnf clean all
+sudo dnf makecache
+sudo dnf list --repo=centos8
+
+
+
+dnf install epel-release
+dnf provides ansible
+
+dnf install ansible
+
+ssh-keygen -t rsa
+ssh-copy-id or
+
+for hosts in 1 2 3 4
+do
+ssh-copy-id node$hosts
+
+
+export ANSIBLE_CONFIG=/tmp/ansible.cfg
+
+ansible mygroup --list-hosts
+ansible mygroup -m ping -o
+
+
+
+
+
+
+

@@ -85,7 +85,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   ##-- Node 2 ------------------------------------------------------------------
   config.vm.define "node2" do |node2|
-    node2.vm.network "public_network", ip: "192.168..182"
+    node2.vm.network "public_network", ip: "192.168.0.182"
     node2.vm.synced_folder ".", "/vagrant", type: "rsync", rsync__exclude: [".git/", "*.vdi"]
 
     #-- Provider ---------------------------------------------------------------
