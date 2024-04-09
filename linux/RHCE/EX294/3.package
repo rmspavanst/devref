@@ -34,6 +34,37 @@ ansible-playbook package.yml --check #dry running
 ansible-playbook package.yml
 
 
+ansible all -m command -a 'rpm -q php mariadb --last' -b
+ansible all -m command -a 'yum grouplist "Developmemt Tools"' -b
+
+ansible dev -m command -a 'yum update -y' -b
+
+===============================================================================================================================================
+
+vi.package.yml
+---
+- name: Playbook to install and update packages
+  hosts: dev,balancers,prod
+  tasks:
+    - name: install php and mariadb package
+      yum:
+        name:
+          - php
+          - mariadb
+        state: latest
+
+    - name: install Development Tools group package
+      yum:
+        name: '@Developmemt Tools'
+        state: latest
+      when: inventory_hostname in groups['dev']
+
+    - name: update all the packages
+      yum:
+        name: '*'
+        state: latest
+      when: inventory_hostname in groups['dev']
+
 
 
 
@@ -50,3 +81,7 @@ ansible-playbook package.yml
 
 
 vi timesync.yml
+---
+- name: Configuring NTP
+  hosts: all
+  

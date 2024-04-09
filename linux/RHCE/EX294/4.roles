@@ -7,6 +7,6 @@
     - Deploys an index page that presents following message: Welcome to <hostname> in <Ipaddr>
 
     - where Hostme is the fully qualified domain name of the managed node and IPaddr is the ipaddress host name
-Create a playbook called httpd.yml 
-Is placed at  /home/admin/ansible/apache.yml.
-Runs role apache against webservers hosts group.
+    #Create a playbook called httpd.yml 
+        -Is placed at  /home/admin/ansible/apache.yml.
+        -Runs role apache against webservers hosts group.

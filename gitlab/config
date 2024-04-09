@@ -1,0 +1,101 @@
+# https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/doc/settings/database.md#using-a-non-packaged-postgresql-database-management-server
+
+
+
+
+sudo -i -u postgres
+psql
+
+createdb -E UTF-8 -T template0 gitlabhq_production
+
+sudo -u postgres psql -d template1 -c "CREATE USER gitlab CREATEDB;"
+
+sudo -u postgres psql -d template1 -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
+
+sudo -u postgres psql -d template1 -c "CREATE EXTENSION IF NOT EXISTS btree_gist;"
+
+sudo -u postgres psql -d template1 -c "CREATE DATABASE gitlabhq_production OWNER gitlab;"
+
+GRANT ALL PRIVILEGES ON DATABASE gitlabhq_production TO gitlab;
+ALTER USER gitlab WITH PASSWORD 'gitlab'; (optional)
+
+useradd gitlab
+passwd gitlab #git
+
+sudo -u gitlab -H psql -d gitlabhq_production
+
+Check if the pg_trgm extension is enabled:
+
+SELECT true AS enabled
+FROM pg_available_extensions
+WHERE name = 'pg_trgm'
+AND installed_version IS NOT NULL;
+
+If the extension is enabled this produces the following output:
+
+enabled
+---------
+ t
+(1 row)
+
+Check if the btree_gist extension is enabled:
+
+SELECT true AS enabled
+FROM pg_available_extensions
+WHERE name = 'btree_gist'
+AND installed_version IS NOT NULL;
+
+If the extension is enabled this produces the following output:
+
+enabled
+---------
+ t
+(1 row)
+
+Quit the database session:
+
+gitlabhq_production> \q
+
+
+GRANT ALL PRIVILEGES ON DATABASE gitlabhq_production TO git;
+
+
+psql -h 10.102.0.6 -U gitlab -d gitlabhq_production
+
+
+
+
+Backup:=
+=============
+
+sudo gitlab-backup create
+
+To restore a backup, you must restore /etc/gitlab/gitlab-secrets.json (for Omnibus packages) or /home/git/gitlab/.secret
+
+
+Restore:
+===============
+First ensure your backup tar file is in the backup directory described in the gitlab.rb configuration gitlab_rails['backup_path']. The default is /var/opt/gitlab/backups. It needs to be owned by the git user.
+
+sudo cp 16493107454_2022_04_25_14.6.1-ee_gitlab_backup.tar /var/opt/gitlab/backups/
+sudo chown git:git /var/opt/gitlab/backups/16493107454_2022_04_25_14.6.1-ee_gitlab_backup.tar
+Stop the processes that are connected to the database. Leave the rest of GitLab running:
+
+sudo gitlab-ctl stop puma
+sudo gitlab-ctl stop sidekiq
+# Verify
+sudo gitlab-ctl status
+Next, restore the backup, specifying the timestamp of the backup you wish to restore:
+
+# This command will overwrite the contents of your GitLab database!
+sudo gitlab-backup restore BACKUP=16493107454_2022_04_25_14.6.1-ee
+
+If there’s a GitLab version mismatch between your backup tar file and the installed version of GitLab, the restore command aborts with an error message. Install the correct GitLab version, and then try again.
+
+Next, restore /etc/gitlab/gitlab-secrets.json if necessary, as previously mentioned.
+
+Reconfigure, restart and check GitLab:
+
+sudo gitlab-ctl reconfigure
+sudo gitlab-ctl restart
+sudo gitlab-rake gitlab:check SANITIZE=true

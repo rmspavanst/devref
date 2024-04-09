@@ -77,5 +77,55 @@ ansible --version
 ansible-inventory --graph
 
 
+or 
+
+
+==========================================================================================================================
+
+
+
+cat inventory
+[dev]
+node1.ansi.example.com
+
+[test]
+node2.ansi.example.com
+
+[prod]
+node3.ansi.example.com
+node4.ansi.example.com
+
+[balancers]
+repo.ansi.example.com
+
+[webservers:children]
+prod
+
+
+cat ansible.cfg
+[defaults]
+inventory = /home/admin/ansible/inventory
+roles_path = /home/admin/ansible/roles
+collections_paths=/home/admin/ansible/collections
+remote_user = admin
+
+
+[privilege_escalation]
+become = true
+#become_user = root
+#become_method = sudo
+#become_ask_pass = False
+
+
+ansible all --list-hosts
+ansible-inventory --list
+ansible-inventory --graph
+
+
+ansible all -m command -a 'id'
+
+
+
+
 
 

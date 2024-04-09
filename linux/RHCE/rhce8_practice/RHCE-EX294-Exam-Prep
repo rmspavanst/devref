@@ -1,0 +1,291 @@
+bastion
+workstation
+servera
+serverb
+serverc
+serverd
+
+
+rpm -q ansible
+# vi .vimrc (set ai nu ts=2 et cuc)
+
+
+useradd admin (in all nodes) # provide sudo access with NOPASSWD:ALL
+passwd admin (redhat)
+passwd root (redhat)
+
+yum install ansible -y
+
+
+
+Q1. Install and configure Ansible on control node
+
+su - admin
+mkdir -p /home/admin/ansible/roles
+cd /home/admin/ansible
+
+# vi inventory
+
+[dev]
+node1.example.com
+
+[balancer]
+node2.example.com
+
+[prod]
+node3.example.com
+node4.example.com
+
+[webservers:children]
+prod
+
+# vi ansible.cfg
+
+[defaults]
+inventory=./inventory
+roles_path=./roles:/usr/share/ansible/roles
+remote_user= admin
+
+[previlage_escalation]
+become
+
+
+ssh-keygen
+ssh-copy-id #to all the nodes
+
+# ansible all -m ping
+
+
+Q2.) create yum repo on all the manageds nodes
+    * name of the repo us baseos and appstream
+    * destription is "RH294 Description"
+    * bse Url is http://content.example.com/rhel8.0/x86_64/dvd/AppStream and /dvd/BaseOS
+    * GPG check is true
+    * GPG key is http://content.example.com/rhel8.0/x86_64/dvd/RPM-GPG-KEY-redhat-release
+    * The repository is enabled
+
+
+vi yum-pack.sh
+
+#!/bin/bash
+ansible all -m yum_repository -a 'name=AppStream destription="RH294 Description" baseurl=http://content.example.com/rhel8.0/x86_64/dvd/AppStream enabled=true gpgcheck=true gpgkey=http://content.example.com/rhel8.0/x86_64/dvd/RPM-GPG-KEY-redhat-release state=present' -u admin -b 
+ansible all -m yum_repository -a 'name=BaseOS destription="RH294 Description" baseurl=http://content.example.com/rhel8.0/x86_64/dvd/BaseOS enabled=true gpgcheck=true gpgkey=http://content.example.com/rhel8.0/x86_64/dvd/RPM-GPG-KEY-redhat-release state=present' -u admin -b 
+
+chmod +x yum-pack.sh
+
+ansible all -m command -a 'yum repolist all' -b
+
+sh yum-pack.sh
+ansible all -m command -a 'yum repolist all' -b
+ansible all -m command -a 'ls -lrt /etc/yum.repos.d' -b
+
+
+
+Q3.) Playbook for packages.yml
+    - php and mariadb pkg on dev, balancer and prod host groups
+    - Development tools pkg on dev host group
+    - Update all packages to the latest version on dev host group
+
+vi packages.yml
+---
+- name: Playbook to install and update packages/RPMs
+  hosts: all (dev,balancers)
+  remote_user: admin
+  become: true
+  tasks:
+    - name: Install php & mariadb package
+      yum:
+        name:
+          - php
+          - mariadb
+        state: latest
+    
+    - name: Install '@Development Tools' group package
+      yum:
+        name: '@Development Tools'
+        state: latest   
+      when: inventory_hostname in groups['dev']
+
+    - name: Update all the packages
+      yum:
+        name: '*'
+        state: latest   
+      when: inventory_hostname in groups['dev'] 
+
+
+ansible-playbook packages.yml --suntax-check
+ansible-playbook packages.yml
+
+ansible all -m command -a 'rpm -q php mariadb --last' -b
+ansible servera -m command -a 'yum grouplist "Development Tools"' -b
+ansible servera -m command -a 'yum update -y' -b
+
+
+
+Q4.) Roles package and playbook called timesync.yml
+    - Run on all managed hosts
+    - Uses the timesync role
+    - Configure the role to use the time server 172.25.254.254
+    - Configure the role to set the iburst parameter as enabled
+
+
+ansible-galaxy list
+sudo yum install rhel-system-roles.noarch
+ansible-galaxy list
+
+vi timesync.yml
+---
+- name: Configure NTP
+  hosts: all
+  remote_user: admin
+  become: true
+  vars:
+    timesync_ntp_servers:
+    - hostname: 172.25.254.254
+      iburst: true
+  roles:
+    - rhel-system-roles.timesync
+  tasks:
+    - command: timedatectl set-ntp true
+
+ ansible-playbook timesync.yml --syntax-check
+ ansible-playbook timesync.yml --check   
+ ansible-playbook timesync.yml
+
+ansible all -m command -a 'grep -i iburst /etc/chrony.conf' -b
+ansible all -m command -a 'chronyc sources -v' -b
+ansible all -m command -a 'timedatectl' -b
+
+
+or
+
+
+# pwd
+home/admin/ansible/
+# sudo yum install rhel-system-roles.noarch -y
+# cd roles/
+# ansible-galaxy list
+# cp -r /usr/share/ansible/roles/rhelsystem-roles.timesync .
+# vim  timesync.yml
+---
+- name:
+  hosts: all
+  vars:
+    timesync_ntp_provider: chrony
+    timesync_ntp_servers:
+      - hostname: classroom.example.com  → in exam its ip-address
+        iburst: yes
+    timezone: Asia/Kolkata
+  roles:
+    - rhel-system-roles.timesync
+  tasks:
+    - name:
+      timezone:
+        name: "{{timezone}}"
+:wq!
+# ansible-playbook timesync.yml -–syntax-check
+# ansible-playbook timesync.yml
+
+
+
+Q5.) Create a role called apache in /home/admin/ansible/roles with the following requirements:
+    - The httpd package is installed, enabled on boot, and started.
+    - The firewall is enabled and running with a rule to allow access to the web server.
+    - template file index.html.j2 is used to create the file /var/www/html/index.html with the output:
+        Welcome to HOSTNAME on IPADDRESS            
+        where HOSTNAME is the fqdn of the managed node and IPADDRESS is the IP-Address of the managed node.
+        note: you have to create index.html.j2 file.
+    - Create a playbook called httpd.yml that uses this role and the playbook runs on hosts in the webservers host group.
+
+
+# pwd
+/home/admin/ansible/roles/
+# ansible-galaxy init apache
+# vim apache/vars/main.yml
+---
+# vars file for apache
+http_pkg: httpd 
+firewall_pkg: firewalld
+http_srv: httpd
+firewall_srv: firewalld
+rule: http
+webpage: /var/www/html/index.html
+template: index.html.j2
+:wq!
+# vim apache/tasks/package.yml
+---
+- name:
+  yum:
+    name:
+      - "{{http_pkg}}"
+      - "{{firewall_pkg}}"
+    state: latest
+:wq!
+# vim apache/tasks/service.yml
+---
+- name:
+  service:
+    name: "{{http_srv}}"
+    enabled: true
+    state: started
+- name:
+  service:
+    name: "{{firewall_srv}}"
+    enabled: true
+    state: started
+:wq!
+# vim apache/tasks/firewall.yml
+---
+- name:
+  firewalld:
+    service: "{{rule}}"
+    state: enabled
+    permanent: true
+    immediate: true
+:wq!
+
+
+# vim apache/tasks/webpage.yml
+---
+- name:
+  template:
+    src: "{{template}}"
+    dest: "{{webpage}}"
+  notify: restart_httpd
+!wq
+# vim apache/tasks/main.yml
+---
+# tasks file for apache
+- import_tasks: package.yml
+- import_tasks: service.yml
+- import_tasks: firewall.yml
+- import_tasks: webpage.yml
+:wq!
+# vim apache/templates/index.html.j2
+Welcome to {{ansible_fqdn}} on {{ansible_default_ipv4.address}}
+# vim apache/handlers/main.yml
+---
+# handlers file for apache
+- name: restart_httpd
+  service:
+    name: http
+    state: restarted
+:wq!
+# cd ..
+# pwd
+/home/admin/ansible/
+# vim  httpd.yml
+---
+- name:
+  hosts: webservers
+  roles:
+    - ./roles/apache
+:wq!
+# ansible-playbook httpd.yml –-syntax-check
+# ansible-playbook httpd.yml
+
+
+
+
+
+
