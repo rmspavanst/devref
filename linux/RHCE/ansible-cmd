@@ -1,0 +1,60 @@
+# yum list installed platform-python
+Installed Packages
+platform-python.x86_64       3.6.8-37.el         @anaconda
+
+
+# ansible -m setup localhost | grep ansible_python_version
+
+
+[usa]
+washington[1:2].example.com
+
+[canada]
+ontario[01:02].example.com
+
+# ansible washington1.example.com --list-hosts
+  hosts (1):
+    washington1.example.com
+
+# ansible washington01.example.com --list-hosts
+ [WARNING]: provided hosts list is empty, only localhost is available
+ hosts (0):
+
+# ansible canada --list-hosts
+  hosts (2):
+    ontario01.example.com
+    ontario02.example.com
+
+# ansible all --list-hosts
+# ansible ungrouped --list-hosts
+# ansible all -i inventory --list-hosts
+
+
+
+# vi ansible.cfg
+
+[defaults]
+inventory = ./inventory
+remote_user = user
+ask_pass = false
+
+[privilege_escalation]
+become = true
+become_method = sudo
+become_user = root
+become_ask_pass = false
+
+
+Directive	    Description
+---------       -------------------
+inventory	    Specifies the path to the inventory file.
+remote_user	    The name of the user to log in as on the managed hosts. If not specified, the current user's name is used.
+ask_pass	    Whether or not to prompt for an SSH password. Can be false if using SSH public key authentication.
+become	        Whether to automatically switch user on the managed host (typically to root) after connecting. This can also be         
+                specified by a play.
+become_method	How to switch user (typically sudo, which is the default, but su is an option).
+become_user	    The user to switch to on the managed host (typically root, which is the default).
+become_ask_pass	Whether to prompt for a password for your become_method. Defaults to false.
+
+
+
