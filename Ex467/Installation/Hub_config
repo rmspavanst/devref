@@ -1,0 +1,61 @@
+
+skopeo login hub.lab.example.com
+
+HUB="hub.lab.example.com"
+AAP="ansible-automation-platform-22"
+
+skopeo copy docker-archive:ee-29-rhel8.tgz docker://${HUB}/${AAP}/ee-29-rhel8:latest
+
+skopeo copy docker-archive:ee-minimal-rhel8.tgz docker://${HUB}/${AAP}/ee-minimal-rhel8:latest
+skopeo copy docker-archive:ee-supported-rhel8.tgz docker://${HUB}/${AAP}/ee-supported-rhel8:latest
+
+or
+
+Using Podman:
+
+[student@workstation certified-EEs]$ podman load -i ee-supported-rhel8.tgz
+
+podman tag registry.redhat.io/ansible-automation-platform-22/ee-supported-rhel8 hub.lab.example.com/ansible-automation-platform-22/ee-supported-rhel8
+podman push hub.lab.example.com/ansible-automation-platform-22/ee-supported-rhel8
+
+
+
+1. Create the containers namespace and then upload the containers.podman content collection.
+    Navigate to Collections → Namespaces and then click Create.
+    Enter containers in the Name field and then click Create to create the namespace.
+    Click Upload collection.
+    Click Select file, select /home/student/content-collections/community/containers-podman-1.9.1.tar.gz, and then click Upload.
+
+2. Create the ansible namespace and then upload the ansible.posix content collection.
+    Navigate to Collections → Namespaces and then click Create.
+    Enter ansible in the Name field and then click Create to create the namespace.
+    Click Upload collection.
+    Click Select file, select the /home/student/content-collections/certified/ansible-posix-1.3.0.tar.gz archive, and then click Upload.
+
+3. Approve the uploaded content collections.
+    Navigate to Collections → Approval.
+    Click Approve to approve the ansible.posix content collection.
+    Click Approve to approve the containers.podman content collection.
+    Navigate to Collections → Collections and verify that private automation hub displays the podman and posix automation content collections.
+
+4. Synchronize the automaton controller Demo Project project resource.
+    Navigate to https://controller.lab.example.com and log in as the admin user with redhat as the password.
+    Navigate to Resources → Projects to display existing project resources.
+    Click the Sync Project icon to synchronize the Demo Project resource.
+
+5. Update the Demo Inventory resource to remove the localhost resource. Add the workstation.lab.example.com host to the Demo Inventory resource.
+Making this change allows the Demo Inventory resource to target a machine in your environment (workstation.lab.example.com) rather than the automation execution environment (localhost).
+    Navigate to Resources → Inventories to display existing inventory resources.
+    Click the link for the Demo Inventory resource and then click the Hosts tab.
+    Select the localhost resource and then click Delete. Confirm your decision to delete the localhost resource.
+    Click Add. Enter workstation.lab.example.com in the Name field and then click Save.
+
+6. Update the Demo Credential machine credential resource so that it uses valid credentials for accessing the workstation.lab.example.com host.
+    Navigate to Resources → Credentials to display existing credentials.
+    Locate the Demo Credential resource and click the Edit Credential icon for that row.
+    Enter student in the Username field, enter student in the Password field, and then click Save.
+        If you previously completed this exercise, then click the Replace icon to enter a new password.
+
+7. Launch the Demo Job Template job.
+    Navigate to Resources → Templates to display existing templates.
+    Click the Launch Template icon to initiate the job. The Demo Job Template resource uses the Demo Credential machine credential resource to connect to the workstation.lab.example.com host in the Demo Inventory resource.

@@ -1,0 +1,73 @@
+
+
+1. Navigate to https://controller.lab.example.com and log in as the admin user with redhat as the password.
+2. Create a user, sam, as a Normal User.
+    Navigate to Access → Users and then click Add.
+    On the Create New User page, fill in the details as follows:
+
+    Field	            Value
+    First Name	        Sam
+    Last Name	        Simons
+    Email	            sam@lab.example.com
+    Username	        sam
+    Password	        redhat123
+    Confirm Password	redhat123
+    User Type	        Normal User
+    Organization	    Default
+    Click Save to create the new user.
+
+3. Verify the roles for the newly created sam user.
+    Click the Roles tab to see the user’s roles.
+    User sam has the Member role for the Default organization.
+    Click admin → Logout in the upper-right corner to log out and then log back in as the sam user with redhat123 as the password.
+    User sam has limited access. In the left navigation, some items are not displayed, such as Administration → Notifications, Administration → Management Jobs, Administration → Instance Groups, and Settings.
+    Navigate to Access → Users. User sam cannot add, modify, or delete users. This user can update basic settings, such as the first name, last name, email, username, and password fields.
+    Click sam → Logout in the upper-right corner to log out.
+
+
+4. Create a user, sylvia, as a System Auditor.
+    Log back in as the admin user and use redhat as the password.
+    Navigate to Access → Users and then click Add.
+    On the Create New User page, fill in the details as follows:
+
+    Field	            Value
+    First Name	        Sylvia
+    Last Name	        Simons
+    Email	            sylvia@lab.example.com
+    Username	        sylvia
+    Password	        redhat123
+    Confirm Password	redhat123
+    User Type	        System Auditor
+    Organization	    Default
+    Click Save to create the new user.
+
+5. Verify the roles for sylvia.
+    Click the Roles tab to see the user’s roles. Notice that user sylvia has the System Auditor role.
+    Log out and log back in as sylvia user with redhat123 as the password.
+    The user sylvia has access to all elements, such Users, Teams, Projects, Credentials, and so on. Although the user can see all of the resources, the user cannot add, modify, delete, or use any of the resources.
+    Navigate to Access → Users. The user sylvia cannot add, modify, or delete users. This user can update basic settings, such as the first name, last name, email, username, and password fields.
+    Click sylvia → Logout in the upper-right corner to log out.
+
+6. Create a user, simon, as a System Administrator.
+    Log back in as the admin user and use redhat as the password.
+    Navigate to Access → Users and then click Add.
+    On the Create New User page, fill in the details as follows:
+
+    Field	        Value
+    First Name	    Simon
+    Last Name	    Stephens
+    Email	        simon@lab.example.com
+    Username	    simon
+    Password	    redhat123
+    Confirm Password redhat123
+    User Type	    System Administrator
+    Organization	Default
+    Click Save to create the new user.
+
+7. Verify the roles for simon.
+    Click the Roles tab to see the user’s roles. This time the Roles page explicitly displays the message: System administrators have unrestricted access to all resources.
+    Log out and log back in as simon user with redhat123 as the password.
+    The user simon has access to all elements, such as Users, Teams, Projects, Credentials, and so on.
+    Navigate to Access → Users. The user simon can add, modify, and delete users.
+    Click simon → Logout to log out of the automation controller web UI.
+

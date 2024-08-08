@@ -65,12 +65,8 @@ After running the adhoc.sh bash script, you should be able to SSH into all manag
 # vim adhoc.sh 
 	#!/bin/bash
     # you can specify the inventory file with -i option 
-    ansible all -m user -a "user='automation'\
-    comment='User Create by Ansible'" -u root --ask-pass 
-
-    ansible all -m authorized_key -a "user=automation state=present \
-    key={{ lookup('file', '/home/automation/.ssh/id_rsa.pub') }}" -u root --ask-pass
-
+    ansible all -m user -a "user='automation' comment='User Create by Ansible'" -u root --ask-pass 
+    ansible all -m authorized_key -a "user=automation state=present key={{ lookup('file', '/home/automation/.ssh/id_rsa.pub') }}" -u root --ask-pass
     ansible all -m copy -a "src='/etc/sudoers.d/automation' dest='/etc/sudoers.d/'" -u root --ask-pass
 
 # chmod 755 adhoc.sh 

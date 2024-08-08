@@ -1,0 +1,28 @@
+1. Gathering Certificates and Private Keys
+2. Trusting Custom CA Certificates
+   $ update-ca-trust
+
+tree certs
+certs
+├── classroom-ca.pem
+├── control2.lab.example.com.crt
+├── control2.lab.example.com.key
+├── controller.lab.example.com.crt
+├── controller.lab.example.com.key
+├── db.lab.example.com.crt
+├── db.lab.example.com.key
+├── exec1.lab.example.com.crt
+├── exec1.lab.example.com.key
+├── exec2.lab.example.com.crt
+├── exec2.lab.example.com.key
+├── exec3.lab.example.com.crt
+├── exec3.lab.example.com.key
+├── hop1.lab.example.com.crt
+├── hop1.lab.example.com.key
+├── hub.lab.example.com.crt
+└── hub.lab.example.com.key
+
+
+
+./setup.sh -e ignore_preflight_errors=true
+
