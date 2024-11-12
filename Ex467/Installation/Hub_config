@@ -9,6 +9,17 @@ skopeo copy docker-archive:ee-29-rhel8.tgz docker://${HUB}/${AAP}/ee-29-rhel8:la
 skopeo copy docker-archive:ee-minimal-rhel8.tgz docker://${HUB}/${AAP}/ee-minimal-rhel8:latest
 skopeo copy docker-archive:ee-supported-rhel8.tgz docker://${HUB}/${AAP}/ee-supported-rhel8:latest
 
+
+# to check verison
+skopeo inspect docker://hub.lab.example.com/${REPO} --format "{{ .Labels.version }}-{{ .Labels.release }}"
+
+# to change tag
+skopeo copy docker://hub.lab.example.com/${REPO} docker://hub.lab.example.com/${REPO}:1.0.0-99
+
+# skopeo list-tags
+skopeo list-tags docker://hub.lab.example.com/${REPO}
+
+
 or
 
 Using Podman:
@@ -59,3 +70,17 @@ Making this change allows the Demo Inventory resource to target a machine in you
 7. Launch the Demo Job Template job.
     Navigate to Resources → Templates to display existing templates.
     Click the Launch Template icon to initiate the job. The Demo Job Template resource uses the Demo Credential machine credential resource to connect to the workstation.lab.example.com host in the Demo Inventory resource.
+
+
+upload collection using cli
+
+vi ansibl.cfg
+[galaxy]
+server_list = publish
+
+[galaxy_server.publish_repo]
+url= <copy from hub namesapce cli> 
+token=<copy from hub>
+
+ansible-galaxy collection publish -v ansible-posix-1.3.0.tar.xz
+

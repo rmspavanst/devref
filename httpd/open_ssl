@@ -6,3 +6,135 @@ openssl req -new -x509 -nodes -out /etc/pki/tls/certs/amazonaws.com.crt -keyout 
  SSLCertificateKeyFile  /etc/pki/tls/private/ec2-65-0-150-92.ap-south-1.compute.amazonaws.com.key
 
 
+sudo yum install openssl
+openssl genpkey -algorithm RSA -out /etc/httpd/conf.d/ssl/luxasiasellerchat.com.key
+openssl req -new -key /etc/httpd/conf.d/ssl/luxasiasellerchat.com.key -out /etc/httpd/conf.d/ssl/luxasiasellerchat.com.csr
+
+vi /etc/httpd/conf.d/luxasia.conf
+
+<VirtualHost *:80>
+    ServerName scraping.luxasiasellerchat.com
+    Redirect permanent / https://scraping.luxasiasellerchat.com/
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName scraping.luxasiasellerchat.com
+
+    # SSL Configuration
+    SSLEngine on
+    SSLCertificateFile /etc/httpd/conf.d/ssl/luxasiasellerchat.com.crt
+    SSLCertificateKeyFile /etc/httpd/conf.d/ssl/luxasiasellerchat.com.key
+    SSLCertificateChainFile /etc/httpd/conf.d/ssl/luxasiasellerchat.com.ca.crt
+
+    #ProxyPreserveHost On
+    ProxyPass / http://3.7.140.229:6000/
+    ProxyPassReverse / http://3.7.140.229:6000/
+</VirtualHost>
+
+
+
+
+sudo yum install epel-release
+sudo yum install certbot python-certbot-apache
+
+sudo certbot --apache -d scraping.luxasiasellerchat.com
+
+sudo certbot certonly --standalone --preferred-challenges http -d domain-name.com
+
+
+###
+
+sudo yum install httpd -y
+sudo systemctl start httpd
+sudo yum install mod_ssl -y
+LoadModule ssl_module modules/mod_ssl.so
+
+
+sudo certbot --apache -d periscope.leapcommerce.com
+
+
+
+
+openssl genpkey -algorithm RSA -out /etc/ssl/private/periscope.leapcommerce.com.key
+openssl req -new -key /etc/ssl/private/periscope.leapcommerce.com.key -out /etc/ssl/certs/periscope.leapcommerce.com.csr
+
+openssl x509 -req -days 365 -in /etc/ssl/certs/periscope.leapcommerce.com.csr -signkey /etc/ssl/private/periscope.leapcommerce.com.key -out /etc/ssl/certs/periscope.leapcommerce.com.crt
+
+
+<VirtualHost *:80>
+    ServerName periscope.leapcommerce.com
+    Redirect permanent / https://periscope.leapcommerce.com/
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerAdmin admin@leapcommerce.com
+    ServerName periscope.leapcommerce.com
+    DocumentRoot /var/www/html
+
+    SSLEngine on
+
+    # Path to the certificate file (replace with actual file path)
+    SSLCertificateFile /etc/ssl/certs/periscope.leapcommerce.com.crt
+
+    # Path to the private key file (replace with actual file path)
+    SSLCertificateKeyFile /etc/ssl/private/periscope.leapcommerce.com.key
+
+    # Optional: Path to certificate chain file, if needed (for intermediate certificates)
+    # SSLCertificateChainFile /etc/ssl/certs/intermediate.crt
+
+    <Directory /var/www/html>
+        AllowOverride All
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+
+
+
+
+
+# Redirect HTTP requests to HTTPS
+<VirtualHost *:80>
+    ServerName periscope.leapcommerce.com
+    ServerAlias www.periscope.leapcommerce.com
+    Redirect permanent / https://periscope.leapcommerce.com/
+</VirtualHost>
+
+# Redirect HTTPS requests from www to non-www
+<VirtualHost *:443>
+    ServerName www.periscope.leapcommerce.com
+
+    # SSL Configuration
+    SSLEngine on
+    SSLCertificateFile /etc/httpd/conf.d/ssl/luxasiasellerchat.com.crt
+    SSLCertificateKeyFile /etc/httpd/conf.d/ssl/luxasiasellerchat.com.key
+    SSLCertificateChainFile /etc/httpd/conf.d/ssl/luxasiasellerchat.com.ca.crt
+
+    # Redirect rule to non-www
+    RewriteEngine On
+    RewriteCond %{HTTP_HOST} ^www\.scraping\.luxasiasellerchat\.com$ [NC]
+    RewriteRule ^(.*)$ https://periscope.leapcommerce.com$1 [L,R=301]
+</VirtualHost>
+
+# Main HTTPS VirtualHost
+<VirtualHost *:443>
+    ServerName periscope.leapcommerce.com
+
+    # SSL Configuration
+    SSLEngine on
+    SSLCertificateFile /etc/httpd/conf.d/ssl/luxasiasellerchat.com.crt
+    SSLCertificateKeyFile /etc/httpd/conf.d/ssl/luxasiasellerchat.com.key
+    SSLCertificateChainFile /etc/httpd/conf.d/ssl/luxasiasellerchat.com.ca.crt
+
+    #Proxy Configuration
+    ProxyPreserveHost On
+    ProxyPass / http://3.7.140.229:6000/
+    ProxyPassReverse / http://3.7.140.229:6000/
+</VirtualHost>
+
+
+
+
+
+

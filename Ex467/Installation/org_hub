@@ -1,0 +1,115 @@
+Instructions
+
+1. Create a new group called Developers and assign permissions to manage Ansible Content Collections        
+   and containers in private automation hub.
+
+    Navigate to https://hub.lab.example.com and log in as the admin user with redhat as the password.
+    Navigate to User Access → Groups and then click Create.
+    Enter Developers in the Name field and then click Create.
+    Click Edit. In the Collection Namespaces object list, select the following permissions:
+        Add namespace
+        Change namespace
+        Delete namespace
+        Upload to namespace
+    In the Collections object list, select the following permissions:
+        Delete collection
+        Modify Ansible repo content.
+    In the Containers object list, select the following permissions:
+        Change container namespace permissions
+        Change containers
+        Change image tags
+        Create new containers
+        Delete container repository
+        Push to existing containers
+    Click Save to create the new group.
+
+2. Create a new group called Image Managers and assign permissions to manage images in private automation hub.
+
+    Navigate to User Access → Groups and then click Create.
+    Enter Image Managers in the Name field and then click Create.
+    Click Edit. In the Containers object list, select the following permissions:
+        Change containers
+        Change image tags
+        Create new containers
+        Delete container repository
+        Push to existing containers
+    Click Save to create the new group.
+
+3. Create a new group called Operations and assign all the permissions to all the objects in private 
+    automation hub.
+
+    Navigate to User Access → Groups and then click Create.
+    Enter Operations in the Name field and then click Create.
+    Click Edit and for each object select all the permissions.
+    Click Save to create the new group.
+
+4. Create a new user called daniel and add the user to the Developers group.
+
+    Navigate to User Access → Users and then click Create.
+    On the Create new user page, fill in the details as follows and click Save to create the new user.
+
+    Field	    Value
+    Username	daniel
+    First name	Daniel
+    Last name	George
+    Email	    daniel@lab.example.com
+    Password	redhat123
+    Password confirmation	redhat123
+    Groups	    Developers
+    User type	Not a super user
+
+5. Create a new user called oliver and add the user to the Operations group.
+
+    Navigate to User Access → Users and then click Create.
+    On the Create new user page, fill in the details as follows and click Save to create the new user.
+
+    Field	    Value
+    Username	oliver
+    First name	Oliver
+    Last name	Stone
+    Email	    oliver@lab.example.com
+    Password	redhat123
+    Password confirmation	redhat123
+    Groups	    Operations
+    User type	Not a super user
+
+6. Create a new user called simon as a super user.
+
+    Navigate to User Access → Users and then click Create.
+    On the Create new user page, fill in the details as follows and click Save to create the new user.
+
+    Field	    Value
+    Username	simon
+    First name	Simon
+    Last name	Stephens
+    Email	    simon@lab.example.com
+    Password	redhat123
+    Password confirmation	redhat123
+    Groups	    (no group)
+    User type	Super user
+
+7. Verify the permissions for the Developers group by creating a namespace and then uploading a content collection.
+
+    Log out from the private automation hub web UI and log in as daniel with redhat123 as the password.
+    Navigate to Collections → Namespaces and then click Create.
+    On the Create new namespace page, fill in the details as follows and click Create to create the new namespace.
+
+    Field           Value
+    Name	        community
+    Namespace ownersDevelopers
+
+IMPORTANT
+The group must be a namespace owner in order to upload to the namespace. Adding a group as namespace owner provides Change namespace and Upload to namespace permissions to the group.
+
+    Click Upload collection.
+    Click Select file, select the archive located at /home/student/content-collections/community/community-mysql-3.1.1.tar.gz, and then click Upload.
+    After the upload completes successfully, click Collections → Approval.
+    Click Approve to approve the community.mysql content collection.
+    Navigate to Collections → Collections and verify that the private automation hub server displays the mysql automation content collection.
+
+8. Confirm that user simon has all permissions, as the super user.
+    Log out from the private automation hub web UI and log in as simon with redhat123 as the password.
+    Navigate to User access → Users and confirm that Create button is enabled. It means user simon has permission to create new users.
+    Navigate to Collections → Namespaces and confirm that Create button is enabled. It means user simon has permission to create new namespaces.
+    Navigate to Execution Environments → Execution Environments and confirm that Add execution environment is enabled. It means user simon has permission to add new execution environment.
+    Log out from the private automation hub web UI.

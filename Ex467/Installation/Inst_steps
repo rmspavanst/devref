@@ -26,3 +26,17 @@ certs
 
 ./setup.sh -e ignore_preflight_errors=true
 
+to repair:
+
+ansible-lint -p refresh_fact_cache.yml
+
+curl -X POST --user admin:redhat https://controller.lab.example.com/api/v2/workflow_job_template/13/launch/ > /dev/null
+
+skopeo inspect --format "{{ .Labels.version }}-{{ .Labels.release }}" docker://registry.redhat.io/ansible-automation-platform-22/ee-supported-rhel8
+
+podman load -i ee-supported-rhel8.tgz
+
+podman tag registry.redhat.io/ansible-automation-platform-22/ee-supported-rhel8 \
+hub.lab.example.com/ansible-automation-platform-22/ee-supported-rhel8
+
+podman push hub.lab.example.com/ansible-automation-platform-22/ee-supported-rhel8

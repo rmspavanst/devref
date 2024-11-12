@@ -1,0 +1,38 @@
+skopeo login hub.lab.example.com
+Username: admin
+Password: redhat
+Login Succeeded!
+
+skopeo copy \
+> docker-archive:ee-29-rhel8.tgz \
+> docker://hub.lab.example.com/ansible-automation-platform-22/ee-29-rhel8:latest
+
+
+skopeo copy \
+> docker-archive:ee-minimal-rhel8.tgz \
+> docker://hub.lab.example.com/ansible-automation-platform-22/ee-minimal-rhel8:latest
+
+skopeo copy \
+> docker-archive:ee-supported-rhel8.tgz \
+> docker://hub.lab.example.com/ansible-automation-platform-22/ee-supported-rhel8:latest
+
+
+
+# From the terminal window, use the skopeo inspect command to identify the version and release of the container image archives
+
+[student@workstation certified-EEs]$ skopeo inspect \
+> docker-archive:ee-29-rhel8.tgz \
+> --format "{{ .Labels.version }}-{{ .Labels.release }}"
+1.0.0-119
+
+[student@workstation certified-EEs]$ skopeo inspect \
+> docker-archive:ee-minimal-rhel8.tgz \
+> --format "{{ .Labels.version }}-{{ .Labels.release }}"
+1.0.0-128
+
+[student@workstation certified-EEs]$ skopeo inspect \
+> docker-archive:ee-supported-rhel8.tgz \
+> --format "{{ .Labels.version }}-{{ .Labels.release }}"
+1.0.0-99
+
+

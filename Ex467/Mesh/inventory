@@ -1,0 +1,59 @@
+# Basic:
+
+[automationcontroller] 
+controller.lab.example.com
+control2.lab.example.com
+
+[automationcontroller:vars]
+node_type=control 
+peers=execution_nodes 
+
+[execution_nodes] 
+exec1.lab.example.com
+exec2.lab.example.com
+
+
+
+
+# A Resilient Configuration with Local and Remote Instance Groups
+
+[automationcontroller]
+controller.lab.example.com
+control2.lab.example.com
+
+[automationcontroller:vars] 1
+node_type=control
+peers=instance_group_local
+
+[execution_nodes] 2
+exec1.lab.example.com
+exec2.lab.example.com
+exec3.lab.example.com
+hop1.lab.example.com
+
+[instance_group_local] 3
+exec1.lab.example.com
+exec2.lab.example.com
+
+[instance_group_remote] 4
+exec3.lab.example.com
+
+[instance_group_remote:vars]
+peers=hop 5
+
+[hop] 6
+hop1.lab.example.com
+
+[hop:vars] 7
+node_type=hop
+peers=automationcontroller
+
+
+1. All of the controllers are control nodes. Because at least one execution node is a hop node, the automationcontrollers group cannot peer with the entire execution_nodes group.
+2. List all execution nodes regardless of the node type. You could define the node type for each node, but it might be easier to create groups and group variables as shown in this example.
+3. The four hosts defined in the execution_nodes group, only exec1.lab.example.com and exec2.lab.example.com can establish peer connections with hosts in the automationcontrollers group. Because of the instance_group_ prefix, the installation script creates this instance group resource.
+4. Execution nodes in the instance_group_remote group cannot directly connect to the control nodes.
+5. The execution nodes in the instance_group_remote group peer with the hosts in the hop group.
+6. Creating a separate group for hop nodes makes it easier to assign common variables and add or remove hop nodes from the group.
+7. All of the hosts in the hop group are hop nodes and they peer with all hosts in the automationcontroller group.
+

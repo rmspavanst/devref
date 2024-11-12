@@ -1,0 +1,73 @@
+vi inventory
+
+[automationcontroller]
+controller.lab.example.com
+control2.lab.example.com
+
+[automationcontroller:vars]
+node_type=control
+web_server_ssl_cert=/home/student/certs/{{ inventory_hostname }}.crt
+web_server_ssl_key=/home/student/certs/{{ inventory_hostname }}.key
+
+
+[execution_nodes]
+exec1.lab.example.com peers=automationcontroller
+exec2.lab.example.com peers=hop1.lab.example.com
+exec3.lab.example.com peers=hop1.lab.example.com
+hop1.lab.example.com node_type=hop peers=automationcontroller
+
+
+[automationhub]
+hub.lab.example.com
+
+[database]
+db.lab.example.com
+
+
+[all:vars] 
+admin_password='redhat'
+pg_host='db.lab.example.com'
+pg_password='redhat'
+registry_url='hub.lab.example.com'
+registry_username='admin'
+registry_password='redhat'
+automationhub_admin_password='redhat'
+automationhub_pg_host='db.lab.example.com'
+automationhub_pg_password='redhat'
+custom_ca_cert=/home/student/certs/classroom-ca.pem
+automationhub_ssl_cert=/home/student/certs/hub.lab.example.com.crt
+automationhub_ssl_key=/home/student/certs/hub.lab.example.com.key
+postgres_use_ssl=True
+postgres_ssl_cert=/home/student/certs/db.lab.example.com.crt
+postgres_ssl_key=/home/student/certs/db.lab.example.com.key
+
+to validate
+
+./setup.sh -- --tag generate_dot_file
+
+ sudo yum install graphviz
+ dot -Tjpg mesh-topology.dot -o graph-topology.jpg
+
+open /home/student/aap2.2-bundle/graph-topology.jpg file in a web browser
+
+sudo -i
+./setup.sh -e ignore_preflight_errors=true
+
+
+1. Create two automation controller instance groups and assign execution nodes to the instance groups using the following table:
+
+ 	                    Instance group name	Instances
+    Instance Group 1	public	            exec1.lab.example.com
+    Instance Group 2	internal	        exec2.lab.example.com exec3.lab.example.com
+
+Navigate to https://controller.lab.example.com and log in as the admin user with redhat as the password.
+Navigate to Administration → Instance Groups and then click Add → Add instance group.
+Create the first instance group using public as the name and then click Save.
+Click the Instances tab and then click Associate.
+Select the exec1.lab.example.com host and then click Save.
+
+Navigate to Administration → Instance Groups and then click Add → Add instance group.
+Create the second instance group using internal as the name and then click Save.
+Click the Instances tab and then click Associate.
+Select the exec2.lab.example.com and exec3.lab.example.com hosts and then click Save.
+

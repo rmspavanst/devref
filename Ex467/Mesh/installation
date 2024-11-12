@@ -1,0 +1,48 @@
+# Deploying Distributed Execution with Automation Mesh
+
+cd ~/aap2.2-bundle/
+
+vi inventory
+
+[automationcontroller]
+controller.lab.example.com
+control2.lab.example.com
+
+[automationcontroller:vars]
+node_type=control
+web_server_ssl_cert=/home/student/certs/{{ inventory_hostname }}.crt
+web_server_ssl_key=/home/student/certs/{{ inventory_hostname }}.key
+
+# Because the [automationcontroller:vars] section now configures unique web server SSL certificates and keys for each automation controller host, comment out the existing web_server_ssl_cert and web_server_ssl_key variables in the [all:vars] section. The existing lines change to the following:
+
+#web_server_ssl_cert=/home/student/certs/controller.lab.example.com.crt
+#web_server_ssl_key=/home/student/certs/controller.lab.example.com.key
+
+[execution_nodes]
+exec1.lab.example.com peers=automationcontroller
+exec2.lab.example.com peers=automationcontroller
+exec3.lab.example.com peers=hop1.lab.example.com
+hop1.lab.example.com peers=automationcontroller node_type=hop
+
+
+
+diff -B inventory ../mesh-deploy/inventory
+
+./setup.sh -- --tags generate_dot_file
+cat mesh-topology.dot
+
+sudo dnf install graphviz
+
+dot -Tjpg mesh-topology.dot -o graph-topology.jpg
+
+./setup.sh -e ignore_preflight_errors=true
+
+
+# Listing Nodes and Instance Groups
+awx-manage list_instances
+
+# Monitoring Automation Mesh from the Command Line
+receptorctl --socket /var/run/awx-receptor/receptor.sock  status
+
+receptorctl --socket /var/run/awx-receptor/receptor.sock ping exec2.lab.example.com
+receptorctl --socket /var/run/awx-receptor/receptor.sock traceroute exec3.lab.example.com

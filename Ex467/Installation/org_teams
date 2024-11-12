@@ -1,0 +1,100 @@
+Instructions
+
+1. Create a new team called Developers.
+    Navigate to https://controller.lab.example.com and log in as the admin user with redhat as the password.
+    Navigate to Access → Teams and then click Add.
+    Create the team using the following information:
+
+    Field	    Value
+    Name	    Developers
+    Description	Dev Team
+    Organization Default
+    Click Save to create the new team.
+
+2. Create the daniel user.
+    Navigate to Access → Users and then click Add.
+    Create the new user with the following information:
+
+    Field	    Value
+    First Name	Daniel
+    Last Name	George
+    Email	    daniel@lab.example.com
+    Username	daniel
+    Password	redhat123
+    Confirm Password	redhat123
+    User Type	Normal User
+    Organization	Default
+    NOTE
+    The user type is set to Normal User rather than System Administrator. The daniel user will be an administrator of the Developers team, but the user will not be assigned administrative capabilities on the entire automation controller instance.
+
+    Click Save to create the new user.
+
+3. Assign the daniel user the Admin role on the Developers team.
+    Navigate to Access → Teams and then click the link for the Developers team.
+    Click the Access tab and then click Add.
+    Click Users and then click Next.
+    Select daniel and then click Next.
+    Select Admin and then click Save to assign the role.
+
+4. Create the donnie user.
+    Navigate to Access → Users and then click Add.
+    Create the new user with the following information:
+
+    Field	    Value
+    First Name	Donnie
+    Last Name	Jameson
+    Email	    donnie@lab.example.com
+    Username	donnie
+    Password	redhat123
+    Confirm Password	redhat123
+    User Type	Normal User
+    Organization	Default
+    Click Save to create the new user.
+
+5. Assign the donnie user the Read role on the Developers team.
+    Navigate to Access → Teams and then click the link for the Developers team.
+    Click the Access tab and then click Add.
+    Click Users and then click Next.
+    Select donnie and then click Next.
+    Select Read and then click Save to assign the role.
+
+6. Create the david user and associate the user with the Developers team. Associating the user adds the Member role for the team.
+    Navigate to Access → Users and then click Add.
+    Create the new user with the following information:
+
+    Field	Value
+    First Name	David
+    Last Name	Jackobs
+    Email	david@lab.example.com
+    Username	david
+    Password	redhat123
+    Confirm Password	redhat123
+    User Type	Normal User
+    Organization	Default
+    Click Save to create the new user.
+    On the Details page for the david user, click the Teams tab and then click Associate.
+    Select Developers and then click Save to assign the Member role.
+    Click admin → Logout to exit the automation controller web UI.
+
+7. Verify the permissions for the daniel user.
+    Log in to the automation controller web UI as daniel with redhat123 as the password.
+    Navigate to Access → Teams and then click the link for the Developers team.
+    Notice that the Edit button is available, indicating that the daniel user can make changes to the Developers team.
+    Click the Access tab.
+    Notice that the Add button is available and that each existing role assignment for members of the Developers team contains an X, indicating that the role assignment can be removed. The daniel user can manage permissions for the Developers team. Having the Admin role additionally allows the daniel user to inherit permissions assigned to the Developers team.
+    Click daniel → Logout to exit the automation controller web UI.
+
+8. Verify the permissions for the donnie user.
+    Log in to the automation controller web UI as donnie with redhat123 as the password.
+    Navigate to Access → Teams and then click the link for the Developers team.
+    Click the Access tab.
+    Notice that the Add button is not available and that each existing role assignment does not contain an X, indicating that the role assignment cannot be removed. The donnie user can view information about the Developers team, but the user cannot make changes to it. Additionally, by only having the Read role, the donnie user does not inherit permissions assigned to the Developers team.
+    Click donnie → Logout to exit the automation controller web UI.
+
+9. Verify the permissions for the david user.
+    Log in to the automation controller web UI as david with redhat123 as the password.
+    Navigate to Access → Teams and then click the link for the Developers team.
+    Click the Access tab.
+    Notice that the Add button is not available and that each existing role assignment does not contain an X, indicating that the role assignment cannot be removed. Like the donnie user, the david user can view information about the Developers team, but the user cannot make changes to it. Unlike the donnie user, having the Member role allows the david user to inherit permissions assigned to the Developers team.
+
+    Click david → Logout to exit the automation controller web UI.
