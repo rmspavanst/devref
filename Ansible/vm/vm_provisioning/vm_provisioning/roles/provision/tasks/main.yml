@@ -1,0 +1,25 @@
+---
+- name: Clone VM from template
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ username }}"
+    password: "{{ password }}"
+    validate_certs: no
+    datacenter: "{{ datacenter }}"
+    cluster: "{{ cluster }}"
+    datastore: "{{ datastore }}"
+    folder: "{{ folder }}"
+    template: "{{ template }}"
+    name: "{{ vm_name }}"
+    state: "{{ state }}"
+    customization_spec: "{{ customization_spec }}"
+    hardware:
+      memory_mb: "{{ memory_mb }}"
+      num_cpus: "{{ num_cpus }}"
+    disk:
+      - size_gb: "{{ disk_size_gb }}"
+        type: thin
+        datastore: "{{ datastore }}"
+    networks:
+      - name: "{{ network_name }}"
+        device_type: vmxnet3

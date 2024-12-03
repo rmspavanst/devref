@@ -1,0 +1,24 @@
+---
+- name: Check vCenter connectivity
+  community.vmware.vmware_ping:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ username }}"
+    password: "{{ password }}"
+    validate_certs: no
+
+- name: Check if template exists
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ username }}"
+    password: "{{ password }}"
+    validate_certs: no
+    datacenter: "{{ datacenter }}"
+    folder: "{{ folder }}"
+    name: "{{ template }}"
+    state: poweredoff
+  register: template_check
+
+- name: Fail if template does not exist
+  fail:
+    msg: "Template {{ template }} does not exist in folder {{ folder }}"
+  when: template_check.failed

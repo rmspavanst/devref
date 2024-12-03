@@ -1,0 +1,15 @@
+vcenter_hostname: "vcsa.cloud.local"
+username: "administrator@vsphere.local"
+password: "P@$$w0rd1$"
+datacenter: "CloudLocal"
+cluster: "vsancluster"
+datastore: "vsanDatastore"
+folder: "testansible"
+template: "Win2019clone"
+customization_spec: "CloudLocalServerDHCP"
+vm_name: "win19clone01"
+state: "poweredon"
+memory_mb: 4096
+num_cpus: 2
+disk_size_gb: 60
+network_name: "VM Network"

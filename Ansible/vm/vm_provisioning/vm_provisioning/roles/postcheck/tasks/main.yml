@@ -1,0 +1,17 @@
+---
+- name: Verify VM is powered on
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ username }}"
+    password: "{{ password }}"
+    validate_certs: no
+    datacenter: "{{ datacenter }}"
+    folder: "{{ folder }}"
+    name: "{{ vm_name }}"
+    state: poweredon
+  register: vm_status
+
+- name: Fail if VM is not powered on
+  fail:
+    msg: "VM {{ vm_name }} is not powered on"
+  when: vm_status.instance.state != 'poweredon'

@@ -1,0 +1,10 @@
+---
+- name: VM Provisioning Playbook
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/vars.yml
+  roles:
+    - precheck
+    - provision
+    - postcheck

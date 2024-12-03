@@ -1,0 +1,17 @@
+---
+- name: Power off VM
+  community.vmware.vmware_guest_powerstate:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ username }}"
+    password: "{{ password }}"
+    validate_certs: no
+    datacenter: "{{ datacenter }}"
+    folder: "{{ folder }}"
+    name: "{{ vm_name }}"
+    state: powered-off
+  register: poweroff_result
+
+- name: Fail if VM power off failed
+  fail:
+    msg: "Failed to power off VM {{ vm_name }}"
+  when: poweroff_result.failed
